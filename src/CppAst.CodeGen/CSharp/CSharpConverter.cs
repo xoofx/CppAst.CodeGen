@@ -151,6 +151,7 @@ namespace CppAst.CodeGen.CSharp
                         _csCompilation = ConvertCompilation(cppCompilation, context);
                         _cppCompilation.Diagnostics.CopyTo(_csCompilation.Diagnostics);
                         csElement = _csCompilation;
+                        ProcessConvertBegin();
                         break;
                     case CppEnum cppEnum:
                         csElement = TryConvertEnum(cppEnum, context);
@@ -201,6 +202,8 @@ namespace CppAst.CodeGen.CSharp
             {
                 if (cppElement is CppCompilation)
                 {
+                    ProcessConvertEnd();
+
                     // Reset current CppCompilation and current CSharpCompilation
                     _cppCompilation = null;
                     _csCompilation = null;
@@ -282,6 +285,24 @@ namespace CppAst.CodeGen.CSharp
                 elementVisibility = Options.GenerateAsInternal ? CSharpVisibility.Internal : CSharpVisibility.Public;
             }
             element.Visibility = elementVisibility;
+        }
+
+        private void ProcessConvertBegin()
+        {
+            for (var i = _pipeline.ConvertBegin.Count - 1; i >= 0; i--)
+            {
+                var converting = _pipeline.ConvertBegin[i];
+                converting(this);
+            }
+        }
+
+        private void ProcessConvertEnd()
+        {
+            for (var i = _pipeline.ConvertEnd.Count - 1; i >= 0; i--)
+            {
+                var converting = _pipeline.ConvertEnd[i];
+                converting(this);
+            }
         }
 
         private void ProcessConverting(CppElement cppElement, CSharpElement context)
