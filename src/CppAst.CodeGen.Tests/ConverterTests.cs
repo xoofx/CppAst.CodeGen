@@ -52,7 +52,12 @@ namespace CppAst.CodeGen.Tests
         {
             var options = new CSharpConverterOptions()
             {
-                GenerateAsInternal = true
+                GenerateAsInternal = true,
+                TypedefCodeGenKind =  CppTypedefCodeGenKind.NoWrapExpectWhiteList,
+                TypedefWrapWhiteList =
+                {
+                    "git_my_string"
+                }
             };
 
             var csCompilation = CSharpConverter.Convert(@"
@@ -80,7 +85,11 @@ namespace CppAst.CodeGen.Tests
 
             struct git_my_repo;
 
-            EXPORT_API bool function0(git_my_repo* myrepo, int a, float b, const char* text, const char text2[], bool arg4[]);
+            typedef int git_my_yoyo;
+
+            typedef const char* git_my_string;
+
+            EXPORT_API bool function0(git_my_repo* myrepo, int a, float b, const char* text, const char text2[], bool arg4[], git_my_yoyo arg5, git_my_string arg6);
             ", options);
 
             Assert.False(csCompilation.HasErrors);

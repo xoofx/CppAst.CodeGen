@@ -7,6 +7,15 @@ using Zio;
 
 namespace CppAst.CodeGen.CSharp
 {
+    public enum CppTypedefCodeGenKind
+    {
+        Wrap,
+
+        NoWrapExpectWhiteList,
+
+        NoWrap,
+    }
+    
     public class CSharpConverterOptions : CppParserOptions
     {
         public CSharpConverterOptions()
@@ -34,6 +43,8 @@ namespace CppAst.CodeGen.CSharp
             DefaultDllImportNameAndArguments = "\"libnative\"";
             GenerateAsInternal = false;
             GenerateEnumItemAsFields = true;
+            TypedefCodeGenKind = CppTypedefCodeGenKind.Wrap;
+            TypedefWrapWhiteList = new HashSet<string>();
             Tags = new Dictionary<string, object>();
             DefaultMarshalForString = new CSharpMarshalAttribute(CSharpUnmanagedKind.LPStr);
             DefaultMarshalForBool = new CSharpMarshalAttribute(CSharpUnmanagedKind.U1);
@@ -54,6 +65,11 @@ namespace CppAst.CodeGen.CSharp
         public CSharpMarshalAttribute DefaultMarshalForBool { get; set; }
 
         public bool GenerateEnumItemAsFields { get; set; }
+
+
+        public CppTypedefCodeGenKind TypedefCodeGenKind { get; set; }
+        
+        public HashSet<string> TypedefWrapWhiteList { get; }
 
         public Dictionary<string, object> Tags { get; private set; }
 
