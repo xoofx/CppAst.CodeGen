@@ -46,6 +46,25 @@ namespace CppAst.CodeGen.CSharp
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
             mappingRule.TypeRemap = type;
+
+            mappingRule.CppElementActions.Add((converter, element, context, matches) =>
+            {
+                var remapType = DefaultMappingRulesConverter.GetCppTypeRemap(converter, type);
+                if (remapType == null) return;
+
+                if (element is CppField cppField)
+                {
+                    // TODO: wait for new release of CppAst
+                    //cppField.Type = remapType;
+                }
+
+                if (element is CppParameter cppParameter)
+                {
+                    // TODO: wait for new release of CppAst
+                    //cppParameter.Type = remapType;
+                }
+            });
+
             return mappingRule;
         }
 
@@ -107,7 +126,7 @@ namespace CppAst.CodeGen.CSharp
             };
         }
 
-        public static CppElementMappingRule Map<TCppElement>(this CppMappingRules dispatcher, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0) where TCppElement : CppElement
+        public static CppElementMappingRule MapAll<TCppElement>(this CppMappingRules dispatcher, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0) where TCppElement : CppElement
         {
             return new CppElementMappingRule(new CppElementTypeMatcher<TCppElement>())
             {

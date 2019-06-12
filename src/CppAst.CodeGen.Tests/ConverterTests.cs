@@ -25,16 +25,31 @@ namespace CppAst.CodeGen.Tests
                 {
                     e => e.MapMacroToConst("MYNAME_(.*)", "int", @"YOYO_$1"),
                     e => e.MapMacroToEnum("MYNAME_(.*)", "MYNAME_ENUM", @"MYNAME_ENUM_$1"),
+                    e => e.Map<CppParameter>("function0::x").Type("bool"),
                 }
             };
 
             var csCompilation = CSharpConverter.Convert(@"
+#ifdef WIN32
+#define EXPORT_API __declspec(dllexport)
+#else
+#define EXPORT_API __attribute__((visibility(""default"")))
+#endif
 #define MYNAME_X 1
 #define MYNAME_Y 2
-#define MYNAME_XYWZ 3 + z
+#define MYNAME_XYWZ 3
+
+EXPORT_API void function0(int x);
             ", options);
 
             Assert.False(csCompilation.HasErrors);
+            
+            var fs = new MemoryFileSystem();
+            var codeWriter = new CodeWriter(new CodeWriterOptions(fs));
+            csCompilation.DumpTo(codeWriter);
+
+            var text = fs.ReadAllText(options.DefaultOutputFilePath);
+            Console.WriteLine(text);
         }
 
         [Test]
@@ -53,7 +68,7 @@ namespace CppAst.CodeGen.Tests
             var options = new CSharpConverterOptions()
             {
                 GenerateAsInternal = true,
-                TypedefCodeGenKind =  CppTypedefCodeGenKind.NoWrapExpectWhiteList,
+                TypedefCodeGenKind =  CppTypedefCodeGenKind.Wrap,
                 TypedefWrapWhiteList =
                 {
                     "git_my_string"
