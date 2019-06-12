@@ -28,11 +28,12 @@ namespace CppAst.CodeGen.CSharp
 
             var csElementType = converter.GetCSharpType(elementType, context);
 
-            var noWrap = converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.NoWrap
-                || (converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.NoWrapExpectWhiteList && !converter.Options.TypedefWrapWhiteList.Contains(cppTypedef.Name));
+            var noWrap = converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.NoWrap && !converter.Options.TypedefWrapWhiteList.Contains(cppTypedef.Name);
 
-            // If we are from system includes and the underlying type is not a pointer
-            // we bypass entirely the typedef
+            // If:
+            // - the typedef is from system includes and the underlying type is not a pointer
+            // - or the typedef mode is "no-wrap" and is not in the whitelist
+            // then we bypass entirely the typedef and return immediately the element type
             if (noWrap || (isFromSystemIncludes && elementType.TypeKind != CppTypeKind.Pointer))
             {
                 return csElementType;
@@ -61,23 +62,11 @@ namespace CppAst.CodeGen.CSharp
             csStruct.Modifiers |= CSharpModifiers.ReadOnly;
             csStruct.BaseTypes.Add(new CSharpFreeType($"IEquatable<{name}>"));
 
-            // TODO: cache it in converter tags
-            var localCodeWriter = new CodeWriter(new CodeWriterOptions());
-            localCodeWriter.PushOutput(new StringWriter());
-            csElementType.DumpReferenceTo(localCodeWriter);
-            var csElementTypeName = localCodeWriter.PopOutput().ToString();
-            
+            // Dump the type name and attached attributes for the element type
+            var csElementTypeName = converter.ConvertTypeReferenceToString(csElementType, out var attachedAttributes);
 
             csStruct.Members.Add(new CSharpLineElement($"public {name}({csElementTypeName} value) => this.Value = value;"));
-
-            localCodeWriter.PushOutput(new StringWriter());
-            csElementType.DumpContextualAttributesTo(localCodeWriter);
-            var attributes = localCodeWriter.PopOutput().ToString().Trim();
-            if (!string.IsNullOrEmpty(attributes))
-            {
-                attributes = attributes + "\n";
-            }
-            csStruct.Members.Add(new CSharpLineElement($"{attributes}public readonly {csElementTypeName} Value;"));
+            csStruct.Members.Add(new CSharpLineElement($"{attachedAttributes}public readonly {csElementTypeName} Value;"));
             csStruct.Members.Add(new CSharpLineElement($"public bool Equals({name} other) =>  Value.Equals(other.Value);"));
             csStruct.Members.Add(new CSharpLineElement($"public override bool Equals(object obj) => obj is {name} other && Equals(other);"));
             csStruct.Members.Add(new CSharpLineElement($"public override int GetHashCode() => Value.GetHashCode();"));

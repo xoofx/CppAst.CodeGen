@@ -4,8 +4,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
 {
@@ -13,6 +15,7 @@ namespace CppAst.CodeGen.CSharp
     {
         private CppCompilation _cppCompilation;
         private CSharpCompilation _csCompilation;
+        private CodeWriter _csTempWriter;
         private readonly Dictionary<CppElement, CSharpElement> _mapCppToCSharp;
 
         private readonly CSharpConverterPipeline _pipeline;
@@ -21,6 +24,7 @@ namespace CppAst.CodeGen.CSharp
         {
             Options = options ?? throw new ArgumentNullException(nameof(options));
             _mapCppToCSharp = new Dictionary<CppElement, CSharpElement>(CppElementReferenceEqualityComparer.Default);
+            _csTempWriter = new CodeWriter(new CodeWriterOptions(null));
             Tags = new Dictionary<string, object>();
 
             _pipeline = new CSharpConverterPipeline(options);
@@ -102,6 +106,20 @@ namespace CppAst.CodeGen.CSharp
         {
             var obj = GetTagValueOrNull(name);
             return obj == null ? default : obj is T objT ? objT : default;
+        }
+
+        public string ConvertTypeReferenceToString(CSharpType csType, out string attachedAttributes)
+        {
+            var strWriter = (StringWriter) _csTempWriter.CurrentWriter;
+            strWriter.GetStringBuilder().Length = 0;
+            csType.DumpReferenceTo(_csTempWriter);
+            var typeReferenceName = strWriter.ToString();
+            
+            strWriter.GetStringBuilder().Length = 0;
+            csType.DumpContextualAttributesTo(_csTempWriter);
+            attachedAttributes = strWriter.ToString();
+
+            return typeReferenceName;
         }
 
         private CSharpCompilation Convert(CppCompilation cppCompilation)

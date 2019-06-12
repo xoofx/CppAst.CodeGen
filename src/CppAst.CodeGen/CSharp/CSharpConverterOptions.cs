@@ -11,8 +11,6 @@ namespace CppAst.CodeGen.CSharp
     {
         Wrap,
 
-        NoWrapExpectWhiteList,
-
         NoWrap,
     }
     
@@ -65,7 +63,6 @@ namespace CppAst.CodeGen.CSharp
         public CSharpMarshalAttribute DefaultMarshalForBool { get; set; }
 
         public bool GenerateEnumItemAsFields { get; set; }
-
 
         public CppTypedefCodeGenKind TypedefCodeGenKind { get; set; }
         
