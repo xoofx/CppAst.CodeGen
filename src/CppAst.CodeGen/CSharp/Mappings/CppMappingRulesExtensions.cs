@@ -54,14 +54,12 @@ namespace CppAst.CodeGen.CSharp
 
                 if (element is CppField cppField)
                 {
-                    // TODO: wait for new release of CppAst
-                    //cppField.Type = remapType;
+                    cppField.Type = remapType;
                 }
 
                 if (element is CppParameter cppParameter)
                 {
-                    // TODO: wait for new release of CppAst
-                    //cppParameter.Type = remapType;
+                    cppParameter.Type = remapType;
                 }
             });
 
