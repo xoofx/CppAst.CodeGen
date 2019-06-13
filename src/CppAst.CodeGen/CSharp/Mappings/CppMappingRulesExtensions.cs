@@ -42,14 +42,15 @@ namespace CppAst.CodeGen.CSharp
             return mappingRule;
         }
 
-        public static CppElementMappingRule Type(this CppElementMappingRule mappingRule, string type)
+        public static CppElementMappingRule Type(this CppElementMappingRule mappingRule, string type, int? arraySize = null)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
             mappingRule.TypeRemap = type;
+            mappingRule.TypeRemapArraySize = arraySize;
 
             mappingRule.CppElementActions.Add((converter, element, context, matches) =>
             {
-                var remapType = DefaultMappingRulesConverter.GetCppTypeRemap(converter, type);
+                var remapType = DefaultMappingRulesConverter.GetCppTypeRemap(converter, mappingRule.TypeRemap, mappingRule.TypeRemapArraySize);
                 if (remapType == null) return;
 
                 if (element is CppField cppField)

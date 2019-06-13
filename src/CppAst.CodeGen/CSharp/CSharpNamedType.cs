@@ -7,7 +7,7 @@ using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
 {
-    public abstract class CSharpNamedType : CSharpType
+    public abstract class CSharpNamedType : CSharpType, ICSharpMember
     {
         protected CSharpNamedType(string name)
         {

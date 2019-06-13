@@ -20,6 +20,7 @@ namespace CppAst.CodeGen.CSharp
         {
             Plugins = new List<ICSharpConverterPlugin>()
             {
+                new DefaultGetCSharpNamePlugin(),
                 new DefaultContainerResolver(),
                 new DefaultTypedefConverter(),
                 new DefaultEnumConverter(),

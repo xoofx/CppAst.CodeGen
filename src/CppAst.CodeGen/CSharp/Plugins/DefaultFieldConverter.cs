@@ -16,19 +16,22 @@ namespace CppAst.CodeGen.CSharp
         
         public static CSharpElement ConvertField(CSharpConverter converter, CppField cppField, CSharpElement context)
         {
-            var csContainer = ((ICSharpContainer)(context as CSharpStruct) ?? context as CSharpClass);
-            if (csContainer == null)
+            // Early exit if this is a global variable (we don't handle dllexport)
+            var isGlobalVariable = !(cppField.Parent is CppClass) || cppField.StorageQualifier == CppStorageQualifier.Static;
+            if (isGlobalVariable)
             {
-                csContainer = converter.GetCSharpContainer(cppField, context);
+                return null;
             }
-            
+
+            var csContainer = converter.GetCSharpContainer(cppField, context);
+
             var isUnion = ((cppField.Parent as CppClass)?.ClassKind ?? CppClassKind.Struct) == CppClassKind.Union;
 
             var csFieldName = converter.GetCSharpName(cppField, (CSharpElement)csContainer);
             var csField = new CSharpField(csFieldName) { CppElement = cppField };
             converter.ApplyDefaultVisibility(csField, csContainer);
 
-            bool isConst = cppField.Type is CppQualifiedType qualifiedType && qualifiedType.Qualifier == CppTypeQualifier.Const;
+            bool isConst = cppField.Type is CppQualifiedType qualifiedType && qualifiedType.Qualifier == CppTypeQualifier.Const && qualifiedType.ElementType.TypeKind == CppTypeKind.Primitive;
             if (isConst)
             {
                 csField.Modifiers |= CSharpModifiers.Const;
@@ -41,8 +44,7 @@ namespace CppAst.CodeGen.CSharp
             if (isUnion)
             {
                 csField.Attributes.Add(new CSharpFreeAttribute("FieldOffset(0)"));
-                var container = converter.GetCSharpContainer(cppField, context);
-                converter.AddUsing(container, "System.Runtime.InteropServices");
+                converter.AddUsing(csContainer, "System.Runtime.InteropServices");
             }
             csField.FieldType = converter.GetCSharpType(cppField.Type, csField);
 

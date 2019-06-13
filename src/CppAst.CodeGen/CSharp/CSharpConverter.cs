@@ -135,6 +135,11 @@ namespace CppAst.CodeGen.CSharp
             return Convert(cppElement, 0, context);
         }
 
+        public CSharpType ConvertAnonymousType(CppType cppType, CSharpElement context)
+        {
+            return (CSharpType)Convert(cppType, context);
+        }
+
         private CSharpElement Convert(CppElement cppElement, int index, CSharpElement context)
         {
             if (_mapCppToCSharp.TryGetValue(cppElement, out var csElement)) return csElement;
@@ -237,7 +242,7 @@ namespace CppAst.CodeGen.CSharp
             return CSharpHelper.EscapeName(name);
         }
 
-        public CSharpType GetCSharpType(CppType cppType, CSharpElement context)
+        public CSharpType GetCSharpType(CppType cppType, CSharpElement context, bool nested = false)
         {
             if (cppType == null) throw new ArgumentNullException(nameof(cppType));
             if (context == null) throw new ArgumentNullException(nameof(context));
@@ -246,7 +251,7 @@ namespace CppAst.CodeGen.CSharp
             for (var i = _pipeline.GetCSharpTypeResolvers.Count - 1; i >= 0; i--)
             {
                 var getCSharpTypeDelegate = _pipeline.GetCSharpTypeResolvers[i];
-                csType = getCSharpTypeDelegate(this, cppType, context);
+                csType = getCSharpTypeDelegate(this, cppType, context, nested);
                 if (csType != null)
                 {
                     return csType;
@@ -261,7 +266,7 @@ namespace CppAst.CodeGen.CSharp
         //{
         //    if (context == null) throw new ArgumentNullException(nameof(context));
 
-        //    var container = GetCSharpClosestContainer(context);
+        //    var container = GetCSharpContainer(context);
         //    if (container is CSharpTypeWithMembers typeWithMembers)
         //    {
         //        return typeWithMembers.Visibility;
@@ -533,19 +538,19 @@ namespace CppAst.CodeGen.CSharp
             return (CSharpType) FindCSharpElement(cppType);
         }
 
-        private ICSharpContainer GetCSharpClosestContainer(CSharpElement context)
+        public ICSharpContainer GetCSharpContainer(CppElement element, CSharpElement context)
         {
             // Default implementation, returns the current context
             var nextContext = context;
-            while (nextContext != null)
+            while (nextContext != null && !(nextContext is CSharpCompilation))
             {
                 if (nextContext is ICSharpContainer container) return container;
                 nextContext = context.Parent;
             }
-            return _csCompilation;
+            return GetCSharpContainerFromPlugins(element, context);
         }
         
-        public ICSharpContainer GetCSharpContainer(CppElement element, CSharpElement context)
+        private ICSharpContainer GetCSharpContainerFromPlugins(CppElement element, CSharpElement context)
         {
             for (var i = _pipeline.GetCSharpContainerResolvers.Count - 1; i >= 0; i--)
             {

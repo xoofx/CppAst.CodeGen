@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -53,7 +54,7 @@ namespace CppAst.CodeGen.CSharp
                         var typeIndex = int.Parse(result.Groups[1].Value);
 
                         var typeToCompile = cachedRules.TypesToCompile[typeIndex];
-                        cachedRules.TypesCompiled[typeToCompile.TypeRemap] = cppTypedef.ElementType;
+                        cachedRules.TypesCompiled[new TypeRemapKey(typeToCompile.TypeRemap, typeToCompile.TypeRemapArraySize)] = cppTypedef.ElementType;
                         typedefs.RemoveAt(i);
                     }
                 }
@@ -137,7 +138,15 @@ namespace CppAst.CodeGen.CSharp
                 {
                     var rule = cachedRules.TypesToCompile[i];
                     AppendPragmaLine(rule, additionalHeaders);
-                    additionalHeaders.AppendLine($"typedef {rule.TypeRemap} {cachedRules.Prefix}{i}_typedef;");
+                    if (rule.TypeRemapArraySize.HasValue)
+                    {
+                        var value = rule.TypeRemapArraySize.Value;
+                        additionalHeaders.AppendLine($"typedef {rule.TypeRemap} {cachedRules.Prefix}{i}_typedef[{(value < 0 ? string.Empty : value.ToString(CultureInfo.InvariantCulture))}];");
+                    }
+                    else
+                    {
+                        additionalHeaders.AppendLine($"typedef {rule.TypeRemap} {cachedRules.Prefix}{i}_typedef;");
+                    }
                 }
             }
         }
@@ -186,11 +195,11 @@ namespace CppAst.CodeGen.CSharp
             }
         }
 
-        internal static CppType GetCppTypeRemap(CSharpConverter converter, string typeName)
+        internal static CppType GetCppTypeRemap(CSharpConverter converter, string typeName, int? typeRemapArraySize = null)
         {
             var cachedRules = GetCachedRules(converter);
 
-            if (cachedRules.TypesCompiled.TryGetValue(typeName, out var cppType))
+            if (cachedRules.TypesCompiled.TryGetValue(new TypeRemapKey(typeName, typeRemapArraySize), out var cppType))
             {
                 return cppType;
             }
@@ -232,13 +241,13 @@ namespace CppAst.CodeGen.CSharp
                     cachedRules.MacroRules.Add(mappingRule);
                 }
 
-                var tempTypedefRules = new Dictionary<string, CppElementMappingRule>();
+                var tempTypedefRules = new Dictionary<TypeRemapKey, CppElementMappingRule>();
                 foreach (var mappingRule in converter.Options.MappingRules.StandardRules)
                 {
                     cachedRules.StandardRules.Add(mappingRule);
                     if (mappingRule.TypeRemap != null)
                     {
-                        tempTypedefRules[mappingRule.TypeRemap] = mappingRule;
+                        tempTypedefRules[new TypeRemapKey(mappingRule.TypeRemap, mappingRule.TypeRemapArraySize)] = mappingRule;
                     }
                 }
 
@@ -261,7 +270,7 @@ namespace CppAst.CodeGen.CSharp
                 StandardRules = new List<CppElementMappingRule>();
                 ElementToMatches = new Dictionary<CppElement, List<CppElementMatch>>(CppElementReferenceEqualityComparer.Default);
                 TypesToCompile = new List<CppElementMappingRule>();
-                TypesCompiled = new Dictionary<string, CppType>();
+                TypesCompiled = new Dictionary<TypeRemapKey, CppType>();
                 Prefix = "cppast_" + Guid.NewGuid().ToString("N") + "_";
             }
 
@@ -273,13 +282,44 @@ namespace CppAst.CodeGen.CSharp
 
             public List<CppElementMappingRule> TypesToCompile { get; }
 
-            public Dictionary<string, CppType> TypesCompiled { get; }
+            public Dictionary<TypeRemapKey, CppType> TypesCompiled { get; }
 
             public Dictionary<CppElement, List<CppElementMatch>> ElementToMatches { get; }
 
             public bool IsEmpty => MacroRules.Count == 0 && StandardRules.Count == 0;
         }
-        
+
+        private readonly struct TypeRemapKey
+        {
+            public TypeRemapKey(string typeRemap, int? typeRemapArraySize)
+            {
+                TypeRemap = typeRemap;
+                TypeRemapArraySize = typeRemapArraySize;
+            }
+
+            public readonly string TypeRemap;
+
+            public readonly int? TypeRemapArraySize;
+
+            public bool Equals(TypeRemapKey other)
+            {
+                return string.Equals(TypeRemap, other.TypeRemap) && TypeRemapArraySize == other.TypeRemapArraySize;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is TypeRemapKey other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return ((TypeRemap != null ? TypeRemap.GetHashCode() : 0) * 397) ^ TypeRemapArraySize.GetHashCode();
+                }
+            }
+        }
+
         private readonly struct CppElementMatch
         {
             public CppElementMatch(CppElementMappingRule rule, List<ICppElementMatch> matches)

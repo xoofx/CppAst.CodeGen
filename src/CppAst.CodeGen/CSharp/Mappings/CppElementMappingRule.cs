@@ -23,6 +23,8 @@ namespace CppAst.CodeGen.CSharp
 
         public string TypeRemap { get; set; }
 
+        public int? TypeRemapArraySize { get; set; }
+
         public List<CppElementModifierDelegate> CppElementActions { get; }
 
         public List<CSharpElementModifierDelegate> CSharpElementActions { get; }

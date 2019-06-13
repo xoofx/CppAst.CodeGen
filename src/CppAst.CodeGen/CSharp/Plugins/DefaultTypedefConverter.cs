@@ -26,7 +26,7 @@ namespace CppAst.CodeGen.CSharp
 
             var isFromSystemIncludes = IsFromSystemIncludes(converter.CurrentCppCompilation, cppTypedef);
 
-            var csElementType = converter.GetCSharpType(elementType, context);
+            var csElementType = converter.GetCSharpType(elementType, context, true);
 
             var noWrap = converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.NoWrap && !converter.Options.TypedefWrapWhiteList.Contains(cppTypedef.Name);
 

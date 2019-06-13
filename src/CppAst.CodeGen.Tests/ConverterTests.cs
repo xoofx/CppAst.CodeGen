@@ -17,6 +17,40 @@ namespace CppAst.CodeGen.Tests
     public class ConverterTests
     {
         [Test]
+        public void TestAnonymousStructAndFunction()
+        {
+            var options = new CSharpConverterOptions()
+            {
+            };
+
+            var csCompilation = CSharpConverter.Convert(@"
+struct {
+    int a;
+    int b;
+    void (*ptr)(int arg0, int arg1, void (*arg2)(int arg3));
+
+    union
+    {
+        int c;
+        int d;
+    } e;
+} outer;
+            ", options);
+
+            Assert.False(csCompilation.HasErrors);
+
+            var fs = new MemoryFileSystem();
+            var codeWriter = new CodeWriter(new CodeWriterOptions(fs));
+            csCompilation.DumpTo(codeWriter);
+
+            var text = fs.ReadAllText(options.DefaultOutputFilePath);
+            Console.WriteLine(text);
+        }
+
+
+
+
+        [Test]
         public void TestMacroToConst()
         {
             var options = new CSharpConverterOptions()
@@ -25,7 +59,8 @@ namespace CppAst.CodeGen.Tests
                 {
                     e => e.MapMacroToConst("MYNAME_(.*)", "int", @"YOYO_$1"),
                     e => e.MapMacroToEnum("MYNAME_(.*)", "MYNAME_ENUM", @"MYNAME_ENUM_$1"),
-                    e => e.Map<CppParameter>("function0::x").Type("bool"),
+                    e => e.Map<CppParameter>("function0::x").Type("char*"),
+                    e => e.Map<CppFunction>("function0").Visibility(CSharpVisibility.Private),
                 }
             };
 

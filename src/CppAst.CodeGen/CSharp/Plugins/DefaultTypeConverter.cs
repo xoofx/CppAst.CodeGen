@@ -21,7 +21,7 @@ namespace CppAst.CodeGen.CSharp
             pipeline.GetCSharpTypeResolvers.Add(GetCSharpType);
         }
 
-        public static CSharpType GetCSharpType(CSharpConverter converter, CppType cppType, CSharpElement context)
+        public static CSharpType GetCSharpType(CSharpConverter converter, CppType cppType, CSharpElement context, bool nested)
         {
             // Early exit for primitive types
             if (cppType is CppPrimitiveType cppPrimitiveType)
@@ -54,9 +54,9 @@ namespace CppAst.CodeGen.CSharp
                 }
                 else
                 {
-                    var pointedCSharpType = converter.FindCSharpType(elementType);
+                    var pointedCSharpType = converter.GetCSharpType(elementType, context, true);
 
-                    if (context is CSharpParameter)
+                    if (!nested && context is CSharpParameter)
                     {
                         switch (elementType.TypeKind)
                         {
@@ -66,19 +66,19 @@ namespace CppAst.CodeGen.CSharp
                                 break;
                             case CppTypeKind.Qualified:
                                 var qualifiedType = (CppQualifiedType) elementType;
-                                csType = new CSharpRefType(qualifiedType.Qualifier == CppTypeQualifier.Const ? CSharpRefKind.In : CSharpRefKind.Ref, converter.GetCSharpType(qualifiedType.ElementType, context));
+                                csType = new CSharpRefType(qualifiedType.Qualifier == CppTypeQualifier.Const ? CSharpRefKind.In : CSharpRefKind.Ref, converter.GetCSharpType(qualifiedType.ElementType, context, true));
                                 break;
                             case CppTypeKind.Function:
-                                csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(elementType, context));
+                                csType = pointedCSharpType;
                                 break;
                             case CppTypeKind.Typedef:
-                                csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(elementType, context));
+                                csType = new CSharpRefType(CSharpRefKind.Ref, pointedCSharpType);
                                 break;
                             case CppTypeKind.StructOrClass:
-                                csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(elementType, context));
+                                csType = new CSharpRefType(CSharpRefKind.Ref, pointedCSharpType);
                                 break;
                             case CppTypeKind.Enum:
-                                csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(elementType, context));
+                                csType = new CSharpRefType(CSharpRefKind.Ref, pointedCSharpType);
                                 break;
                             case CppTypeKind.TemplateParameterType:
                                 break;
@@ -88,11 +88,11 @@ namespace CppAst.CodeGen.CSharp
                                 var cppPrimitive = (CppPrimitiveType) elementType;
                                 if (cppPrimitive.Kind != CppPrimitiveKind.Void)
                                 {
-                                    csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(elementType, context));
+                                    csType = new CSharpRefType(CSharpRefKind.Ref, pointedCSharpType);
                                 }
                                 break;
                             case CppTypeKind.Pointer:
-                                csType = new CSharpRefType(CSharpRefKind.Out, converter.GetCSharpType(elementType, context));
+                                csType = new CSharpRefType(CSharpRefKind.Out, pointedCSharpType);
                                 break;
                         }
                     }
@@ -107,6 +107,7 @@ namespace CppAst.CodeGen.CSharp
                             case CppTypeKind.Qualified:
                                 break;
                             case CppTypeKind.Function:
+                                csType = converter.ConvertAnonymousType(elementType, context);
                                 break;
                             case CppTypeKind.Typedef:
                                 break;
@@ -147,7 +148,7 @@ namespace CppAst.CodeGen.CSharp
                         }
                         else
                         {
-                            var csArrayElementType = converter.GetCSharpType(arrayElementType, context);
+                            var csArrayElementType = converter.GetCSharpType(arrayElementType, context, true);
                             csType = new CSharpArrayType(csArrayElementType);
                             var typeWithAttributes = new CSharpTypeWithAttributes(csType);
                             var attr = new CSharpMarshalAttribute(CSharpUnmanagedKind.LPArray);
@@ -167,18 +168,21 @@ namespace CppAst.CodeGen.CSharp
                         break;
 
                     case CppTypeKind.Reference:
-                        csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(((CppReferenceType)cppType).ElementType, context));
+                        csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(((CppReferenceType)cppType).ElementType, context, true));
                         break;
                     case CppTypeKind.Qualified:
                         var qualifiedType = (CppQualifiedType) cppType;
-                        csType = converter.GetCSharpType(qualifiedType.ElementType, context);
+                        csType = converter.GetCSharpType(qualifiedType.ElementType, context, true);
                         // TODO: Handle in parameters
                         break;
                     case CppTypeKind.Function:
+                        csType = converter.ConvertAnonymousType(cppType, context);
                         break;
                     case CppTypeKind.Typedef:
                         break;
                     case CppTypeKind.StructOrClass:
+                        csType = converter.ConvertAnonymousType(cppType, context);
+                        break;
                     case CppTypeKind.Enum:
                         break;
                     case CppTypeKind.TemplateParameterType:

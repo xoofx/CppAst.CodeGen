@@ -11,7 +11,7 @@ namespace CppAst.CodeGen.CSharp
     {
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
-            pipeline.GetCSharpTypeResolvers.Add(ConvertFunctionType);
+            pipeline.FunctionTypeConverters.Add(ConvertAnonymousFunctionType);
         }
 
         public static bool IsFunctionType(CppType type, out CppFunctionType cppFunctionType)
@@ -32,14 +32,9 @@ namespace CppAst.CodeGen.CSharp
             return true;
         }
 
-        public static CSharpType ConvertFunctionType(CSharpConverter converter, CppType cppType, CSharpElement context)
+        public static CSharpElement ConvertAnonymousFunctionType(CSharpConverter converter, CppFunctionType cppfunctiontype, CSharpElement context)
         {
-            if (cppType.TypeKind != CppTypeKind.Function)
-            {
-                return null;
-            }
-
-            return ConvertNamedFunctionType(converter, (CppFunctionType)cppType, context, null);
+            return ConvertNamedFunctionType(converter, cppfunctiontype, context, null);
         }
 
         public static CSharpType ConvertNamedFunctionType(CSharpConverter converter, CppFunctionType cppType, CSharpElement context, string name)

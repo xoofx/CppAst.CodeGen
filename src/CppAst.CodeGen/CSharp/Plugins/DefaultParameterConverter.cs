@@ -26,7 +26,7 @@ namespace CppAst.CodeGen.CSharp
             var csParam = new CSharpParameter(csParamName) {CppElement = cppParam};
             parameters.Add(csParam);
 
-            var csParamType = converter.GetCSharpType(cppParam.Type, context);
+            var csParamType = converter.GetCSharpType(cppParam.Type, csParam);
             csParam.Index = index;
             csParam.ParameterType = csParamType;
 

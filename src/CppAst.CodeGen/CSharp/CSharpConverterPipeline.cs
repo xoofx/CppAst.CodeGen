@@ -14,7 +14,7 @@ namespace CppAst.CodeGen.CSharp
 
     public delegate string GetCSharpNameDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
 
-    public delegate CSharpType GetCSharpTypeDelegate(CSharpConverter converter, CppType cppType, CSharpElement context);
+    public delegate CSharpType GetCSharpTypeDelegate(CSharpConverter converter, CppType cppType, CSharpElement context, bool nested);
 
     public delegate CSharpCompilation ConvertCompilationDelegate(CSharpConverter converter, CppCompilation cppCompilation, CSharpElement context);
 
