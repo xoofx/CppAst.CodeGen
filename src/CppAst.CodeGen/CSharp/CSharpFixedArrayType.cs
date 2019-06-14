@@ -6,21 +6,19 @@ using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
 {
-    public class CSharpTextComment : CSharpComment
+    public class CSharpFixedArrayType : CSharpTypeWithElement
     {
-        public CSharpTextComment(string text)
+        public CSharpFixedArrayType(CSharpType elementType, int size) : base(elementType)
         {
-            Text = text;
+            Size = size;
         }
 
-        public string Text { get; set; }
-
-        public bool IsRawText { get; set; }
+        public int Size { get; set; }
 
         public override void DumpTo(CodeWriter writer)
         {
-            // TODO: escape
-            writer.Write(Text);
+            ElementType?.DumpReferenceTo(writer);
+            writer.Write($"[{Size}]");
         }
     }
 }

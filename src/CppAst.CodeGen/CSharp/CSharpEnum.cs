@@ -21,7 +21,10 @@ namespace CppAst.CodeGen.CSharp
         public override IEnumerable<CSharpAttribute> GetAttributes()
         {
             foreach (var attr in base.GetAttributes()) yield return attr;
-            yield return new CSharpFreeAttribute("Flags");
+            if (IsFlags)
+            {
+                yield return new CSharpFreeAttribute("Flags");
+            }
         }
     }
 }

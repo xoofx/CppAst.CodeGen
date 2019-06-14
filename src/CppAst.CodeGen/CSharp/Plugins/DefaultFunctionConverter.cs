@@ -30,6 +30,8 @@ namespace CppAst.CodeGen.CSharp
             converter.ApplyDefaultVisibility(csFunction, container);
             container.Members.Add(csFunction);
 
+            converter.AddUsing(container, "System.Runtime.InteropServices");
+
             csFunction.Modifiers |= CSharpModifiers.Static | CSharpModifiers.Extern;
             csFunction.Name = converter.GetCSharpName(cppFunction, csFunction);
             csFunction.Comment = converter.GetCSharpComment(cppFunction, csFunction);

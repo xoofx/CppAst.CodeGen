@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using CppAst.CodeGen.Common;
+using Zio.FileSystems;
 
 namespace CppAst.CodeGen.CSharp
 {
@@ -15,6 +16,13 @@ namespace CppAst.CodeGen.CSharp
         }
 
         public List<CSharpComment> Children { get; }
+
+        public string ChildrenToFullString()
+        {
+            var writer = new CodeWriter(new CodeWriterOptions(new MemoryFileSystem(), CodeWriterMode.Full));
+            DumpChildrenTo(writer);
+            return writer.CurrentWriter.ToString();
+        }
 
         protected internal void DumpChildrenTo(CodeWriter writer)
         {

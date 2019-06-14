@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
@@ -21,10 +22,10 @@ namespace CppAst.CodeGen.CSharp
 
             if (DefaultFunctionTypeConverter.IsFunctionType(elementType, out var cppFunctionType))
             {
-                return DefaultFunctionTypeConverter.ConvertNamedFunctionType(converter, cppFunctionType, context, cppTypedef.Name);
+                return DefaultFunctionTypeConverter.ConvertNamedFunctionType(converter, cppFunctionType, context, cppTypedef);
             }
 
-            var isFromSystemIncludes = IsFromSystemIncludes(converter.CurrentCppCompilation, cppTypedef);
+            var isFromSystemIncludes = converter.IsFromSystemIncludes(cppTypedef);
 
             var csElementType = converter.GetCSharpType(elementType, context, true);
 
@@ -34,7 +35,8 @@ namespace CppAst.CodeGen.CSharp
             // - the typedef is from system includes and the underlying type is not a pointer
             // - or the typedef mode is "no-wrap" and is not in the whitelist
             // then we bypass entirely the typedef and return immediately the element type
-            if (noWrap || (isFromSystemIncludes && elementType.TypeKind != CppTypeKind.Pointer))
+            bool is_size_t = isFromSystemIncludes && cppTypedef.Name == "size_t";
+            if (noWrap || (isFromSystemIncludes && elementType.TypeKind != CppTypeKind.Pointer && !is_size_t))
             {
                 return csElementType;
             }
@@ -53,7 +55,7 @@ namespace CppAst.CodeGen.CSharp
             csStruct.Comment = converter.GetCSharpComment(cppTypedef, csStruct);
 
             // Requires System.Runtime.InteropServices
-            csStruct.Attributes.Add(new CSharpFreeAttribute("StructLayout(LayoutKind.Sequential)"));
+            csStruct.Attributes.Add(new CSharpStructLayoutAttribute(LayoutKind.Sequential) { CharSet = converter.Options.DefaultCharSet });
 
             // Required by StructLayout
             converter.AddUsing(container, "System.Runtime.InteropServices");
@@ -63,7 +65,8 @@ namespace CppAst.CodeGen.CSharp
             csStruct.BaseTypes.Add(new CSharpFreeType($"IEquatable<{name}>"));
 
             // Dump the type name and attached attributes for the element type
-            var csElementTypeName = converter.ConvertTypeReferenceToString(csElementType, out var attachedAttributes);
+            var attachedAttributes = string.Empty;
+            var csElementTypeName = is_size_t ? "IntPtr" : converter.ConvertTypeReferenceToString(csElementType, out attachedAttributes);
 
             csStruct.Members.Add(new CSharpLineElement($"public {name}({csElementTypeName} value) => this.Value = value;"));
             csStruct.Members.Add(new CSharpLineElement($"{attachedAttributes}public readonly {csElementTypeName} Value;"));
@@ -73,22 +76,11 @@ namespace CppAst.CodeGen.CSharp
             csStruct.Members.Add(new CSharpLineElement($"public override string ToString() => Value.ToString();"));
             csStruct.Members.Add(new CSharpLineElement($"public static implicit operator {csElementTypeName}({name} from) => from.Value;"));
             csStruct.Members.Add(new CSharpLineElement($"public static implicit operator {name}({csElementTypeName} from) => new {name}(from);"));
+            csStruct.Members.Add(new CSharpLineElement($"public static bool operator ==({name} left, {name} right) => left.Equals(right);"));
+            csStruct.Members.Add(new CSharpLineElement($"public static bool operator !=({name} left, {name} right) => !left.Equals(right);"));
 
             return csStruct;
 
-        }
-        
-        private static bool IsFromSystemIncludes(CppCompilation cppCompilation, CppElement cppElement)
-        {
-            while (cppElement != null)
-            {
-                if (cppElement == cppCompilation.System)
-                {
-                    return true;
-                }
-                cppElement = cppElement.Parent as CppElement;
-            }
-            return false;
         }
     }
 }

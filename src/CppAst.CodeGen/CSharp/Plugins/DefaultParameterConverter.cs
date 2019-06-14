@@ -22,7 +22,7 @@ namespace CppAst.CodeGen.CSharp
                 return null;
             }
 
-            var csParamName = converter.GetCSharpName(cppParam, context);
+            var csParamName = string.IsNullOrEmpty(cppParam.Name) ? "arg" + index : converter.GetCSharpName(cppParam, context);
             var csParam = new CSharpParameter(csParamName) {CppElement = cppParam};
             parameters.Add(csParam);
 

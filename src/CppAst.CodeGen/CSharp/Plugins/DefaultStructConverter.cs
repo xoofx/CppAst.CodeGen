@@ -39,8 +39,8 @@ namespace CppAst.CodeGen.CSharp
 
             // Requires System.Runtime.InteropServices
             csStruct.Attributes.Add(isUnion ? 
-                new CSharpFreeAttribute("StructLayout(LayoutKind.Explicit)") : 
-                new CSharpFreeAttribute("StructLayout(LayoutKind.Sequential)")
+                new CSharpStructLayoutAttribute(LayoutKind.Explicit) { CharSet = converter.Options.DefaultCharSet } : 
+                new CSharpStructLayoutAttribute(LayoutKind.Sequential) { CharSet = converter.Options.DefaultCharSet }
             );
 
             // Required by StructLayout
@@ -59,6 +59,8 @@ namespace CppAst.CodeGen.CSharp
                 csStruct.Members.Add(new CSharpLineElement($"public override bool Equals(object obj) => obj is {csStruct.Name} other && Equals(other);"));
                 csStruct.Members.Add(new CSharpLineElement($"public override int GetHashCode() => _handle.GetHashCode();"));
                 csStruct.Members.Add(new CSharpLineElement($"public override string ToString() => \"0x\" + (IntPtr.Size == 8 ? _handle.ToString(\"X16\") : _handle.ToString(\"X8\"));"));
+                csStruct.Members.Add(new CSharpLineElement($"public static bool operator ==({csStruct.Name} left, {csStruct.Name} right) => left.Equals(right);"));
+                csStruct.Members.Add(new CSharpLineElement($"public static bool operator !=({csStruct.Name} left, {csStruct.Name} right) => !left.Equals(right);"));
             }
 
             return csStruct;

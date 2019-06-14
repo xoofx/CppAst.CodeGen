@@ -3,7 +3,6 @@
 // See license.txt file in the project root for full license information.
 
 using System;
-using System.Runtime.InteropServices;
 
 namespace CppAst.CodeGen.CSharp
 {
@@ -37,27 +36,15 @@ namespace CppAst.CodeGen.CSharp
             return ConvertNamedFunctionType(converter, cppfunctiontype, context, null);
         }
 
-        public static CSharpType ConvertNamedFunctionType(CSharpConverter converter, CppFunctionType cppType, CSharpElement context, string name)
+        public static CSharpType ConvertNamedFunctionType(CSharpConverter converter, CppFunctionType cppType, CSharpElement context, CppTypedef typedef)
         {
             if (cppType == null) throw new ArgumentNullException(nameof(cppType));
 
-            if (name == null)
+            string name = typedef?.Name;
+            if (typedef == null)
             {
-                // Create a contextual name
-                var cppElement = context.CppElement;
-                while (cppElement != null)
-                {
-                    name = converter.GetCSharpName(cppElement, context, string.Empty);
-                    if (!string.IsNullOrEmpty(name))
-                    {
-                        break;
-                    }
-                    cppElement = (CppElement)cppElement.Parent;
-                }
-
-                name = name != null ? name + "Delegate" : "Delegate";
+                name = converter.GetCSharpName(cppType, context);
             }
-
             var csDelegate = new CSharpDelegate(name) { CppElement = cppType };
 
             var cppFunctionType = (CppFunctionType)cppType;
@@ -66,10 +53,12 @@ namespace CppAst.CodeGen.CSharp
             var csCallingConvention = cppFunctionType.CallingConvention.GetCSharpCallingConvention();
             csDelegate.Attributes.Add(new CSharpFreeAttribute($"UnmanagedFunctionPointer(CallingConvention.{csCallingConvention})"));
 
-            var container = converter.GetCSharpContainer(cppFunctionType, context);
+            var container =  typedef != null ? converter.GetCSharpContainer(typedef, context) : converter.GetCSharpContainer(cppFunctionType, context);
 
             converter.ApplyDefaultVisibility(csDelegate, container);
             container.Members.Add(csDelegate);
+
+            converter.AddUsing(container, "System.Runtime.InteropServices");
 
             csDelegate.Comment = converter.GetCSharpComment(cppFunctionType, csDelegate);
             csDelegate.ReturnType = converter.GetCSharpType(cppFunctionType.ReturnType, csDelegate);

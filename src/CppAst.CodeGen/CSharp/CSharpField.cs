@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
@@ -43,9 +44,22 @@ namespace CppAst.CodeGen.CSharp
             FieldType?.DumpContextualAttributesTo(writer);
             Visibility.DumpTo(writer);
             Modifiers.DumpTo(writer);
-            FieldType?.DumpReferenceTo(writer);
-            writer.Write(" ");
-            writer.Write(Name);
+
+            if (FieldType is CSharpFixedArrayType fixedArrayType)
+            {
+                writer.Write("fixed ");
+                fixedArrayType.ElementType.DumpReferenceTo(writer);
+                writer.Write(" ");
+                writer.Write(Name);
+                writer.Write("[").Write(fixedArrayType.Size.ToString(CultureInfo.InvariantCulture)).Write("]");
+            }
+            else
+            {
+                FieldType?.DumpReferenceTo(writer);
+                writer.Write(" ");
+                writer.Write(Name);
+            }
+
             if (InitValue != null)
             {
                 writer.Write(" = ");

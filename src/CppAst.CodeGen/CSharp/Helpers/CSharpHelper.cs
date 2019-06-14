@@ -4,11 +4,118 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace CppAst.CodeGen.CSharp
 {
     public static class CSharpHelper
     {
+        private const string LetterLowerChar = @"\p{Ll}";
+        private const string LetterLowerOrDigitChar = "[" + LetterLowerChar + DigitChar + "]";
+        private const string LetterUpperChar = @"\p{Lu}";
+        private const string LetterUpperOrDigitChar = "[" + LetterUpperChar + DigitChar + "]";
+        private const string DigitChar = @"\p{N}";
+
+        private const string LowerWord = LetterLowerChar + LetterLowerOrDigitChar + "*";
+        private const string UpperWord = LetterUpperChar + LetterUpperOrDigitChar + "*";
+        private const string PascalWord = LetterUpperChar + LetterLowerOrDigitChar + "+";
+
+        private static readonly Regex MatchLowerCase = new Regex($"^{LowerWord}$");
+        private static readonly Regex MatchCamelCase = new Regex($"^{LowerWord}({PascalWord})+$");
+        private static readonly Regex MatchPascalCase = new Regex($"^({PascalWord})+$");
+        private static readonly Regex MatchScreamingCase = new Regex($"^{UpperWord}$");
+
+        private static readonly Regex MatchCamelSnakeCase = new Regex($"^{LowerWord}(_{PascalWord})+$");
+        private static readonly Regex MatchLowerSnakeCase = new Regex($"^{LowerWord}(_{LetterLowerOrDigitChar}+)+$");
+        private static readonly Regex MatchPascalSnakeCase = new Regex($"^{PascalWord}(_{PascalWord})+$");
+        private static readonly Regex MatchScreamingSnakeCase = new Regex($"^{UpperWord}(_{LetterUpperOrDigitChar}+)+$");
+
+        public static bool IsSnake(this CSharpCasingKind casingKind)
+        {
+            return casingKind >= CSharpCasingKind.CamelSnake;
+        }
+
+        public static bool IsCamel(this CSharpCasingKind casingKind)
+        {
+            return casingKind == CSharpCasingKind.Camel || casingKind == CSharpCasingKind.CamelSnake;
+        }
+
+        public static bool IsLower(this CSharpCasingKind casingKind)
+        {
+            return casingKind == CSharpCasingKind.Lower || casingKind == CSharpCasingKind.LowerSnake;
+        }
+
+        public static bool IsPascal(this CSharpCasingKind casingKind)
+        {
+            return casingKind == CSharpCasingKind.Pascal || casingKind == CSharpCasingKind.PascalSnake;
+        }
+
+        public static string ToPascal(string text)
+        {
+            if (text == null) throw new ArgumentNullException(nameof(text));
+            if (text.Length == 0) return text;
+
+            if (char.IsLower(text[0]))
+            {
+                if (text.Length == 1) return char.ToUpper(text[0]).ToString();
+                return char.ToUpper(text[0]) + text.Substring(1);
+            }
+
+            return text;
+        }
+
+        internal static string AppendWithCasing(string name, CSharpCasingKind nameCasingKind, string nameToAppend, CSharpCasingKind nameToAppendCasingKind)
+        {
+            // Could be improved to better merge casing
+            if (!string.IsNullOrEmpty(nameToAppend))
+            {
+                if ((nameCasingKind.IsSnake() || nameToAppendCasingKind.IsSnake()))
+                {
+                    if (nameCasingKind.IsPascal() && !nameToAppendCasingKind.IsPascal())
+                    {
+                        name = name + "_" + ToPascal(nameToAppend);
+                    }
+                    else
+                    {
+                        name = name + "_" + nameToAppend;
+                    }
+                }
+                else
+                {
+                    if (nameCasingKind.IsPascal() && !nameToAppendCasingKind.IsPascal())
+                    {
+                        name = name + ToPascal(nameToAppend);
+                    }
+                    else
+                    {
+                        if (nameCasingKind == CSharpCasingKind.Lower && nameToAppendCasingKind == CSharpCasingKind.Lower)
+                        {
+                            name = name + "_" + nameToAppend;
+                        }
+                        else
+                        {
+                            name = name + nameToAppend;
+                        }
+                    }
+                }
+            }
+            return name;
+        }
+
+        public static CSharpCasingKind GetCSharpCasingKind(string name)
+        {
+            if (MatchLowerCase.Match(name).Success) return CSharpCasingKind.Lower;
+            if (MatchCamelCase.Match(name).Success) return CSharpCasingKind.Camel;
+            if (MatchPascalCase.Match(name).Success) return CSharpCasingKind.Pascal;
+            if (MatchScreamingCase.Match(name).Success) return CSharpCasingKind.Screaming;
+            if (MatchCamelSnakeCase.Match(name).Success) return CSharpCasingKind.CamelSnake;
+            if (MatchLowerSnakeCase.Match(name).Success) return CSharpCasingKind.LowerSnake;
+            if (MatchPascalSnakeCase.Match(name).Success) return CSharpCasingKind.PascalSnake;
+            if (MatchScreamingSnakeCase.Match(name).Success) return CSharpCasingKind.ScreamingSnake;
+
+            return CSharpCasingKind.Undefined;
+        }
+        
         public static CallingConvention GetCSharpCallingConvention(this CppCallingConvention cppCallingConvention)
         {
             switch (cppCallingConvention)

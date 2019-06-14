@@ -12,6 +12,8 @@ namespace CppAst.CodeGen.CSharp
 
     public delegate ICSharpContainer GetCSharpContainerDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
 
+    public delegate CSharpComment ConvertCommentDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
+
     public delegate string GetCSharpNameDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
 
     public delegate CSharpType GetCSharpTypeDelegate(CSharpConverter converter, CppType cppType, CSharpElement context, bool nested);
@@ -53,6 +55,7 @@ namespace CppAst.CodeGen.CSharp
             GetCSharpContainerResolvers = new List<GetCSharpContainerDelegate>();
             AfterPreprocessing = new List<AfterPreprocessingDelegate>();
             CompilationConverters = new List<ConvertCompilationDelegate>();
+            CommentConverters = new List<ConvertCommentDelegate>();
             EnumConverters = new List<ConvertEnumDelegate>();
             EnumItemConverters = new List<ConvertEnumItemDelegate>();
             ClassConverters = new List<ConvertClassDelegate>();
@@ -80,6 +83,8 @@ namespace CppAst.CodeGen.CSharp
         public List<GetCSharpContainerDelegate> GetCSharpContainerResolvers { get; }
 
         public List<ConvertCompilationDelegate> CompilationConverters { get; }
+
+        public List<ConvertCommentDelegate> CommentConverters { get; }
 
         public List<ConvertEnumDelegate> EnumConverters { get; }
 
@@ -114,6 +119,7 @@ namespace CppAst.CodeGen.CSharp
             GetCSharpTypeResolvers.Clear();
             GetCSharpContainerResolvers.Clear();
             CompilationConverters.Clear();
+            CommentConverters.Clear();
             EnumConverters.Clear();
             EnumItemConverters.Clear();
             ClassConverters.Clear();

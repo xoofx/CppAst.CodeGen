@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.IO;
+using System.Runtime.InteropServices;
 
 namespace CppAst.CodeGen.CSharp
 {
@@ -11,12 +12,49 @@ namespace CppAst.CodeGen.CSharp
 
         public static string DefaultGetCSharpName(CSharpConverter converter, CppElement element, CSharpElement context)
         {
-            if (element is CppFunction cppFunction && context is ICSharpMember csMember)
+            var name = string.Empty;
+
+            // Try to get the name directly from the CppElement
+            if (element is ICppMember member)
             {
-                var name = csMember.Name + "Delegate";
-                return name;
+                name = member.Name;
             }
-            return null;
+
+            // If it is null, try to get a contextual name from the context
+            if (string.IsNullOrEmpty(name))
+            {
+                var contextName = string.Empty;
+                if (context is ICSharpMember csMember)
+                {
+                    contextName = csMember.Name;
+                }
+
+                if (!string.IsNullOrEmpty(contextName))
+                {
+                    name = contextName;
+                }
+            }
+            
+            // If the name is null, we create an anonymous type name that includes the type, file name, and file offset
+            if (string.IsNullOrEmpty(name))
+            {
+                var fileName = Path.GetFileNameWithoutExtension(element.Span.Start.File);
+                name = $"__Anonymous{element.GetType().Name}_{fileName}_{element.Span.Start.Offset}";
+            }
+            else if (element is CppType cppType && (!(element is ICppMember cppMember) || string.IsNullOrEmpty(cppMember.Name)))
+            {
+                switch (cppType)
+                {
+                    case CppClass cppClass:
+                        name = CSharpHelper.AppendWithCasing(name, CSharpHelper.GetCSharpCasingKind(name), cppClass.ClassKind.ToString().ToLowerInvariant() , CSharpCasingKind.Lower);
+                        break;
+                    case CppFunctionType cppFunctionType:
+                        name = CSharpHelper.AppendWithCasing(name, CSharpHelper.GetCSharpCasingKind(name), "delegate", CSharpCasingKind.Lower);
+                        break;
+                }
+            }
+
+            return name;
         }
    }
 }

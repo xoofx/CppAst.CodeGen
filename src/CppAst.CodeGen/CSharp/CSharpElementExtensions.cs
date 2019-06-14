@@ -88,6 +88,11 @@ namespace CppAst.CodeGen.CSharp
                 writer.Write("abstract ");
             }
 
+            if ((modifiers & CSharpModifiers.Unsafe) != 0)
+            {
+                writer.Write("unsafe ");
+            }
+
             if ((modifiers & CSharpModifiers.ReadOnly) != 0)
             {
                 writer.Write("readonly ");

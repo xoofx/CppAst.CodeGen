@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using CppAst.CodeGen.Common;
 
@@ -9,8 +10,9 @@ namespace CppAst.CodeGen.CSharp
 {
     public class CSharpXmlComment : CSharpComment
     {
-        public CSharpXmlComment()
+        public CSharpXmlComment(string tagName)
         {
+            TagName = tagName ?? throw new ArgumentNullException(nameof(tagName));
             Attributes = new List<CSharpXmlAttribute>();
         }
 

@@ -17,6 +17,7 @@ namespace CppAst.CodeGen.CSharp
         private CSharpCompilation _csCompilation;
         private CodeWriter _csTempWriter;
         private readonly Dictionary<CppElement, CSharpElement> _mapCppToCSharp;
+        private readonly Stack<ICSharpContainer> _currentContainers;
 
         private readonly CSharpConverterPipeline _pipeline;
 
@@ -26,6 +27,8 @@ namespace CppAst.CodeGen.CSharp
             _mapCppToCSharp = new Dictionary<CppElement, CSharpElement>(CppElementReferenceEqualityComparer.Default);
             _csTempWriter = new CodeWriter(new CodeWriterOptions(null));
             Tags = new Dictionary<string, object>();
+
+            _currentContainers = new Stack<ICSharpContainer>();
 
             _pipeline = new CSharpConverterPipeline(options);
             _pipeline.RegisterPlugins(this);
@@ -87,7 +90,7 @@ namespace CppAst.CodeGen.CSharp
 
             if (additionalHeaders.Length > 0)
             {
-                cppOptions.PostHeaderText = (cppOptions.PostHeaderText ?? string.Empty) + "\n" + additionalHeaders + "\n";
+                cppOptions.PostHeaderText = (cppOptions.PostHeaderText ?? String.Empty) + "\n" + additionalHeaders + "\n";
             }
 
             var cppCompilation = parse(cppOptions);
@@ -135,7 +138,7 @@ namespace CppAst.CodeGen.CSharp
             return Convert(cppElement, 0, context);
         }
 
-        public CSharpType ConvertAnonymousType(CppType cppType, CSharpElement context)
+        public CSharpType ConvertType(CppType cppType, CSharpElement context)
         {
             return (CSharpType)Convert(cppType, context);
         }
@@ -148,6 +151,8 @@ namespace CppAst.CodeGen.CSharp
             {
                 // Gives a chance to modify the element before processing it
                 ProcessConverting(cppElement, context);
+
+                CppElement cppWithChildrenToVisit = cppElement;
 
                 switch (cppElement)
                 {
@@ -181,6 +186,11 @@ namespace CppAst.CodeGen.CSharp
                         break;
                     case CppTypedef cppTypedef:
                         csElement = TryConvertTypedef(cppTypedef, context);
+                        // Workaround to force the visit of typedef
+                        if (csElement?.CppElement is CppFunctionType)
+                        {
+                            cppWithChildrenToVisit = csElement.CppElement;
+                        }
                         break;
                 }
 
@@ -189,12 +199,24 @@ namespace CppAst.CodeGen.CSharp
                     Register(cppElement, csElement);
                 }
 
-                if (cppElement is ICppContainer container)
+                if (cppWithChildrenToVisit is ICppContainer container)
                 {
                     var subContext = csElement ?? context;
+
+                    bool containerPushed = false;
+                    if (subContext is ICSharpContainer csharpContainer && !(subContext is CSharpCompilation))
+                    {
+                        _currentContainers.Push(csharpContainer);
+                        containerPushed = true;
+                    }
                     foreach (var nestedCppElement in container.Children())
                     {
                         Convert((CppElement)nestedCppElement, 0, subContext);
+                    }
+
+                    if (containerPushed)
+                    {
+                        _currentContainers.Pop();
                     }
                 }
 
@@ -220,7 +242,34 @@ namespace CppAst.CodeGen.CSharp
         
         public CSharpComment GetCSharpComment(CppElement element, CSharpElement context)
         {
+            if (element == null) throw new ArgumentNullException(nameof(element));
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            for (var i = _pipeline.CommentConverters.Count - 1; i >= 0; i--)
+            {
+                var commentConverter = _pipeline.CommentConverters[i];
+                var csComment = commentConverter(this, element, context);
+                if (csComment != null)
+                {
+                    return csComment;
+                }
+            }
             return null;
+        }
+
+        public bool IsFromSystemIncludes(CppElement cppElement)
+        {
+            if (_cppCompilation == null) return false;
+
+            while (cppElement != null)
+            {
+                if (cppElement == _cppCompilation.System)
+                {
+                    return true;
+                }
+                cppElement = cppElement.Parent as CppElement;
+            }
+            return false;
         }
 
         public string GetCSharpName(CppElement member, CSharpElement context, string defaultName = null)
@@ -238,7 +287,18 @@ namespace CppAst.CodeGen.CSharp
                 }
             }
 
-            name = name ?? (member as ICppMember)?.Name ?? (member as CppParameter)?.Name ?? defaultName ?? $"unsupported_name /* {member} */";
+            if (String.IsNullOrEmpty(name))
+            {
+                name = (member as ICppMember)?.Name;
+                if (String.IsNullOrEmpty(name))
+                {
+                    name = defaultName;
+                    if (String.IsNullOrEmpty(name))
+                    {
+                        name = $"unsupported_name /* {member} */";
+                    }
+                }
+            }
             return CSharpHelper.EscapeName(name);
         }
 
@@ -540,16 +600,35 @@ namespace CppAst.CodeGen.CSharp
 
         public ICSharpContainer GetCSharpContainer(CppElement element, CSharpElement context)
         {
-            // Default implementation, returns the current context
-            var nextContext = context;
-            while (nextContext != null && !(nextContext is CSharpCompilation))
+            if (element.Parent != CurrentCppCompilation && element.Parent != CurrentCppCompilation.System)
             {
-                if (nextContext is ICSharpContainer container) return container;
-                nextContext = context.Parent;
+                // Default implementation, returns the current context
+                var nextContext = context;
+                while (nextContext != null && !(nextContext is CSharpCompilation))
+                {
+                    if (nextContext is ICSharpContainer container) return container;
+                    nextContext = context.Parent;
+                }
+
+                if (context is CSharpParameter)
+                {
+                    var currentContainer = GetCSharpCurrentContainer();
+                    if (currentContainer != null)
+                    {
+                        return currentContainer;
+                    }
+                }
             }
+
             return GetCSharpContainerFromPlugins(element, context);
         }
-        
+
+
+        public ICSharpContainer GetCSharpCurrentContainer()
+        {
+            return _currentContainers.Count > 0 ? _currentContainers.Peek() : null;
+        }
+
         private ICSharpContainer GetCSharpContainerFromPlugins(CppElement element, CSharpElement context)
         {
             for (var i = _pipeline.GetCSharpContainerResolvers.Count - 1; i >= 0; i--)
@@ -561,7 +640,6 @@ namespace CppAst.CodeGen.CSharp
                     return container;
                 }
             }
-
             throw new InvalidOperationException($"Unable to find or create a CSharp container for the element `{element}`");
         }
 

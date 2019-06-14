@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Zio;
 
 namespace CppAst.CodeGen.CSharp
@@ -20,6 +21,7 @@ namespace CppAst.CodeGen.CSharp
         {
             Plugins = new List<ICSharpConverterPlugin>()
             {
+                new DefaultCommentConverter(),
                 new DefaultGetCSharpNamePlugin(),
                 new DefaultContainerResolver(),
                 new DefaultTypedefConverter(),
@@ -45,6 +47,8 @@ namespace CppAst.CodeGen.CSharp
             TypedefCodeGenKind = CppTypedefCodeGenKind.Wrap;
             TypedefWrapWhiteList = new HashSet<string>();
             Tags = new Dictionary<string, object>();
+            DefaultCharSet = CharSet.Ansi;
+            AllowFixedSizeBuffers = true;
             DefaultMarshalForString = new CSharpMarshalAttribute(CSharpUnmanagedKind.LPStr);
             DefaultMarshalForBool = new CSharpMarshalAttribute(CSharpUnmanagedKind.U1);
         }
@@ -58,6 +62,12 @@ namespace CppAst.CodeGen.CSharp
         public bool GenerateAsInternal { get; set; }
 
         public string DefaultDllImportNameAndArguments { get; set; }
+
+        public bool AllowFixedSizeBuffers { get; set; }
+
+        public CharSet DefaultCharSet { get; set; }
+
+        public bool DispatchOutputPerInclude { get; set; }
 
         public CSharpMarshalAttribute DefaultMarshalForString { get; set; }
 

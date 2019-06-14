@@ -23,5 +23,12 @@ namespace CppAst.CodeGen.CSharp
             DumpTo(writer);
             return writer.CurrentWriter.ToString();
         }
+
+        public string ToFullString()
+        {
+            var writer = new CodeWriter(new CodeWriterOptions(new MemoryFileSystem(), CodeWriterMode.Full));
+            DumpTo(writer);
+            return writer.CurrentWriter.ToString();
+        }
     }
 }

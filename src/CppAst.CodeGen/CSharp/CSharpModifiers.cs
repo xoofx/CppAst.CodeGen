@@ -16,5 +16,6 @@ namespace CppAst.CodeGen.CSharp
         Abstract = 1 << 3,
         Const = 1 << 4,
         ReadOnly = 1 << 5,
+        Unsafe = 1 << 6,
     }
 }
