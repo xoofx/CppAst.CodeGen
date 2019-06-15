@@ -20,7 +20,7 @@ namespace CppAst.CodeGen.CSharp
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
-        public List<CSharpAttribute> Attributes { get; }
+        public List<CSharpAttribute> Attributes { get; private set; }
 
         public int Index { get; set; }
 
@@ -33,6 +33,38 @@ namespace CppAst.CodeGen.CSharp
         public string Name { get; set; }
 
         public string DefaultValue { get; set; }
+
+        public CSharpParameter Clone()
+        {
+            var newParam = (CSharpParameter) MemberwiseClone();
+            newParam.Attributes = new List<CSharpAttribute>();
+            foreach (var attr in Attributes)
+            {
+                newParam.Attributes.Add(attr.Clone());
+            }
+            return newParam;
+        }
+
+        public void DumpArgTo(CodeWriter writer)
+        {
+            if (ParameterType is CSharpRefType refType)
+            {
+                switch (refType.Kind)
+                {
+                    case CSharpRefKind.Out:
+                        writer.Write("out ");
+                        break;
+                    case CSharpRefKind.Ref:
+                        writer.Write("ref ");
+                        break;
+                    case CSharpRefKind.RefReadOnly:
+                        writer.Write("ref readonly ");
+                        break;
+                }
+            }
+            
+            writer.Write(Name);
+        }
 
         public override void DumpTo(CodeWriter writer)
         {

@@ -3,12 +3,13 @@
 // See license.txt file in the project root for full license information.
 namespace CppAst.CodeGen.CSharp
 {
-    public interface ICSharpContainer
+  
+    public interface ICSharpContainer : ICSharpElement
     {
         ICSharpContainer Parent { get; }
 
         CSharpContainerList<CSharpElement> Members { get; }
-
+        
         void ValidateMember(CSharpElement element);
     }
 }

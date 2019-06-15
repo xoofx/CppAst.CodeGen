@@ -1,13 +1,40 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <!--<VersionSuffix>alpha</VersionSuffix>
+    <BuildNumber>001</BuildNumber>-->
+    <PackageId>CppAst.CodeGen</PackageId>
+    <Description>CppAst.CodeGen is an extensible P/Invoke Code Generator from C++ to C# for .NET</Description>
+    <Copyright>Alexandre Mutel</Copyright>
+    <Authors>Alexandre Mutel</Authors>
+    <PackageTags>parser;c++;c#;codegen;pinvoke</PackageTags>
+    <PackageReleaseNotes>https://github.com/xoofx/CppAst.CodeGen/blob/master/changelog.md</PackageReleaseNotes>
+    <PackageIconUrl>https://raw.githubusercontent.com/xoofx/CppAst.CodeGen/master/img/cppast_codegen.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/xoofx/CppAst.CodeGen</PackageProjectUrl>
+    <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/xoofx/CppAst.CodeGen</RepositoryUrl>
     <LangVersion>7.3</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <VersionSuffix Condition="'$(VersionSuffix)' != '' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!--Add support for sourcelink-->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CppAst" Version="0.5.3" />
+    <PackageReference Include="CppAst" Version="0.5.4" />
     <PackageReference Include="Zio" Version="0.7.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19270-01" PrivateAssets="All"/>
+  </ItemGroup>
+  
 </Project>

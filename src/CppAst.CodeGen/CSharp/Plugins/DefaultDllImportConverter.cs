@@ -32,7 +32,7 @@ namespace CppAst.CodeGen.CSharp
             var callingConvention = (method.CppElement as CppFunction)?.CallingConvention ?? CppCallingConvention.Default;
             var csCallingConvention = callingConvention.GetCSharpCallingConvention();
             var name = converter.Options.DefaultDllImportNameAndArguments ?? "LibNativeName";
-            method.Attributes.Add(new CSharpFreeAttribute($"DllImport({name}, CallingConvention = CallingConvention.{csCallingConvention})"));
+            method.Attributes.Add(new CSharpDllImportAttribute(name) { CallingConvention =  csCallingConvention});
         }
     }
 }

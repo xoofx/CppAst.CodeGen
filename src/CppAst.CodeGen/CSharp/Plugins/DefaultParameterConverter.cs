@@ -16,6 +16,7 @@ namespace CppAst.CodeGen.CSharp
         
         public static CSharpElement ConvertParameter(CSharpConverter converter, CppParameter cppParam, int index, CSharpElement context)
         {
+            var parent = ((CSharpElement)(context as CSharpMethod) ?? (context as CSharpDelegate));
             var parameters = (context as CSharpMethod)?.Parameters ?? (context as CSharpDelegate)?.Parameters;
             if (parameters == null)
             {
@@ -23,7 +24,7 @@ namespace CppAst.CodeGen.CSharp
             }
 
             var csParamName = string.IsNullOrEmpty(cppParam.Name) ? "arg" + index : converter.GetCSharpName(cppParam, context);
-            var csParam = new CSharpParameter(csParamName) {CppElement = cppParam};
+            var csParam = new CSharpParameter(csParamName) {CppElement = cppParam, Parent =  parent};
             parameters.Add(csParam);
 
             var csParamType = converter.GetCSharpType(cppParam.Type, csParam);

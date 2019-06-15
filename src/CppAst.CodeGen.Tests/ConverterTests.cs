@@ -3,6 +3,9 @@
 // See license.txt file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using CppAst.CodeGen.Common;
 using CppAst.CodeGen.CSharp;
 using NUnit.Framework;
@@ -12,7 +15,7 @@ using Zio.FileSystems;
 namespace CppAst.CodeGen.Tests
 {
     /// <summary>
-    /// TEMP
+    /// TODO: Add tests
     /// </summary>
     public class ConverterTests
     {
@@ -46,8 +49,6 @@ struct {
             var text = fs.ReadAllText(options.DefaultOutputFilePath);
             Console.WriteLine(text);
         }
-
-
 
 
         [Test]
@@ -123,12 +124,15 @@ EXPORT_API void function0(int x);
                 TOTO_FLAG = 1 << 0,
             };
 
+            // This is a comment
             struct Tata
             {
                 int a;
 
                 int b;
                 int c;
+                char items[4];
+                int item2[8];
 
                 const char* d;
             };
@@ -139,6 +143,10 @@ EXPORT_API void function0(int x);
 
             typedef const char* git_my_string;
 
+            // This is a comment.
+            // This is another comment
+            // @param myrepo yoyo
+            // @return This is a big list of things to return
             EXPORT_API bool function0(git_my_repo* myrepo, int a, float b, const char* text, const char text2[], bool arg4[], git_my_yoyo arg5, git_my_string arg6);
             ", options);
 
