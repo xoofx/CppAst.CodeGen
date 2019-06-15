@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System;
 using System.Runtime.InteropServices;
 
 namespace CppAst.CodeGen.CSharp
@@ -23,7 +24,7 @@ namespace CppAst.CodeGen.CSharp
 
             foreach (var attr in method.Attributes)
             {
-                if (attr.ToText().StartsWith("DllImport"))
+                if (attr is CSharpDllImportAttribute)
                 {
                     return;
                 }
