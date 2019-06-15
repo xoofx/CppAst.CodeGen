@@ -1,4 +1,4 @@
 # Changelog
 
-## WIP (TBD 2019)
+## 0.1.0 (15 Jun 2019)
 - Initial version
