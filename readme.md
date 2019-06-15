@@ -1,4 +1,4 @@
-# CppAst.CodeGen [![Build status](https://ci.appveyor.com/api/projects/status/75a6tolv5evpv5j4?svg=true)](https://ci.appveyor.com/project/xoofx/cppast.codegen)   [![NuGet](https://img.shields.io/nuget/v/CppAst.CodeGen.svg)](https://www.nuget.org/packages/CppAst.CodeGen/)
+# CppAst.CodeGen [![Build status](https://ci.appveyor.com/api/projects/status/im96w75jnq89kwdl?svg=true)](https://ci.appveyor.com/project/xoofx/cppast-codegen) [![NuGet](https://img.shields.io/nuget/v/CppAst.CodeGen.svg)](https://www.nuget.org/packages/CppAst.CodeGen/)
 
 <img align="right" width="160px" height="160px" src="img/cppast_codegen.png">
 
