@@ -607,7 +607,7 @@ namespace CppAst.CodeGen.CSharp
                 while (nextContext != null && !(nextContext is CSharpCompilation))
                 {
                     if (nextContext is ICSharpContainer container) return container;
-                    nextContext = context.Parent;
+                    nextContext = nextContext.Parent;
                 }
 
                 if (context is CSharpParameter)

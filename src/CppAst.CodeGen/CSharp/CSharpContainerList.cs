@@ -45,6 +45,7 @@ namespace CppAst.CodeGen.CSharp
         public void Add(TElement item)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
+            if (ReferenceEquals(item, _container)) throw new ArgumentException("Cannot add item to itself as a container owner");
             _container.ValidateMember(item);
             if (item.Parent != null)
             {
@@ -99,6 +100,7 @@ namespace CppAst.CodeGen.CSharp
         public void Insert(int index, TElement item)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
+            if (ReferenceEquals(item, _container)) throw new ArgumentException("Cannot add item to itself as a container owner");
             _container.ValidateMember(item);
             if (item.Parent != null)
             {

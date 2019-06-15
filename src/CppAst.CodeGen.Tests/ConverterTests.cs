@@ -15,7 +15,7 @@ using Zio.FileSystems;
 namespace CppAst.CodeGen.Tests
 {
     /// <summary>
-    /// TODO: Add tests
+    /// TODO: Write proper tests
     /// </summary>
     public class ConverterTests
     {
