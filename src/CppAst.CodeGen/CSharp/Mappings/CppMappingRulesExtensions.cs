@@ -71,6 +71,77 @@ namespace CppAst.CodeGen.CSharp
                 {
                     cppParameter.Type = remapType;
                 }
+
+                if (element is CppFunction cppFunction)
+                {
+                    cppFunction.ReturnType = remapType;
+                }
+
+            });
+
+            return mappingRule;
+        }
+        
+        public static CppElementMappingRule InitValue(this CppElementMappingRule mappingRule, string value)
+        {
+            mappingRule.CSharpElementActions.Add((converter, element, matches) =>
+            {
+                if (element is CSharpField csField)
+                {
+                    csField.InitValue = value;
+                }
+
+                if (element is CSharpParameter csParam)
+                {
+                    csParam.DefaultValue = value;
+                }
+            });
+
+            return mappingRule;
+        }
+
+        public static CppElementMappingRule MarshalAs(this CppElementMappingRule mappingRule, CSharpUnmanagedKind unmanagedKind)
+        {
+            return MarshalAs(mappingRule, new CSharpMarshalAttribute(unmanagedKind));
+        }
+
+        public static CppElementMappingRule MarshalAs(this CppElementMappingRule mappingRule, CSharpMarshalAttribute marshalAttribute)
+        {
+            if (marshalAttribute == null) throw new ArgumentNullException(nameof(marshalAttribute));
+
+            mappingRule.CSharpElementActions.Add((converter, element, matches) =>
+            {
+                var csField = element as CSharpField;
+                var csParam = element as CSharpParameter;
+                var csMethod = element as CSharpMethod;
+                if (csField == null && csParam == null && csMethod == null) return;
+
+                var type = csField?.FieldType ?? csParam?.ParameterType ?? csMethod?.ReturnType;
+                // Should not happen, but in case 
+                if (type == null) return;
+               
+                if (type is CSharpTypeWithAttributes cppTypeWithAttributes)
+                {
+                    for (var i = cppTypeWithAttributes.Attributes.Count - 1; i >= 0; i--)
+                    {
+                        var attr = cppTypeWithAttributes.Attributes[i];
+                        if (attr is CSharpMarshalAttribute)
+                        {
+                            cppTypeWithAttributes.Attributes.RemoveAt(i);
+                            cppTypeWithAttributes.Attributes.Insert(i, marshalAttribute);
+                            return;
+                        }
+                    }
+                    cppTypeWithAttributes.Attributes.Add(marshalAttribute);
+                }
+                else
+                {
+                    var typeWithAttributes = new CSharpTypeWithAttributes(type);
+                    typeWithAttributes.Attributes.Add(marshalAttribute);
+                    if (csField != null) csField.FieldType = typeWithAttributes;
+                    else if (csParam != null) csParam.ParameterType = typeWithAttributes;
+                    else if (csMethod != null) csMethod.ReturnType = typeWithAttributes;
+                }
             });
 
             return mappingRule;
