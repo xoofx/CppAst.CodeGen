@@ -59,6 +59,10 @@ namespace CppAst.CodeGen.CSharp
                         }
                         matches.Add(match);
                         matchIndex++;
+                        if (matchIndex == _regexParts.Count)
+                        {
+                            break;
+                        }
                     }
                     else
                     {
