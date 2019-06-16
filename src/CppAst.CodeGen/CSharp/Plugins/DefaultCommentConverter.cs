@@ -48,7 +48,7 @@ namespace CppAst.CodeGen.CSharp
                     case CppCommentKind.ParamCommand:
                         var paramComment = (CppCommentParamCommand)childComment;
 
-                        var csParamComment = new CSharpParamComment(CSharpHelper.EscapeName(paramComment.ParamName));
+                        var csParamComment = new CSharpParamComment(paramComment.ParamName);
                         csParamComment.Children.Add(GetChildAsCSharpComment(paramComment));
                         csFullComment.Children.Add(csParamComment);
                         break;
