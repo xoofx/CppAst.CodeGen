@@ -58,7 +58,7 @@ struct {
             {
                 MappingRules =
                 {
-                    e => e.MapMacroToConst("MYNAME_(.*)", "int", @"YOYO_$1"),
+                    e => e.MapMacroToConst("MYNAME_(.*)", "int"),
                     e => e.MapMacroToEnum("MYNAME_(.*)", "MYNAME_ENUM", @"MYNAME_ENUM_$1"),
                     e => e.Map<CppParameter>("function0::x").Type("char*"),
                     e => e.Map<CppFunction>("function0").Visibility(CSharpVisibility.Private),

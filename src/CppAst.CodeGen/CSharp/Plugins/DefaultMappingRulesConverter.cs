@@ -89,7 +89,14 @@ namespace CppAst.CodeGen.CSharp
                                     macroName = Regex.Replace(regexMatch.RegexInput, regexMatch.RegexPattern, macroToConst.ConstFieldName);
                                 }
 
-                                additionalHeaders.AppendLine($"const {macroToConst.ConstFieldTypeName} {cachedRules.Prefix}{macroName} = ({macroToConst.ConstFieldTypeName}){cppMacro.Value};");
+                                if (macroToConst.ExplicitCast)
+                                {
+                                    additionalHeaders.AppendLine($"const {macroToConst.ConstFieldTypeName} {cachedRules.Prefix}{macroName} = ({macroToConst.ConstFieldTypeName}){cppMacro.Value};");
+                                }
+                                else
+                                {
+                                    additionalHeaders.AppendLine($"const {macroToConst.ConstFieldTypeName} {cachedRules.Prefix}{macroName} = {cppMacro.Value};");
+                                }
                             }
                             else if (cppMacroRule is CppMacroToEnumMappingRule macroToEnum)
                             {
@@ -119,7 +126,14 @@ namespace CppAst.CodeGen.CSharp
                                 }
 
                                 AppendPragmaLine(cppMacroRule, macrosAsEnumText);
-                                macrosAsEnumText.AppendLine($"    {cachedRules.Prefix}{enumItemName} = ({macroToEnum.CppIntegerTypeName}){cppMacro.Value},");
+                                if (macroToEnum.ExplicitCast)
+                                {
+                                    macrosAsEnumText.AppendLine($"    {cachedRules.Prefix}{enumItemName} = ({macroToEnum.CppIntegerTypeName}){cppMacro.Value},");
+                                }
+                                else
+                                {
+                                    macrosAsEnumText.AppendLine($"    {cachedRules.Prefix}{enumItemName} = {cppMacro.Value},");
+                                }
                             }
                         }
                     }

@@ -17,5 +17,7 @@ namespace CppAst.CodeGen.CSharp
         public string CppEnumItemName { get; set; }
 
         public string CppIntegerTypeName { get; set; }
+        
+        public bool ExplicitCast { get; set; }
     }
 }

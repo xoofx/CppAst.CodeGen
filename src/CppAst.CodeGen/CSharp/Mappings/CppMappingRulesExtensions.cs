@@ -152,28 +152,19 @@ namespace CppAst.CodeGen.CSharp
             };
         }
 
-        public static CppElementMappingRule Map(this CppMappingRules dispatcher, Func<CppElement, bool> filter, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static CppElementMappingRule Map(this CppMappingRules dispatcher, Func<CppElement, bool> filter, List<Action<CppMappingRules>> subMappingRules, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static CppMacroToConstMappingRule MapMacroToConst(this CppMappingRules dispatcher, string cppRegexMatchMacroName, string cppType, string enumItemName = null, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
+        public static CppMacroToConstMappingRule MapMacroToConst(this CppMappingRules dispatcher, string cppRegexMatchMacroName, string cppType, bool explicitCast = false, string enumItemName = null, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
         {
             return new CppMacroToConstMappingRule(new CppElementRegexMatcher(cppRegexMatchMacroName))
             {
                 ConstFieldTypeName = cppType,
                 ConstFieldName = enumItemName,
                 DeclarationFileName = mapOriginFilePath,
-                DeclarationLineNumber = mapLineNumber
+                DeclarationLineNumber = mapLineNumber,
+                ExplicitCast = explicitCast,
             };
         }
 
-        public static CppMacroToEnumMappingRule MapMacroToEnum(this CppMappingRules dispatcher, string cppRegexName, string cppEnumTypeName, string cppEnumItemName = null, string integerType = "int", [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
+        public static CppMacroToEnumMappingRule MapMacroToEnum(this CppMappingRules dispatcher, string cppRegexName, string cppEnumTypeName, string cppEnumItemName = null, string integerType = "int", bool explicitCast = false, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
         {
             var rule = new CppMacroToEnumMappingRule(new CppElementRegexMatcher(cppRegexName))
             {
@@ -181,7 +172,8 @@ namespace CppAst.CodeGen.CSharp
                 CppEnumItemName = cppEnumItemName,
                 CppIntegerTypeName = integerType,
                 DeclarationFileName = mapOriginFilePath,
-                DeclarationLineNumber = mapLineNumber
+                DeclarationLineNumber = mapLineNumber,
+                ExplicitCast = explicitCast,
             };
             return rule;
         }
