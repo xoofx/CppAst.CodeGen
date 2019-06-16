@@ -22,6 +22,15 @@ namespace CppAst.CodeGen.CSharp
             }
             return null;
         }
+        
+        public static CppElementMappingRule Discard(this CppElementMappingRule mappingRule)
+        {
+            mappingRule.CppElementActions.Add((converter, element, context, matches) =>
+            {
+                converter.Discard(element);
+            });
+            return mappingRule;
+        }
 
         public static CppElementMappingRule Name(this CppElementMappingRule mappingRule, string replaceName)
         {

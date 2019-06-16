@@ -17,6 +17,7 @@ namespace CppAst.CodeGen.CSharp
         private CSharpCompilation _csCompilation;
         private CodeWriter _csTempWriter;
         private readonly Dictionary<CppElement, CSharpElement> _mapCppToCSharp;
+        private readonly HashSet<CppElement> _cppElementsToDiscard;
         private readonly Stack<ICSharpContainer> _currentContainers;
 
         private readonly CSharpConverterPipeline _pipeline;
@@ -25,6 +26,7 @@ namespace CppAst.CodeGen.CSharp
         {
             Options = options ?? throw new ArgumentNullException(nameof(options));
             _mapCppToCSharp = new Dictionary<CppElement, CSharpElement>(CppElementReferenceEqualityComparer.Default);
+            _cppElementsToDiscard = new HashSet<CppElement>(CppElementReferenceEqualityComparer.Default);
             _csTempWriter = new CodeWriter(new CodeWriterOptions(null));
             Tags = new Dictionary<string, object>();
 
@@ -58,6 +60,17 @@ namespace CppAst.CodeGen.CSharp
 
             var converter = new CSharpConverter(options);
             return converter.Run(parserOptions => CppParser.Parse(text, parserOptions));
+        }
+
+        /// <summary>
+        /// Discard the element from further processing. Should be called during <see cref="CSharpConverterPipeline.Converting"/>.
+        /// </summary>
+        /// <param name="cppElement">The element to discard from further processing</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public void Discard(CppElement cppElement)
+        {
+            if (cppElement == null) throw new ArgumentNullException(nameof(cppElement));
+            _cppElementsToDiscard.Add(cppElement);
         }
 
         private CSharpCompilation Run(Func<CppParserOptions, CppCompilation> parse)
@@ -151,6 +164,12 @@ namespace CppAst.CodeGen.CSharp
             {
                 // Gives a chance to modify the element before processing it
                 ProcessConverting(cppElement, context);
+
+                // If the element is discarded, don't try to convert it
+                if (_cppElementsToDiscard.Contains(cppElement))
+                {
+                    return null;
+                }
 
                 CppElement cppWithChildrenToVisit = cppElement;
 
