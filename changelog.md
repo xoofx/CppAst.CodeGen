@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.1 (16 Jun 2019)
+- Fix issue with type remapping
+
 ## 0.2.0 (16 Jun 2019)
 - Add support for Discard()
 - Fix comment for parameter (do not escape)
