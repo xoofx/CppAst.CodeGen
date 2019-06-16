@@ -22,7 +22,7 @@ namespace CppAst.CodeGen.CSharp
             // Register to the pipeline only we have anything to process
             if (!cachedRules.IsEmpty)
             {
-                if (cachedRules.MacroRules.Count > 0)
+                if (cachedRules.MacroRules.Count > 0 || cachedRules.TypesToCompile.Count > 0)
                 {
                     pipeline.AfterPreprocessing.Add(AfterPreprocessing);
                 }
