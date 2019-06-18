@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.3 (18 Jun 2019)
+- Bump CppAst version to 0.5.7
+
 ## 0.2.2 (16 Jun 2019)
 - Add support for explicit cast for const/enum items
 - Fix const fields
