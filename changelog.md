@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.4 (18 Jun 2019)
+- Add CSharpMarshalAttribute.MarshalTypeRef  
+
 ## 0.2.3 (18 Jun 2019)
 - Bump CppAst version to 0.5.7
 
