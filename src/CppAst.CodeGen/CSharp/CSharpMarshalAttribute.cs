@@ -70,9 +70,14 @@ namespace CppAst.CodeGen.CSharp
         public int? SizeConst { get; set; }
 
         /// <summary>
-        /// Gets or sets a custom marshal type
+        /// Gets or sets a custom marshal type as a string
         /// </summary>
         public string MarshalType { get; set; }
+
+        /// <summary>
+        /// Gets or sets a custom marshal type as a System.Type
+        /// </summary>
+        public string MarshalTypeRef { get; set; }
 
         /// <summary>
         /// Gets or sets the custom Marshal cookie.
@@ -104,12 +109,17 @@ namespace CppAst.CodeGen.CSharp
 
             if (MarshalType != null)
             {
-                builder.Append(", MarshalType = \"").Append(MarshalType).Append("\"");
+                builder.Append(", MarshalType = ").Append(MarshalType);
+            }
+
+            if (MarshalTypeRef != null)
+            {
+                builder.Append(", MarshalTypeRef = ").Append(MarshalTypeRef);
             }
 
             if (MarshalCookie != null)
             {
-                builder.Append(", MarshalCookie = \"").Append(MarshalCookie).Append("\"");
+                builder.Append(", MarshalCookie = ").Append(MarshalCookie);
             }
             builder.Append(")");
             return builder.ToString();
