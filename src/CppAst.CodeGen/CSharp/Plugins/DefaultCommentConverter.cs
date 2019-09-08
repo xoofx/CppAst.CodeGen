@@ -23,7 +23,7 @@ namespace CppAst.CodeGen.CSharp
             }
 
             var comment = cppDecl.Comment;
-            if (comment == null)
+            if (comment == null || comment.Children == null)
             {
                 return null;
             }
