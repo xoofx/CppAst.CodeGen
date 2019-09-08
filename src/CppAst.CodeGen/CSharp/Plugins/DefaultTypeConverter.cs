@@ -11,8 +11,6 @@ namespace CppAst.CodeGen.CSharp
     [StructLayout(LayoutKind.Explicit)]
     public class DefaultTypeConverter: ICSharpConverterPlugin
     {
-        private static readonly string StringTypeKey = typeof(DefaultTypeConverter).FullName + "." + nameof(StringTypeKey);
-        private static readonly string BoolTypeKey = typeof(DefaultTypeConverter).FullName + "." + nameof(BoolTypeKey);
         private static readonly CppQualifiedType ConstChar = new CppQualifiedType(CppTypeQualifier.Const, CppPrimitiveType.Char);
         private static readonly CppQualifiedType ConstVoid = new CppQualifiedType(CppTypeQualifier.Const, CppPrimitiveType.Void);
 
@@ -243,40 +241,24 @@ namespace CppAst.CodeGen.CSharp
 
         public static CSharpType GetBoolType(CSharpConverter converter)
         {
-            var boolType = converter.GetTagValueOrDefault<CSharpType>(BoolTypeKey);
-            if (boolType == null)
+            CSharpType boolType = CSharpPrimitiveType.Bool;
+            if (converter.Options.DefaultMarshalForBool != null)
             {
-                if (converter.Options.DefaultMarshalForBool == null)
-                {
-                    boolType = CSharpPrimitiveType.Bool;
-                }
-                else
-                {
-                    var boolTypeWithMarshal = new CSharpTypeWithAttributes(CSharpPrimitiveType.Bool);
-                    boolTypeWithMarshal.Attributes.Add(converter.Options.DefaultMarshalForBool);
-                    boolType = boolTypeWithMarshal;
-                }
-                converter.Tags[BoolTypeKey] = boolType;
+                var boolTypeWithMarshal = new CSharpTypeWithAttributes(CSharpPrimitiveType.Bool);
+                boolTypeWithMarshal.Attributes.Add(converter.Options.DefaultMarshalForBool.Clone());
+                boolType = boolTypeWithMarshal;
             }
             return boolType;
         }
 
         public static CSharpType GetStringType(CSharpConverter converter)
         {
-            var strType = converter.GetTagValueOrDefault<CSharpType>(StringTypeKey);
-            if (strType == null)
+            CSharpType strType = CSharpPrimitiveType.String;
+            if (converter.Options.DefaultMarshalForString != null)
             {
-                if (converter.Options.DefaultMarshalForString == null)
-                {
-                    strType = CSharpPrimitiveType.String;
-                }
-                else
-                {
-                    var boolTypeWithMarshal = new CSharpTypeWithAttributes(CSharpPrimitiveType.String);
-                    boolTypeWithMarshal.Attributes.Add(converter.Options.DefaultMarshalForString);
-                    strType = boolTypeWithMarshal;
-                }
-                converter.Tags[StringTypeKey] = strType;
+                var boolTypeWithMarshal = new CSharpTypeWithAttributes(CSharpPrimitiveType.String);
+                boolTypeWithMarshal.Attributes.Add(converter.Options.DefaultMarshalForString.Clone());
+                strType = boolTypeWithMarshal;
             }
             return strType;
         }
