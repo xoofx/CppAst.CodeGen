@@ -27,6 +27,8 @@ namespace CppAst.CodeGen.CSharp
         public CSharpType ReturnType { get; set; }
 
         public string Name { get; set; }
+        
+        public CSharpField LinkedField { get; set; }
 
         public Action<CodeWriter, CSharpElement> GetBody { get; set; }
 
