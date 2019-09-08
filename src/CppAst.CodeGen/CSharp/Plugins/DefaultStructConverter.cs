@@ -17,7 +17,7 @@ namespace CppAst.CodeGen.CSharp
         public static CSharpElement ConvertClass(CSharpConverter converter, CppClass cppClass, CSharpElement context)
         {
             // This converter supports only plain struct or union
-            if (cppClass.ClassKind == CppClassKind.Class || cppClass.BaseTypes.Count > 0)
+            if (cppClass.ClassKind == CppClassKind.Class && cppClass.Functions.Any(x => (x.Flags & CppFunctionFlags.Virtual) != 0))
             {
                 return null;
             }
