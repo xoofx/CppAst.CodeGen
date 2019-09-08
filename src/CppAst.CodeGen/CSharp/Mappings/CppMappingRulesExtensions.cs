@@ -105,10 +105,12 @@ namespace CppAst.CodeGen.CSharp
             return MarshalAs(mappingRule, new CSharpMarshalAttribute(unmanagedKind));
         }
 
-        public static CppElementMappingRule MarshalAs(this CppElementMappingRule mappingRule, CSharpMarshalAttribute marshalAttribute)
+        public static CppElementMappingRule MarshalAs(this CppElementMappingRule mappingRule, CSharpMarshalAttribute marshalAttribute, bool cloneAttribute = true)
         {
             if (marshalAttribute == null) throw new ArgumentNullException(nameof(marshalAttribute));
 
+            var clonedAttribute = cloneAttribute ? marshalAttribute.Clone() : marshalAttribute;
+            
             mappingRule.CSharpElementActions.Add((converter, element, matches) =>
             {
                 var csField = element as CSharpField;
@@ -128,16 +130,16 @@ namespace CppAst.CodeGen.CSharp
                         if (attr is CSharpMarshalAttribute)
                         {
                             cppTypeWithAttributes.Attributes.RemoveAt(i);
-                            cppTypeWithAttributes.Attributes.Insert(i, marshalAttribute);
+                            cppTypeWithAttributes.Attributes.Insert(i, clonedAttribute);
                             return;
                         }
                     }
-                    cppTypeWithAttributes.Attributes.Add(marshalAttribute);
+                    cppTypeWithAttributes.Attributes.Add(clonedAttribute);
                 }
                 else
                 {
                     var typeWithAttributes = new CSharpTypeWithAttributes(type);
-                    typeWithAttributes.Attributes.Add(marshalAttribute);
+                    typeWithAttributes.Attributes.Add(clonedAttribute);
                     if (csField != null) csField.FieldType = typeWithAttributes;
                     else if (csParam != null) csParam.ParameterType = typeWithAttributes;
                     else if (csMethod != null) csMethod.ReturnType = typeWithAttributes;
