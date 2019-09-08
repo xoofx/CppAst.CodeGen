@@ -14,10 +14,16 @@ namespace CppAst.CodeGen.CSharp
         public static CSharpElement ConvertEnum(CSharpConverter converter, CppEnum cppEnum, CSharpElement context)
         {
             var enumName = converter.GetCSharpName(cppEnum, context);
+            
             var csEnum = new CSharpEnum(enumName)
             {
                 CppElement =  cppEnum
             };
+
+            if (cppEnum.IsAnonymous)
+            {
+                csEnum.Name += "AnonymousEnum";
+            }
 
             var container = converter.GetCSharpContainer(cppEnum, context);
             container.Members.Add(csEnum);
