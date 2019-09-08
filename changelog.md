@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 (08 Sep 2019)
+- Add support for simple bitfields
+- Fix potential issue with null reference exceptions with comment
+- Exclude inline functions, C++ methods for DllImport functions
+- Fix issue with MarshalAs attributes and force a clone
+- Start to add support for virtual methods/interface (not yet working)
+- Improve codegen for enum 
+- Add support for base type for structs
+
 ## 0.2.4 (18 Jun 2019)
 - Add CSharpMarshalAttribute.MarshalTypeRef  
 
