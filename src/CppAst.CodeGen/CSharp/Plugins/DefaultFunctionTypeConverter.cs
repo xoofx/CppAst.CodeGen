@@ -54,6 +54,10 @@ namespace CppAst.CodeGen.CSharp
             csDelegate.Attributes.Add(new CSharpFreeAttribute($"UnmanagedFunctionPointer(CallingConvention.{csCallingConvention})"));
 
             var container =  typedef != null ? converter.GetCSharpContainer(typedef, context) : converter.GetCSharpContainer(cppFunctionType, context);
+            if (container is CSharpInterface)
+            {
+                container = container.Parent;
+            }
 
             converter.ApplyDefaultVisibility(csDelegate, container);
             container.Members.Add(csDelegate);

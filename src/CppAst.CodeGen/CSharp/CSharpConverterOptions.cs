@@ -29,6 +29,7 @@ namespace CppAst.CodeGen.CSharp
                 new DefaultEnumItemConverter(),
                 new DefaultFunctionConverter(),
                 new DefaultParameterConverter(),
+                new DefaultInterfaceConverter(),
                 new DefaultStructConverter(),
                 new DefaultFieldConverter(),
                 new DefaultFunctionTypeConverter(),

@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace CppAst.CodeGen.CSharp
@@ -31,6 +32,10 @@ namespace CppAst.CodeGen.CSharp
 
             var container = converter.GetCSharpContainer(cppClass, context);
             converter.ApplyDefaultVisibility(csStruct, container);
+            if (container is CSharpInterface)
+            {
+                container = container.Parent;
+            }
             container.Members.Add(csStruct);
 
             csStruct.Comment = converter.GetCSharpComment(cppClass, csStruct);
