@@ -18,6 +18,11 @@ namespace CppAst.CodeGen.CSharp
 
         public override void DumpReferenceTo(CodeWriter writer)
         {
+            if (Parent is CSharpNamedType namedType)
+            {
+                namedType.DumpReferenceTo(writer);
+                writer.Write(".");
+            }
             writer.Write(Name);
         }
     }
