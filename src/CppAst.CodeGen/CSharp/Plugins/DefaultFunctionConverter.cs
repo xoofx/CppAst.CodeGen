@@ -17,7 +17,7 @@ namespace CppAst.CodeGen.CSharp
         public static CSharpElement ConvertFunction(CSharpConverter converter, CppFunction cppFunction, CSharpElement context)
         {
             // We process only public export functions
-            if (!cppFunction.IsPublicExport())
+            if (!cppFunction.IsPublicExport() || ((cppFunction.Flags & (CppFunctionFlags.Inline | CppFunctionFlags.Method | CppFunctionFlags.Constructor | CppFunctionFlags.Destructor)) != 0 && (cppFunction.Flags & CppFunctionFlags.Virtual) == 0))
             {
                 return null;
             }
@@ -32,7 +32,14 @@ namespace CppAst.CodeGen.CSharp
 
             converter.AddUsing(container, "System.Runtime.InteropServices");
 
-            csFunction.Modifiers |= CSharpModifiers.Static | CSharpModifiers.Extern;
+            if ((cppFunction.Flags & CppFunctionFlags.Virtual) == 0)
+            {
+                csFunction.Modifiers |= CSharpModifiers.Static | CSharpModifiers.Extern;
+            }
+            else
+            {
+                csFunction.Visibility = CSharpVisibility.None;
+            }
             csFunction.Name = converter.GetCSharpName(cppFunction, csFunction);
             csFunction.Comment = converter.GetCSharpComment(cppFunction, csFunction);
             csFunction.ReturnType = converter.GetCSharpType(cppFunction.ReturnType, csFunction);
