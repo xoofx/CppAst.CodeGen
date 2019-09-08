@@ -45,6 +45,12 @@ namespace CppAst.CodeGen.CSharp
 
             // Required by StructLayout
             converter.AddUsing(container, "System.Runtime.InteropServices");
+
+            if (cppClass.BaseTypes.Count == 1)
+            {
+                var csBaseType = converter.GetCSharpType(cppClass.BaseTypes[0].Type, context, false);
+                csStruct.Members.Add(new CSharpField("@base") { FieldType = csBaseType, Visibility = CSharpVisibility.Public });
+            }
             
             // For opaque type we use a standard representation
             if (!cppClass.IsDefinition && cppClass.Fields.Count == 0)
