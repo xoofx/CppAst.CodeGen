@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.1 (28 Sep 2019)
+- Make const field as readonly
+
 ## 0.3.0 (08 Sep 2019)
 - Add support for simple bitfields
 - Fix potential issue with null reference exceptions with comment
