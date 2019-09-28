@@ -22,12 +22,14 @@ namespace CppAst.CodeGen.CSharp
         public static CSharpElement ConvertField(CSharpConverter converter, CppField cppField, CSharpElement context)
         {
             // Early exit if this is a global variable (we don't handle dllexport)
-            bool isConst = cppField.Type is CppQualifiedType qualifiedType && qualifiedType.Qualifier == CppTypeQualifier.Const && qualifiedType.ElementType.TypeKind == CppTypeKind.Primitive;
+            bool isConst = cppField.Type is CppQualifiedType qualifiedType && qualifiedType.Qualifier == CppTypeQualifier.Const;
             var isGlobalVariable = (!(cppField.Parent is CppClass) && !isConst) || cppField.StorageQualifier == CppStorageQualifier.Static;
             if (isGlobalVariable)
             {
                 return null;
             }
+
+            var isParentClass = cppField.Parent is CppClass;
 
             var csContainer = converter.GetCSharpContainer(cppField, context);
 
@@ -151,12 +153,20 @@ namespace CppAst.CodeGen.CSharp
             }
             else
             {
+                var parentName = cppField.Parent is CppClass cppClass ? cppClass.Name : string.Empty;
                 var csField = new CSharpField(csFieldName) { CppElement = cppField };
                 converter.ApplyDefaultVisibility(csField, csContainer);
 
                 if (isConst)
                 {
-                    csField.Modifiers |= CSharpModifiers.Const;
+                    if (isParentClass)
+                    {
+                        csField.Modifiers |= CSharpModifiers.ReadOnly;
+                    }
+                    else
+                    {
+                        csField.Modifiers |= CSharpModifiers.Const;
+                    }
                 }
 
                 csContainer.Members.Add(csField);
