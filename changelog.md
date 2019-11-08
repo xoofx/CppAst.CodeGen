@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 (08 Nov 2019)
+- Bump CppAst version to 0.6.0
+- If a const field doesn't an exposed init expression, try to use the value directly
+- If a macro has a comment token attached, try to output it
+- Try to name anonymous union/structs defined within another struct
+- Use the canonical type to detect fixed fields
+
 ## 0.3.1 (28 Sep 2019)
 - Make const field as readonly
 
