@@ -167,7 +167,7 @@ namespace CppAst.CodeGen.CSharp
                         }
                         else
                         {
-                            if (converter.Options.AllowFixedSizeBuffers && arrayType.Size > 0 && context is CSharpField csField && arrayElementType is CppPrimitiveType cppPrimitive && cppPrimitive.Kind != CppPrimitiveKind.Bool)
+                            if (converter.Options.AllowFixedSizeBuffers && arrayType.Size > 0 && context is CSharpField csField && arrayElementType.GetCanonicalType() is CppPrimitiveType cppPrimitive && cppPrimitive.Kind != CppPrimitiveKind.Bool)
                             {
                                 var csParent = (CSharpTypeWithMembers) csField.Parent;
                                 csParent.Modifiers |= CSharpModifiers.Unsafe;
