@@ -73,6 +73,28 @@ namespace CppAst.CodeGen.CSharp
                 csStruct.Members.Add(new CSharpLineElement($"public static bool operator ==({csStruct.Name} left, {csStruct.Name} right) => left.Equals(right);"));
                 csStruct.Members.Add(new CSharpLineElement($"public static bool operator !=({csStruct.Name} left, {csStruct.Name} right) => !left.Equals(right);"));
             }
+            
+            // If we have any anonymous structs/unions for a field type
+            // try to compute a name for them before processing them
+            foreach (var cppField in cppClass.Fields)
+            {
+                var fieldType = cppField.Type;
+
+                if (fieldType is CppClass cppFieldTypeClass && cppFieldTypeClass.IsAnonymous && string.IsNullOrEmpty(cppFieldTypeClass.Name))
+                {
+                    var parentName = string.Empty;
+                    if (cppFieldTypeClass.Parent is CppClass cppParentClass)
+                    {
+                        parentName = cppParentClass.Name;
+                    }
+
+                    if (cppFieldTypeClass.ClassKind == CppClassKind.Union)
+                    {
+                        parentName = parentName == string.Empty ? "union" : parentName + "_union";
+                    }
+                    cppFieldTypeClass.Name = $"{parentName}_{cppField.Name}";
+                }
+            }
 
             return csStruct;
         }
