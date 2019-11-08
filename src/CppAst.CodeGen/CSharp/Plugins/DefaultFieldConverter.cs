@@ -182,7 +182,14 @@ namespace CppAst.CodeGen.CSharp
 
                 if (cppField.InitExpression != null)
                 {
-                    csField.InitValue = converter.ConvertExpression(cppField.InitExpression, context, csField.FieldType);
+                    if (cppField.InitExpression.Kind == CppExpressionKind.Unexposed)
+                    {
+                        csField.InitValue = cppField.InitValue?.Value?.ToString();
+                    }
+                    else
+                    {
+                        csField.InitValue = converter.ConvertExpression(cppField.InitExpression, context, csField.FieldType);
+                    }
                 }
 
                 return csField;
