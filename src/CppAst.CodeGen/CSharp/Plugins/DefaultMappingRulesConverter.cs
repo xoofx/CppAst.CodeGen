@@ -72,6 +72,11 @@ namespace CppAst.CodeGen.CSharp
                 var enumToMacros = new Dictionary<CppMacroToEnumMappingRule, StringBuilder>();
                 foreach (var cppMacro in cppCompilation.Macros)
                 {
+                    if (cppMacro.Parameters != null)
+                    {
+                        continue;
+                    }
+
                     foreach (var cppMacroRule in macroRules)
                     {
                         matches.Clear();
@@ -87,6 +92,14 @@ namespace CppAst.CodeGen.CSharp
                                 if (regexMatch != null && macroToConst.ConstFieldName != null)
                                 {
                                     macroName = Regex.Replace(regexMatch.RegexInput, regexMatch.RegexPattern, macroToConst.ConstFieldName);
+                                }
+
+                                foreach (var token in cppMacro.Tokens)
+                                {
+                                    if (token.Kind == CppTokenKind.Comment && !string.IsNullOrEmpty(token.Text))
+                                    {
+                                        additionalHeaders.AppendLine(token.Text);
+                                    }
                                 }
 
                                 if (macroToConst.ExplicitCast)
