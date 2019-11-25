@@ -30,10 +30,15 @@ namespace CppAst.CodeGen.CSharp
                 
                 csEnumItem.Value = $"unchecked(({csEnum.IntegerBaseType}){(string.IsNullOrEmpty(integerValue) ? cppEnumItem.Value + "" : integerValue)})";
 
-                // Tag the enum has a flags
+                // Tag the enum has flags
                 if (!csEnum.IsFlags && csEnumItem.Value.Contains("<<"))
                 {
                     csEnum.IsFlags = true;
+                }
+                
+                if (csEnum.IsFlags)
+                {
+                    csEnumItem.Value = csEnumItem.Value.Replace("<<", $" << ({csEnum.IntegerBaseType})");
                 }
             }
 
