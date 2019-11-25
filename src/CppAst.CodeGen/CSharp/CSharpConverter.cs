@@ -228,9 +228,11 @@ namespace CppAst.CodeGen.CSharp
                         _currentContainers.Push(csharpContainer);
                         containerPushed = true;
                     }
+                    
+                    var childCount = 0;
                     foreach (var nestedCppElement in container.Children())
                     {
-                        Convert((CppElement)nestedCppElement, 0, subContext);
+                        Convert((CppElement)nestedCppElement, childCount++, subContext);
                     }
 
                     if (containerPushed)
