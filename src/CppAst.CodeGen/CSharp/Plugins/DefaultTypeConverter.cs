@@ -173,7 +173,15 @@ namespace CppAst.CodeGen.CSharp
                                 csParent.Modifiers |= CSharpModifiers.Unsafe;
 
                                 var csArrayElementType = converter.GetCSharpType(arrayElementType, context, true);
-                                csType = new CSharpFixedArrayType(csArrayElementType, arrayType.Size);
+                                
+                                if (csArrayElementType is CSharpTypeWithMembers csArrayElementWithMembers)
+                                {
+                                    csType = new CSharpFixedArrayType(csArrayElementWithMembers.BaseTypes.FirstOrDefault(), arrayType.Size);
+                                }
+                                else
+                                {
+                                    csType = new CSharpFixedArrayType(csArrayElementType, arrayType.Size);
+                                }
                             }
                             else
                             {
