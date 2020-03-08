@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1 (8 Mar 2020)
+- Fix name parameters for delegate callbacks with multiple unnamed parameters
+- Fix invalid casting of enum values
+- Use base type when fixed field has enum type
+
 ## 0.4.0 (08 Nov 2019)
 - Bump CppAst version to 0.6.0
 - If a const field doesn't an exposed init expression, try to use the value directly
