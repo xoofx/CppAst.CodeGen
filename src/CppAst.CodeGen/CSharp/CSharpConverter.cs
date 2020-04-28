@@ -621,7 +621,7 @@ namespace CppAst.CodeGen.CSharp
 
         public ICSharpContainer GetCSharpContainer(CppElement element, CSharpElement context)
         {
-            if (!ReferenceEquals(element.Parent, CurrentCppCompilation) && !ReferenceEquals(element.Parent, CurrentCppCompilation.System))
+            if ((CppCompilation)element.Parent != CurrentCppCompilation && (CppGlobalDeclarationContainer)element.Parent != CurrentCppCompilation.System)
             {
                 // Default implementation, returns the current context
                 var nextContext = context;
