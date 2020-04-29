@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 namespace CppAst.CodeGen.CSharp
 {
     [StructLayout(LayoutKind.Explicit)]
-    public class DefaultFunctionConverter: ICSharpConverterPlugin
+    public class DefaultFunctionConverter : ICSharpConverterPlugin
     {
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
@@ -23,7 +23,7 @@ namespace CppAst.CodeGen.CSharp
             }
 
             // Register the struct as soon as possible
-            var csFunction = new CSharpMethod() {CppElement = cppFunction};
+            var csFunction = new CSharpMethod() { CppElement = cppFunction };
 
             var container = converter.GetCSharpContainer(cppFunction, context);
 
@@ -43,7 +43,7 @@ namespace CppAst.CodeGen.CSharp
             csFunction.Name = converter.GetCSharpName(cppFunction, csFunction);
             csFunction.Comment = converter.GetCSharpComment(cppFunction, csFunction);
             csFunction.ReturnType = converter.GetCSharpType(cppFunction.ReturnType, csFunction);
-            
+
             return csFunction;
         }
     }

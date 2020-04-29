@@ -22,7 +22,7 @@ namespace CppAst.CodeGen.CSharp
             }
             return null;
         }
-        
+
         public static CppElementMappingRule Discard(this CppElementMappingRule mappingRule)
         {
             mappingRule.CppElementActions.Add((converter, element, context, matches) =>
@@ -81,7 +81,7 @@ namespace CppAst.CodeGen.CSharp
 
             return mappingRule;
         }
-        
+
         public static CppElementMappingRule InitValue(this CppElementMappingRule mappingRule, string value)
         {
             mappingRule.CSharpElementActions.Add((converter, element, matches) =>
@@ -110,7 +110,7 @@ namespace CppAst.CodeGen.CSharp
             if (marshalAttribute == null) throw new ArgumentNullException(nameof(marshalAttribute));
 
             var clonedAttribute = cloneAttribute ? marshalAttribute.Clone() : marshalAttribute;
-            
+
             mappingRule.CSharpElementActions.Add((converter, element, matches) =>
             {
                 var csField = element as CSharpField;
@@ -121,7 +121,7 @@ namespace CppAst.CodeGen.CSharp
                 var type = csField?.FieldType ?? csParam?.ParameterType ?? csMethod?.ReturnType;
                 // Should not happen, but in case 
                 if (type == null) return;
-               
+
                 if (type is CSharpTypeWithAttributes cppTypeWithAttributes)
                 {
                     for (var i = cppTypeWithAttributes.Attributes.Count - 1; i >= 0; i--)

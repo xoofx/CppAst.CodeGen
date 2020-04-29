@@ -33,7 +33,7 @@ namespace CppAst.CodeGen.CSharp
 
         public CSharpAttribute Clone()
         {
-            return (CSharpAttribute )MemberwiseClone();
+            return (CSharpAttribute)MemberwiseClone();
         }
 
         public override void DumpTo(CodeWriter writer)

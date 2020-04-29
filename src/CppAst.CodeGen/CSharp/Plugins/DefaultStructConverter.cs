@@ -8,13 +8,13 @@ using System.Runtime.InteropServices;
 namespace CppAst.CodeGen.CSharp
 {
     [StructLayout(LayoutKind.Explicit)]
-    public class DefaultStructConverter: ICSharpConverterPlugin
+    public class DefaultStructConverter : ICSharpConverterPlugin
     {
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.ClassConverters.Add(ConvertClass);
         }
-        
+
         public static CSharpElement ConvertClass(CSharpConverter converter, CppClass cppClass, CSharpElement context)
         {
             // This converter supports only plain struct or union
@@ -39,12 +39,12 @@ namespace CppAst.CodeGen.CSharp
             container.Members.Add(csStruct);
 
             csStruct.Comment = converter.GetCSharpComment(cppClass, csStruct);
-            
+
             bool isUnion = cppClass.ClassKind == CppClassKind.Union;
 
             // Requires System.Runtime.InteropServices
-            csStruct.Attributes.Add(isUnion ? 
-                new CSharpStructLayoutAttribute(LayoutKind.Explicit) { CharSet = converter.Options.DefaultCharSet } : 
+            csStruct.Attributes.Add(isUnion ?
+                new CSharpStructLayoutAttribute(LayoutKind.Explicit) { CharSet = converter.Options.DefaultCharSet } :
                 new CSharpStructLayoutAttribute(LayoutKind.Sequential) { CharSet = converter.Options.DefaultCharSet }
             );
 
@@ -56,7 +56,7 @@ namespace CppAst.CodeGen.CSharp
                 var csBaseType = converter.GetCSharpType(cppClass.BaseTypes[0].Type, context, false);
                 csStruct.Members.Add(new CSharpField("@base") { FieldType = csBaseType, Visibility = CSharpVisibility.Public });
             }
-            
+
             // For opaque type we use a standard representation
             if (!cppClass.IsDefinition && cppClass.Fields.Count == 0)
             {
@@ -73,7 +73,7 @@ namespace CppAst.CodeGen.CSharp
                 csStruct.Members.Add(new CSharpLineElement($"public static bool operator ==({csStruct.Name} left, {csStruct.Name} right) => left.Equals(right);"));
                 csStruct.Members.Add(new CSharpLineElement($"public static bool operator !=({csStruct.Name} left, {csStruct.Name} right) => !left.Equals(right);"));
             }
-            
+
             // If we have any anonymous structs/unions for a field type
             // try to compute a name for them before processing them
             foreach (var cppField in cppClass.Fields)

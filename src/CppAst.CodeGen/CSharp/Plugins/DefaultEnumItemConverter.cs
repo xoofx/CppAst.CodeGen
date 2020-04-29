@@ -3,7 +3,7 @@
 // See license.txt file in the project root for full license information.
 namespace CppAst.CodeGen.CSharp
 {
-    public class DefaultEnumItemConverter: ICSharpConverterPlugin
+    public class DefaultEnumItemConverter : ICSharpConverterPlugin
     {
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
@@ -27,7 +27,7 @@ namespace CppAst.CodeGen.CSharp
             if (cppEnumItem.ValueExpression != null)
             {
                 var integerValue = converter.ConvertExpression(cppEnumItem.ValueExpression, csEnumItem, csEnum.IntegerBaseType);
-                
+
                 csEnumItem.Value = $"unchecked(({csEnum.IntegerBaseType}){(string.IsNullOrEmpty(integerValue) ? cppEnumItem.Value + "" : integerValue)})";
 
                 // Tag the enum has flags
@@ -35,7 +35,7 @@ namespace CppAst.CodeGen.CSharp
                 {
                     csEnum.IsFlags = true;
                 }
-                
+
                 if (csEnum.IsFlags)
                 {
                     csEnumItem.Value = csEnumItem.Value.Replace("<<", $" << ({csEnum.IntegerBaseType})");

@@ -122,7 +122,7 @@ namespace CppAst.CodeGen.CSharp
                 writer.WriteLine();
             }
         }
-        
+
         public static void DumpContextualAttributesTo(this CSharpElement element, CodeWriter writer, bool inline = false, CSharpAttributeScope? scopeOverride = null)
         {
             var provider = element as ICSharpContextualAttributesProvider;

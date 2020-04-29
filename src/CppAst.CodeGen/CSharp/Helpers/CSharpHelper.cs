@@ -115,7 +115,7 @@ namespace CppAst.CodeGen.CSharp
 
             return CSharpCasingKind.Undefined;
         }
-        
+
         public static CallingConvention GetCSharpCallingConvention(this CppCallingConvention cppCallingConvention)
         {
             switch (cppCallingConvention)

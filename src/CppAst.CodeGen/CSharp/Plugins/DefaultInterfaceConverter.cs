@@ -8,13 +8,13 @@ using System.Runtime.InteropServices;
 namespace CppAst.CodeGen.CSharp
 {
     [StructLayout(LayoutKind.Explicit)]
-    public class DefaultInterfaceConverter: ICSharpConverterPlugin
+    public class DefaultInterfaceConverter : ICSharpConverterPlugin
     {
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.ClassConverters.Add(ConvertClass);
         }
-        
+
         public static CSharpElement ConvertClass(CSharpConverter converter, CppClass cppClass, CSharpElement context)
         {
             if (cppClass.ClassKind != CppClassKind.Class)

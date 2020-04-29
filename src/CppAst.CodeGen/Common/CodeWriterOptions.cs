@@ -14,7 +14,7 @@ namespace CppAst.CodeGen.Common
         public CodeWriterOptions() : this(GetDefaultFileSystem(), CodeWriterMode.Full)
         {
         }
-        
+
         public CodeWriterOptions(IFileSystem fileSystem) : this(fileSystem, CodeWriterMode.Full)
         {
         }
@@ -33,11 +33,11 @@ namespace CppAst.CodeGen.Common
         public int IndentSize { get; set; }
 
         public string NewLine { get; set; }
-        
+
         public IFileSystem FileSystem { get; }
 
         public Dictionary<string, object> Tags { get; }
-        
+
         public object this[string tagName]
         {
             get

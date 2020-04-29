@@ -2,7 +2,6 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -10,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace CppAst.CodeGen.CSharp
 {
     [StructLayout(LayoutKind.Explicit)]
-    public class DefaultTypeConverter: ICSharpConverterPlugin
+    public class DefaultTypeConverter : ICSharpConverterPlugin
     {
         private static readonly CppQualifiedType ConstChar = new CppQualifiedType(CppTypeQualifier.Const, CppPrimitiveType.Char);
         private static readonly CppQualifiedType ConstVoid = new CppQualifiedType(CppTypeQualifier.Const, CppPrimitiveType.Void);
@@ -66,7 +65,7 @@ namespace CppAst.CodeGen.CSharp
                             case CppTypeKind.Reference:
                                 break;
                             case CppTypeKind.Qualified:
-                                var qualifiedType = (CppQualifiedType) elementType;
+                                var qualifiedType = (CppQualifiedType)elementType;
                                 csType = new CSharpRefType(qualifiedType.Qualifier == CppTypeQualifier.Const ? (isParam ? CSharpRefKind.In : CSharpRefKind.RefReadOnly) : CSharpRefKind.Ref, converter.GetCSharpType(qualifiedType.ElementType, context, true));
                                 break;
                             case CppTypeKind.Function:
@@ -95,7 +94,7 @@ namespace CppAst.CodeGen.CSharp
                             case CppTypeKind.Unexposed:
                                 break;
                             case CppTypeKind.Primitive:
-                                var cppPrimitive = (CppPrimitiveType) elementType;
+                                var cppPrimitive = (CppPrimitiveType)elementType;
                                 if (cppPrimitive.Kind != CppPrimitiveKind.Void && cppPrimitive.Kind != CppPrimitiveKind.Char && cppPrimitive.Kind != CppPrimitiveKind.UnsignedChar)
                                 {
                                     csType = new CSharpRefType(CSharpRefKind.Ref, pointedCSharpType);
@@ -170,11 +169,11 @@ namespace CppAst.CodeGen.CSharp
                         {
                             if (converter.Options.AllowFixedSizeBuffers && arrayType.Size > 0 && context is CSharpField csField && arrayElementType.GetCanonicalType() is CppPrimitiveType cppPrimitive && cppPrimitive.Kind != CppPrimitiveKind.Bool)
                             {
-                                var csParent = (CSharpTypeWithMembers) csField.Parent;
+                                var csParent = (CSharpTypeWithMembers)csField.Parent;
                                 csParent.Modifiers |= CSharpModifiers.Unsafe;
 
                                 var csArrayElementType = converter.GetCSharpType(arrayElementType, context, true);
-                                
+
                                 if (csArrayElementType is CSharpTypeWithMembers csArrayElementWithMembers)
                                 {
                                     csType = new CSharpFixedArrayType(csArrayElementWithMembers.BaseTypes.FirstOrDefault(), arrayType.Size);
@@ -210,7 +209,7 @@ namespace CppAst.CodeGen.CSharp
                         csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(((CppReferenceType)cppType).ElementType, context, true));
                         break;
                     case CppTypeKind.Qualified:
-                        var qualifiedType = (CppQualifiedType) cppType;
+                        var qualifiedType = (CppQualifiedType)cppType;
                         csType = converter.GetCSharpType(qualifiedType.ElementType, context, true);
                         // TODO: Handle in parameters
                         break;

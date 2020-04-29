@@ -3,9 +3,6 @@
 // See license.txt file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using CppAst.CodeGen.Common;
 using CppAst.CodeGen.CSharp;
 using NUnit.Framework;
@@ -79,7 +76,7 @@ EXPORT_API void function0(int x);
             ", options);
 
             Assert.False(csCompilation.HasErrors);
-            
+
             var fs = new MemoryFileSystem();
             var codeWriter = new CodeWriter(new CodeWriterOptions(fs));
             csCompilation.DumpTo(codeWriter);
@@ -104,7 +101,7 @@ EXPORT_API void function0(int x);
             var options = new CSharpConverterOptions()
             {
                 GenerateAsInternal = true,
-                TypedefCodeGenKind =  CppTypedefCodeGenKind.Wrap,
+                TypedefCodeGenKind = CppTypedefCodeGenKind.Wrap,
                 TypedefWrapWhiteList =
                 {
                     "git_my_string"

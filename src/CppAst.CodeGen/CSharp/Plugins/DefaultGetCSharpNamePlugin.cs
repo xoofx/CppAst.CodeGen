@@ -1,9 +1,8 @@
 ﻿using System.IO;
-using System.Runtime.InteropServices;
 
 namespace CppAst.CodeGen.CSharp
 {
-    public class DefaultGetCSharpNamePlugin: ICSharpConverterPlugin
+    public class DefaultGetCSharpNamePlugin : ICSharpConverterPlugin
     {
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
@@ -34,7 +33,7 @@ namespace CppAst.CodeGen.CSharp
                     name = contextName;
                 }
             }
-            
+
             // If the name is null, we create an anonymous type name that includes the type, file name, and file offset
             if (string.IsNullOrEmpty(name))
             {
@@ -46,7 +45,7 @@ namespace CppAst.CodeGen.CSharp
                 switch (cppType)
                 {
                     case CppClass cppClass:
-                        name = CSharpHelper.AppendWithCasing(name, CSharpHelper.GetCSharpCasingKind(name), cppClass.ClassKind.ToString().ToLowerInvariant() , CSharpCasingKind.Lower);
+                        name = CSharpHelper.AppendWithCasing(name, CSharpHelper.GetCSharpCasingKind(name), cppClass.ClassKind.ToString().ToLowerInvariant(), CSharpCasingKind.Lower);
                         break;
                     case CppFunctionType cppFunctionType:
                         name = CSharpHelper.AppendWithCasing(name, CSharpHelper.GetCSharpCasingKind(name), "delegate", CSharpCasingKind.Lower);
@@ -56,5 +55,5 @@ namespace CppAst.CodeGen.CSharp
 
             return name;
         }
-   }
+    }
 }

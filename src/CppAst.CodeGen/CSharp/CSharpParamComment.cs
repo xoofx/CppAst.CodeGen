@@ -13,7 +13,7 @@ namespace CppAst.CodeGen.CSharp
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
-        
+
         public string Name { get; set; }
 
         public override void DumpTo(CodeWriter writer)

@@ -2,8 +2,6 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-using System;
-
 namespace CppAst.CodeGen.CSharp
 {
     public class CppMacroToEnumMappingRule : CppMacroMappingRule
@@ -17,7 +15,7 @@ namespace CppAst.CodeGen.CSharp
         public string CppEnumItemName { get; set; }
 
         public string CppIntegerTypeName { get; set; }
-        
+
         public bool ExplicitCast { get; set; }
     }
 }

@@ -29,7 +29,7 @@ namespace CppAst.CodeGen.CSharp
         public CSharpType ReturnType { get; set; }
 
         public bool IsConstructor { get; set; }
-        
+
         public string Name { get; set; }
 
         public List<CSharpParameter> Parameters { get; }
@@ -91,12 +91,12 @@ namespace CppAst.CodeGen.CSharp
             // Create a new method
             var clonedMethod = new CSharpMethod
             {
-                Name = csMethod.Name, 
-                ReturnType = csMethod.ReturnType, 
+                Name = csMethod.Name,
+                ReturnType = csMethod.ReturnType,
                 Modifiers = csMethod.Modifiers,
-                Comment =  csMethod.Comment,
+                Comment = csMethod.Comment,
             };
-            
+
             // Remove the comment from the private method now
             for (int i = 0; i < csMethod.Parameters.Count; i++)
             {
@@ -123,11 +123,11 @@ namespace CppAst.CodeGen.CSharp
             csMethod.Visibility = CSharpVisibility.Private;
 
             // Insert the new function right before
-            var members = ((ICSharpContainer) csMethod.Parent).Members;
+            var members = ((ICSharpContainer)csMethod.Parent).Members;
             int index = members.IndexOf(csMethod);
             members.Insert(index, clonedMethod);
-            
-            
+
+
             return clonedMethod;
         }
     }

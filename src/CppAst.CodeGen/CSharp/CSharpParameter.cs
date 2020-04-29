@@ -36,7 +36,7 @@ namespace CppAst.CodeGen.CSharp
 
         public CSharpParameter Clone()
         {
-            var newParam = (CSharpParameter) MemberwiseClone();
+            var newParam = (CSharpParameter)MemberwiseClone();
             newParam.Attributes = new List<CSharpAttribute>();
             foreach (var attr in Attributes)
             {
@@ -62,7 +62,7 @@ namespace CppAst.CodeGen.CSharp
                         break;
                 }
             }
-            
+
             writer.Write(Name);
         }
 
