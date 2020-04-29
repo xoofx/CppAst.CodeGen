@@ -142,7 +142,7 @@ namespace CppAst.CodeGen.CSharp
                     typeWithAttributes.Attributes.Add(clonedAttribute);
                     if (csField != null) csField.FieldType = typeWithAttributes;
                     else if (csParam != null) csParam.ParameterType = typeWithAttributes;
-                    else if (csMethod != null) csMethod.ReturnType = typeWithAttributes;
+                    else csMethod.ReturnType = typeWithAttributes;
                 }
             });
 

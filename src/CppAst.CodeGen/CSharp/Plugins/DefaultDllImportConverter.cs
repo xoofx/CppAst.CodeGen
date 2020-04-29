@@ -9,6 +9,7 @@ namespace CppAst.CodeGen.CSharp
     [StructLayout(LayoutKind.Explicit)]
     public class DefaultDllImportConverter : ICSharpConverterPlugin
     {
+        /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.Converted.Add(AddDefaultDllImport);

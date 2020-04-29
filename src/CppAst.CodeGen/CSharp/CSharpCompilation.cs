@@ -16,14 +16,17 @@ namespace CppAst.CodeGen.CSharp
             Members = new CSharpContainerList<CSharpElement>(this);
         }
 
+        /// <inheritdoc />
         ICSharpContainer ICSharpContainer.Parent => Parent as ICSharpContainer;
 
         public CppDiagnosticBag Diagnostics { get; }
 
         public bool HasErrors => Diagnostics.HasErrors;
 
+        /// <inheritdoc />
         public CSharpContainerList<CSharpElement> Members { get; }
 
+        /// <inheritdoc />
         void ICSharpContainer.ValidateMember(CSharpElement element)
         {
             if (!(element is CSharpGeneratedFile))
@@ -32,6 +35,7 @@ namespace CppAst.CodeGen.CSharp
             }
         }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             if (writer.Mode == CodeWriterMode.Simple)

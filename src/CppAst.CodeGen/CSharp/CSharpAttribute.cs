@@ -36,6 +36,7 @@ namespace CppAst.CodeGen.CSharp
             return (CSharpAttribute)MemberwiseClone();
         }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             DumpTo(writer, Scope);
@@ -66,6 +67,7 @@ namespace CppAst.CodeGen.CSharp
 
         public string Text { get; set; }
 
+        /// <inheritdoc />
         public override string ToText() => Text;
     }
 }

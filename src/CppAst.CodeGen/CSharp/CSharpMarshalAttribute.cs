@@ -84,6 +84,7 @@ namespace CppAst.CodeGen.CSharp
         /// </summary>
         public string MarshalCookie { get; set; }
 
+        /// <inheritdoc />
         public override string ToText()
         {
             var builder = new StringBuilder();

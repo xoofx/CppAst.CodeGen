@@ -14,8 +14,10 @@ namespace CppAst.CodeGen.CSharp
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
+        /// <inheritdoc />
         public string Name { get; set; }
 
+        /// <inheritdoc />
         public override void DumpReferenceTo(CodeWriter writer)
         {
             if (Parent is CSharpNamedType namedType)

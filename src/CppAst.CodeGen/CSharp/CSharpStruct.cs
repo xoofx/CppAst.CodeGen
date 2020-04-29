@@ -10,6 +10,8 @@ namespace CppAst.CodeGen.CSharp
         {
             Modifiers = CSharpModifiers.Partial;
         }
+
+        /// <inheritdoc />
         protected override string DeclarationKind => "struct";
 
         public bool IsOpaque => CppElement is CppClass cppClass && !cppClass.IsDefinition;

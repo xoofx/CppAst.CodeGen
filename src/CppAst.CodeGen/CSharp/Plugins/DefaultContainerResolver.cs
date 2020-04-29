@@ -12,6 +12,7 @@ namespace CppAst.CodeGen.CSharp
     {
         private static readonly string CacheContainerKey = typeof(DefaultContainerResolver) + "." + nameof(CacheContainerKey);
 
+        /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.GetCSharpContainerResolvers.Add(GetSharpContainer);

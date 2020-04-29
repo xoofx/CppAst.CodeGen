@@ -8,6 +8,7 @@ namespace CppAst.CodeGen.CSharp
 {
     public class DefaultTypedefConverter : ICSharpConverterPlugin
     {
+        /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.TypedefConverters.Add(ConvertTypedef);
@@ -69,8 +70,8 @@ namespace CppAst.CodeGen.CSharp
             csStruct.Members.Add(new CSharpLineElement($"{attachedAttributes}public readonly {csElementTypeName} Value;"));
             csStruct.Members.Add(new CSharpLineElement($"public bool Equals({name} other) =>  Value.Equals(other.Value);"));
             csStruct.Members.Add(new CSharpLineElement($"public override bool Equals(object obj) => obj is {name} other && Equals(other);"));
-            csStruct.Members.Add(new CSharpLineElement($"public override int GetHashCode() => Value.GetHashCode();"));
-            csStruct.Members.Add(new CSharpLineElement($"public override string ToString() => Value.ToString();"));
+            csStruct.Members.Add(new CSharpLineElement("public override int GetHashCode() => Value.GetHashCode();"));
+            csStruct.Members.Add(new CSharpLineElement("public override string ToString() => Value.ToString();"));
             csStruct.Members.Add(new CSharpLineElement($"public static implicit operator {csElementTypeName}({name} from) => from.Value;"));
             csStruct.Members.Add(new CSharpLineElement($"public static implicit operator {name}({csElementTypeName} from) => new {name}(from);"));
             csStruct.Members.Add(new CSharpLineElement($"public static bool operator ==({name} left, {name} right) => left.Equals(right);"));

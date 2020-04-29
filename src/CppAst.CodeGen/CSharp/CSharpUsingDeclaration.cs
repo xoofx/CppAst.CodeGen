@@ -20,6 +20,7 @@ namespace CppAst.CodeGen.CSharp
 
         public string Reference { get; set; }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             writer.Write("using ");

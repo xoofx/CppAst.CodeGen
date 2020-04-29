@@ -22,6 +22,7 @@ namespace CppAst.CodeGen.CSharp
 
         public int? Size { get; set; }
 
+        /// <inheritdoc />
         public override string ToText()
         {
             var builder = new StringBuilder();

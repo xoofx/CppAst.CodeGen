@@ -21,6 +21,7 @@ namespace CppAst.CodeGen.CSharp
 
         public string Text { get; set; }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             if (writer.Mode == CodeWriterMode.Full)

@@ -14,6 +14,7 @@ namespace CppAst.CodeGen.CSharp
             Attributes = new List<CSharpAttribute>();
         }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             ElementType.DumpTo(writer);
@@ -21,6 +22,7 @@ namespace CppAst.CodeGen.CSharp
 
         public List<CSharpAttribute> Attributes { get; }
 
+        /// <inheritdoc />
         public IEnumerable<CSharpAttribute> GetContextualAttributes()
         {
             return Attributes;

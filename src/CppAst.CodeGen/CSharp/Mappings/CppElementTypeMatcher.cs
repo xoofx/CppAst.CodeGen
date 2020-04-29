@@ -16,6 +16,7 @@ namespace CppAst.CodeGen.CSharp
 
         public Type MatchType { get; }
 
+        /// <inheritdoc />
         public override bool Match(CppElement cppElement, List<ICppElementMatch> outMatches)
         {
             return MatchType.IsInstanceOfType(cppElement);
@@ -28,6 +29,7 @@ namespace CppAst.CodeGen.CSharp
         {
         }
 
+        /// <inheritdoc />
         public override bool Match(CppElement cppElement, List<ICppElementMatch> outMatches)
         {
             return cppElement is T;

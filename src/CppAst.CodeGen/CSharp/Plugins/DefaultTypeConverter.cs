@@ -14,6 +14,7 @@ namespace CppAst.CodeGen.CSharp
         private static readonly CppQualifiedType ConstChar = new CppQualifiedType(CppTypeQualifier.Const, CppPrimitiveType.Char);
         private static readonly CppQualifiedType ConstVoid = new CppQualifiedType(CppTypeQualifier.Const, CppPrimitiveType.Void);
 
+        /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.GetCSharpTypeResolvers.Add(GetCSharpType);
