@@ -43,7 +43,7 @@ namespace CppAst.CodeGen.CSharp
     public delegate void ProcessBeforeConvertDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
 
     public delegate void ProcessAfterConvertDelegate(CSharpConverter converter, CSharpElement element, CSharpElement context);
-   
+
     public sealed class CSharpConverterPipeline
     {
         public CSharpConverterPipeline(CSharpConverterOptions options)
@@ -109,7 +109,7 @@ namespace CppAst.CodeGen.CSharp
         public List<GlobalProcessingDelegate> ConvertEnd { get; }
 
         public List<ICSharpConverterPlugin> RegisteredPlugins { get; }
-        
+
         public void RegisterPlugins(CSharpConverter converter)
         {
             if (converter == null) throw new ArgumentNullException(nameof(converter));

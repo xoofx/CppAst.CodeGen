@@ -3,12 +3,11 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-using System;
 using System.Text;
 
 namespace CppAst.CodeGen.CSharp
 {
-    public class DefaultCommentConverter: ICSharpConverterPlugin
+    public class DefaultCommentConverter : ICSharpConverterPlugin
     {
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
@@ -31,7 +30,7 @@ namespace CppAst.CodeGen.CSharp
             var csFullComment = new CSharpFullComment();
 
             CSharpXmlComment csRemarks = null;
-            
+
             for (var i = 0; i < comment.Children.Count; i++)
             {
                 var childComment = comment.Children[i];
@@ -63,8 +62,8 @@ namespace CppAst.CodeGen.CSharp
                         }
                         else if (blockCommand.CommandName == "see")
                         {
-                            var seealso = new CSharpXmlComment("seealso") {IsSelfClosing = true};
-                            seealso.Attributes.Add( new CSharpXmlAttribute("cref", GetChildAsText(childComment)));
+                            var seealso = new CSharpXmlComment("seealso") { IsSelfClosing = true };
+                            seealso.Attributes.Add(new CSharpXmlAttribute("cref", GetChildAsText(childComment)));
                             csFullComment.Children.Add(seealso);
                         }
                         else

@@ -14,7 +14,7 @@ namespace CppAst.CodeGen.CSharp
 
         NoWrap,
     }
-    
+
     public class CSharpConverterOptions : CppParserOptions
     {
         public CSharpConverterOptions()
@@ -59,7 +59,7 @@ namespace CppAst.CodeGen.CSharp
         public UPath DefaultOutputFilePath { get; set; }
 
         public string DefaultClassLib { get; set; }
-        
+
         public bool GenerateAsInternal { get; set; }
 
         public string DefaultDllImportNameAndArguments { get; set; }
@@ -77,13 +77,13 @@ namespace CppAst.CodeGen.CSharp
         public bool GenerateEnumItemAsFields { get; set; }
 
         public CppTypedefCodeGenKind TypedefCodeGenKind { get; set; }
-        
+
         public HashSet<string> TypedefWrapWhiteList { get; }
 
         public Dictionary<string, object> Tags { get; private set; }
 
         public CppMappingRules MappingRules { get; private set; }
-        
+
         public List<ICSharpConverterPlugin> Plugins { get; private set; }
 
         public object this[string tagName]

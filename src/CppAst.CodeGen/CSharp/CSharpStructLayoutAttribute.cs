@@ -13,7 +13,7 @@ namespace CppAst.CodeGen.CSharp
         {
             LayoutKind = layoutKind;
         }
-        
+
         public LayoutKind LayoutKind { get; set; }
 
         public CharSet? CharSet { get; set; }
@@ -21,7 +21,7 @@ namespace CppAst.CodeGen.CSharp
         public int? Pack { get; set; }
 
         public int? Size { get; set; }
-        
+
         public override string ToText()
         {
             var builder = new StringBuilder();

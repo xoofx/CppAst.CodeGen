@@ -2,13 +2,12 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-using System;
 using System.Runtime.InteropServices;
 
 namespace CppAst.CodeGen.CSharp
 {
     [StructLayout(LayoutKind.Explicit)]
-    public class DefaultDllImportConverter: ICSharpConverterPlugin
+    public class DefaultDllImportConverter : ICSharpConverterPlugin
     {
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
@@ -33,7 +32,7 @@ namespace CppAst.CodeGen.CSharp
             var callingConvention = (method.CppElement as CppFunction)?.CallingConvention ?? CppCallingConvention.Default;
             var csCallingConvention = callingConvention.GetCSharpCallingConvention();
             var name = converter.Options.DefaultDllImportNameAndArguments ?? "LibNativeName";
-            method.Attributes.Add(new CSharpDllImportAttribute(name) { CallingConvention =  csCallingConvention});
+            method.Attributes.Add(new CSharpDllImportAttribute(name) { CallingConvention = csCallingConvention });
         }
     }
 }

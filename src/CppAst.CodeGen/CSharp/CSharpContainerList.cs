@@ -39,7 +39,7 @@ namespace CppAst.CodeGen.CSharp
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) _elements).GetEnumerator();
+            return ((IEnumerable)_elements).GetEnumerator();
         }
 
         public void Add(TElement item)

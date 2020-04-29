@@ -13,9 +13,9 @@ namespace CppAst.CodeGen.CSharp
         {
             MatchType = matchType ?? throw new ArgumentNullException(nameof(matchType));
         }
-        
+
         public Type MatchType { get; }
-        
+
         public override bool Match(CppElement cppElement, List<ICppElementMatch> outMatches)
         {
             return MatchType.IsInstanceOfType(cppElement);

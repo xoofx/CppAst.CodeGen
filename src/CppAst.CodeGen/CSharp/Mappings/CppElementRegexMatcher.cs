@@ -12,13 +12,13 @@ namespace CppAst.CodeGen.CSharp
     {
         private readonly string _regexString;
         private readonly List<Regex> _regexParts;
-        
+
         public CppElementRegexMatcher(string regexString)
         {
             _regexString = regexString ?? throw new ArgumentNullException(nameof(regexString));
 
             _regexParts = new List<Regex>();
-            var regexTxtParts = _regexString.Split(new string[] {"::"}, StringSplitOptions.RemoveEmptyEntries);
+            var regexTxtParts = _regexString.Split(new string[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var regexTxtPart in regexTxtParts)
             {
                 try
@@ -33,7 +33,7 @@ namespace CppAst.CodeGen.CSharp
             }
             _regexParts.Reverse();
         }
-        
+
         public override bool Match(CppElement cppElement, List<ICppElementMatch> outMatches)
         {
             var iterator = cppElement;

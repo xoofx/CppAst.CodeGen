@@ -220,7 +220,7 @@ namespace CppAst.CodeGen.Common
 
         public override string ToString()
         {
-            return CurrentWriter != null ? CurrentWriter.ToString() : string.Empty; 
+            return CurrentWriter != null ? CurrentWriter.ToString() : string.Empty;
         }
 
         private readonly struct WriterOutput

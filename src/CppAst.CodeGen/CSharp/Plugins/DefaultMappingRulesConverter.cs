@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 namespace CppAst.CodeGen.CSharp
 {
     [StructLayout(LayoutKind.Explicit)]
-    public class DefaultMappingRulesConverter: ICSharpConverterPlugin
+    public class DefaultMappingRulesConverter : ICSharpConverterPlugin
     {
         private const string CachedRulesKey = nameof(DefaultMappingRulesConverter) + "_" + nameof(CachedRulesKey);
 
@@ -237,7 +237,7 @@ namespace CppAst.CodeGen.CSharp
         private static void ProcessCSharpElementMappingRules(CSharpConverter converter, CSharpElement element, CSharpElement context)
         {
             if (element.CppElement == null) return;
-            
+
             var cachedRules = GetCachedRules(converter);
             if (cachedRules.ElementToMatches.TryGetValue(element.CppElement, out var rules))
             {
@@ -282,13 +282,13 @@ namespace CppAst.CodeGen.CSharp
                 {
                     cachedRules.TypesToCompile.Add(cppElementMappingRule.Value);
                 }
-                
+
                 converter.Tags.Add(CachedRulesKey, cachedRules);
             }
 
             return cachedRules;
         }
-        
+
         private class CachedRules
         {
             public CachedRules()
@@ -354,7 +354,7 @@ namespace CppAst.CodeGen.CSharp
                 Rule = rule;
                 Matches = matches;
             }
-            
+
             public CppElementMappingRule Rule { get; }
 
             public List<ICppElementMatch> Matches { get; }
