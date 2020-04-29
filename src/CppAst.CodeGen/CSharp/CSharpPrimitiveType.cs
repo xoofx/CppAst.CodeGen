@@ -30,7 +30,7 @@ namespace CppAst.CodeGen.CSharp
         {
             Kind = kind;
         }
-        
+
         public CSharpPrimitiveKind Kind { get; }
 
         public override void DumpTo(CodeWriter writer)
@@ -88,7 +88,7 @@ namespace CppAst.CodeGen.CSharp
                 default:
                     throw new InvalidOperationException($"{Kind} is not supported");
             }
-            
+
         }
 
         public override void DumpReferenceTo(CodeWriter writer)

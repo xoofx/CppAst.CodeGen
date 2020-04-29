@@ -3,22 +3,20 @@
 // See license.txt file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
 {
     [StructLayout(LayoutKind.Explicit)]
-    public class DefaultFieldConverter: ICSharpConverterPlugin
+    public class DefaultFieldConverter : ICSharpConverterPlugin
     {
         private const string BitFieldName = "__bitfield__";
-        
+
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.FieldConverters.Add(ConvertField);
         }
-        
+
         public static CSharpElement ConvertField(CSharpConverter converter, CppField cppField, CSharpElement context)
         {
             // Early exit if this is a global variable (we don't handle dllexport)
@@ -55,7 +53,7 @@ namespace CppAst.CodeGen.CSharp
                     var canonicalType = (CppPrimitiveType)cppField.Type.GetCanonicalType();
                     csBitFieldStorage = new CSharpBitField(BitFieldName + csContainer.Members.Count)
                     {
-                        Visibility = CSharpVisibility.Private, 
+                        Visibility = CSharpVisibility.Private,
                     };
                     switch (canonicalType.Kind)
                     {
@@ -103,7 +101,7 @@ namespace CppAst.CodeGen.CSharp
                             csBitFieldStorage.FieldType = new CSharpFreeType("unsupported_bitfield_type_" + canonicalType);
                             csBitFieldStorage.MaxBitWidth = 128;
                             break;
-                    } 
+                    }
                     csContainer.Members.Add(csBitFieldStorage);
                 }
 
@@ -125,7 +123,7 @@ namespace CppAst.CodeGen.CSharp
                 {
                     notBitMaskStr = notBitMaskStr.Substring(notBitMaskStr.Length - csBitFieldStorage.MaxBitWidth);
                 }
-                
+
                 csProperty.ReturnType = converter.GetCSharpType(cppField.Type, csProperty);
                 csProperty.GetBody = (writer, element) =>
                 {
@@ -147,7 +145,7 @@ namespace CppAst.CodeGen.CSharp
                     writer.Write($"){bitmaskStr})) << {currentBitOffset}));");
                     writer.WriteLine();
                 };
-    
+
                 csContainer.Members.Add(csProperty);
                 return csProperty;
             }

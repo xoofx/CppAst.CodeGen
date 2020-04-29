@@ -60,7 +60,7 @@ namespace CppAst.CodeGen.CSharp
         {
             UnmanagedType = unmanagedType;
         }
-        
+
         public CSharpUnmanagedKind UnmanagedType { get; set; }
 
         public CSharpUnmanagedKind? ArraySubType { get; set; }
@@ -83,7 +83,7 @@ namespace CppAst.CodeGen.CSharp
         /// Gets or sets the custom Marshal cookie.
         /// </summary>
         public string MarshalCookie { get; set; }
-        
+
         public override string ToText()
         {
             var builder = new StringBuilder();

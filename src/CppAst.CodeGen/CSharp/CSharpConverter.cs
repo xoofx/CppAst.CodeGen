@@ -126,11 +126,11 @@ namespace CppAst.CodeGen.CSharp
 
         public string ConvertTypeReferenceToString(CSharpType csType, out string attachedAttributes)
         {
-            var strWriter = (StringWriter) _csTempWriter.CurrentWriter;
+            var strWriter = (StringWriter)_csTempWriter.CurrentWriter;
             strWriter.GetStringBuilder().Length = 0;
             csType.DumpReferenceTo(_csTempWriter);
             var typeReferenceName = strWriter.ToString();
-            
+
             strWriter.GetStringBuilder().Length = 0;
             csType.DumpContextualAttributesTo(_csTempWriter);
             attachedAttributes = strWriter.ToString();
@@ -141,7 +141,7 @@ namespace CppAst.CodeGen.CSharp
         private CSharpCompilation Convert(CppCompilation cppCompilation)
         {
             if (cppCompilation == null) throw new ArgumentNullException(nameof(cppCompilation));
-            return (CSharpCompilation)Convert(cppCompilation, 0,  null);
+            return (CSharpCompilation)Convert(cppCompilation, 0, null);
         }
 
         private CSharpElement Convert(CppElement cppElement, CSharpElement context)
@@ -228,7 +228,7 @@ namespace CppAst.CodeGen.CSharp
                         _currentContainers.Push(csharpContainer);
                         containerPushed = true;
                     }
-                    
+
                     var childCount = 0;
                     foreach (var nestedCppElement in container.Children())
                     {
@@ -260,7 +260,7 @@ namespace CppAst.CodeGen.CSharp
 
             return csElement;
         }
-        
+
         public CSharpComment GetCSharpComment(CppElement element, CSharpElement context)
         {
             if (element == null) throw new ArgumentNullException(nameof(element));
@@ -423,7 +423,7 @@ namespace CppAst.CodeGen.CSharp
 
             return new CSharpCompilation();
         }
-        
+
         private CSharpElement TryConvertEnum(CppEnum item, CSharpElement context)
         {
             for (var i = _pipeline.EnumConverters.Count - 1; i >= 0; i--)
@@ -543,7 +543,7 @@ namespace CppAst.CodeGen.CSharp
 
             return null;
         }
-        
+
         public void AddUsing(ICSharpContainer container, string referenceName, string aliasName = null, bool isStatic = false)
         {
             if (container == null) throw new ArgumentNullException(nameof(container));
@@ -583,7 +583,7 @@ namespace CppAst.CodeGen.CSharp
                 }
             }
 
-            members.Insert(insertIndex, new CSharpUsingDeclaration(referenceName) { Alias = aliasName, IsStatic =  isStatic });
+            members.Insert(insertIndex, new CSharpUsingDeclaration(referenceName) { Alias = aliasName, IsStatic = isStatic });
         }
 
         private void Register(CppElement cppElement, CSharpElement element)
@@ -616,12 +616,12 @@ namespace CppAst.CodeGen.CSharp
         public CSharpType FindCSharpType(CppType cppType)
         {
             if (cppType == null) throw new ArgumentNullException(nameof(cppType));
-            return (CSharpType) FindCSharpElement(cppType);
+            return (CSharpType)FindCSharpElement(cppType);
         }
 
         public ICSharpContainer GetCSharpContainer(CppElement element, CSharpElement context)
         {
-            if (element.Parent != CurrentCppCompilation && element.Parent != CurrentCppCompilation.System)
+            if (!ReferenceEquals(element.Parent, CurrentCppCompilation) && !ReferenceEquals(element.Parent, CurrentCppCompilation.System))
             {
                 // Default implementation, returns the current context
                 var nextContext = context;

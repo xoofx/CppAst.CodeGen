@@ -13,7 +13,7 @@ namespace CppAst.CodeGen.CSharp
         {
             Reference = reference ?? throw new ArgumentNullException(nameof(reference));
         }
-        
+
         public bool IsStatic { get; set; }
 
         public string Alias { get; set; }

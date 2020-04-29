@@ -7,13 +7,13 @@ using System.Runtime.InteropServices;
 namespace CppAst.CodeGen.CSharp
 {
     [StructLayout(LayoutKind.Explicit)]
-    public class DefaultParameterConverter: ICSharpConverterPlugin
+    public class DefaultParameterConverter : ICSharpConverterPlugin
     {
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.ParameterConverters.Add(ConvertParameter);
         }
-        
+
         public static CSharpElement ConvertParameter(CSharpConverter converter, CppParameter cppParam, int index, CSharpElement context)
         {
             var parent = ((CSharpElement)(context as CSharpMethod) ?? (context as CSharpDelegate));
@@ -24,7 +24,7 @@ namespace CppAst.CodeGen.CSharp
             }
 
             var csParamName = string.IsNullOrEmpty(cppParam.Name) ? "arg" + index : converter.GetCSharpName(cppParam, context);
-            var csParam = new CSharpParameter(csParamName) {CppElement = cppParam, Parent =  parent};
+            var csParam = new CSharpParameter(csParamName) { CppElement = cppParam, Parent = parent };
             parameters.Add(csParam);
 
             var csParamType = converter.GetCSharpType(cppParam.Type, csParam);

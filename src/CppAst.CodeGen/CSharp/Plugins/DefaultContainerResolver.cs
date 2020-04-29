@@ -8,7 +8,7 @@ using Zio;
 
 namespace CppAst.CodeGen.CSharp
 {
-    public class DefaultContainerResolver: ICSharpConverterPlugin
+    public class DefaultContainerResolver : ICSharpConverterPlugin
     {
         private static readonly string CacheContainerKey = typeof(DefaultContainerResolver) + "." + nameof(CacheContainerKey);
 
@@ -23,7 +23,7 @@ namespace CppAst.CodeGen.CSharp
 
             if (cacheContainer == null)
             {
-                cacheContainer = new CacheContainer {DefaultClass = CreateClassLib(converter)};
+                cacheContainer = new CacheContainer { DefaultClass = CreateClassLib(converter) };
                 converter.Tags[CacheContainerKey] = cacheContainer;
             }
 

@@ -15,7 +15,7 @@ namespace CppAst.CodeGen.CSharp
             MacroRules = new List<CppMacroMappingRule>();
             StandardRules = new List<CppElementMappingRule>();
         }
-        
+
         public List<CppMacroMappingRule> MacroRules { get; }
 
 

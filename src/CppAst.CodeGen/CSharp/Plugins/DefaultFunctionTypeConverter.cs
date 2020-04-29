@@ -17,6 +17,7 @@ namespace CppAst.CodeGen.CSharp
         {
             type = type.GetCanonicalType();
             cppFunctionType = type as CppFunctionType;
+
             if (cppFunctionType == null)
             {
                 if (type is CppPointerType ptrType && (ptrType.ElementType is CppFunctionType cppFunctionType2))
@@ -28,6 +29,7 @@ namespace CppAst.CodeGen.CSharp
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -41,19 +43,21 @@ namespace CppAst.CodeGen.CSharp
             if (cppType == null) throw new ArgumentNullException(nameof(cppType));
 
             string name = typedef?.Name;
+
             if (typedef == null)
             {
                 name = converter.GetCSharpName(cppType, context);
             }
-            var csDelegate = new CSharpDelegate(name) { CppElement = cppType };
 
+            var csDelegate = new CSharpDelegate(name) { CppElement = cppType };
             var cppFunctionType = (CppFunctionType)cppType;
 
             // Add calling convention
             var csCallingConvention = cppFunctionType.CallingConvention.GetCSharpCallingConvention();
             csDelegate.Attributes.Add(new CSharpFreeAttribute($"UnmanagedFunctionPointer(CallingConvention.{csCallingConvention})"));
 
-            var container =  typedef != null ? converter.GetCSharpContainer(typedef, context) : converter.GetCSharpContainer(cppFunctionType, context);
+            var container = typedef != null ? converter.GetCSharpContainer(typedef, context) : converter.GetCSharpContainer(cppFunctionType, context);
+
             if (container is CSharpInterface)
             {
                 container = container.Parent;
