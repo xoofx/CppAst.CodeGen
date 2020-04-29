@@ -19,9 +19,7 @@ namespace CppAst.CodeGen.Tests
         [Test]
         public void TestAnonymousStructAndFunction()
         {
-            var options = new CSharpConverterOptions()
-            {
-            };
+            var options = new CSharpConverterOptions();
 
             var csCompilation = CSharpConverter.Convert(@"
 struct {

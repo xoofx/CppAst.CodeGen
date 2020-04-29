@@ -15,6 +15,7 @@ namespace CppAst.CodeGen.CSharp
 
         public CSharpRefKind Kind { get; set; }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             Kind.DumpTo(writer);

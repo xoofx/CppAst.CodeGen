@@ -16,6 +16,7 @@ namespace CppAst.CodeGen.CSharp
 
         public string Name { get; set; }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             writer.Write("<param name=\"").Write(Name).Write("\">");

@@ -14,17 +14,12 @@ namespace CppAst.CodeGen.CSharp
             Text = text ?? throw new ArgumentNullException(nameof(text));
         }
 
-
         public string Text { get; set; }
 
-        public override void DumpTo(CodeWriter writer)
-        {
-            writer.Write(Text);
-        }
+        /// <inheritdoc />
+        public override void DumpTo(CodeWriter writer) => writer.Write(Text);
 
-        public override void DumpReferenceTo(CodeWriter writer)
-        {
-            DumpTo(writer);
-        }
+        /// <inheritdoc />
+        public override void DumpReferenceTo(CodeWriter writer) => DumpTo(writer);
     }
 }

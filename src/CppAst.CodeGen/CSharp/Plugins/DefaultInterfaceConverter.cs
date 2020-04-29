@@ -10,6 +10,7 @@ namespace CppAst.CodeGen.CSharp
     [StructLayout(LayoutKind.Explicit)]
     public class DefaultInterfaceConverter : ICSharpConverterPlugin
     {
+        /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.ClassConverters.Add(ConvertClass);

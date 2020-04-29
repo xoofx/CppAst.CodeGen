@@ -32,16 +32,19 @@ namespace CppAst.CodeGen.CSharp
         /// </summary>
         public ICSharpContainer Container => _container;
 
+        /// <inheritdoc />
         public IEnumerator<TElement> GetEnumerator()
         {
             return _elements.GetEnumerator();
         }
 
+        /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable)_elements).GetEnumerator();
         }
 
+        /// <inheritdoc />
         public void Add(TElement item)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
@@ -55,6 +58,7 @@ namespace CppAst.CodeGen.CSharp
             _elements.Add(item);
         }
 
+        /// <inheritdoc />
         public void Clear()
         {
             foreach (var element in _elements)
@@ -65,17 +69,20 @@ namespace CppAst.CodeGen.CSharp
             _elements.Clear();
         }
 
+        /// <inheritdoc />
         public bool Contains(TElement item)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
             return _elements.Contains(item);
         }
 
+        /// <inheritdoc />
         public void CopyTo(TElement[] array, int arrayIndex)
         {
             _elements.CopyTo(array, arrayIndex);
         }
 
+        /// <inheritdoc />
         public bool Remove(TElement item)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
@@ -87,16 +94,20 @@ namespace CppAst.CodeGen.CSharp
             return false;
         }
 
+        /// <inheritdoc />
         public int Count => _elements.Count;
 
+        /// <inheritdoc />
         public bool IsReadOnly => false;
 
+        /// <inheritdoc />
         public int IndexOf(TElement item)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
             return _elements.IndexOf(item);
         }
 
+        /// <inheritdoc />
         public void Insert(int index, TElement item)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
@@ -111,6 +122,7 @@ namespace CppAst.CodeGen.CSharp
             _elements.Insert(index, item);
         }
 
+        /// <inheritdoc />
         public void RemoveAt(int index)
         {
             var element = _elements[index];
@@ -118,6 +130,7 @@ namespace CppAst.CodeGen.CSharp
             _elements.RemoveAt(index);
         }
 
+        /// <inheritdoc />
         public TElement this[int index]
         {
             get => _elements[index];
@@ -139,8 +152,8 @@ namespace CppAst.CodeGen.CSharp
         {
             get
             {
-                T[] array = new T[this._collection.Count];
-                this._collection.CopyTo(array, 0);
+                T[] array = new T[_collection.Count];
+                _collection.CopyTo(array, 0);
                 return array;
             }
         }

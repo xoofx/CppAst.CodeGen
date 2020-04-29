@@ -16,6 +16,7 @@ namespace CppAst.CodeGen.CSharp
         {
             DllName = dllName;
         }
+
         public string DllName { get; set; }
 
         public string EntryPoint { get; set; }
@@ -28,6 +29,7 @@ namespace CppAst.CodeGen.CSharp
         public bool? BestFitMapping { get; set; }
         public bool? ThrowOnUnmappableChar { get; set; }
 
+        /// <inheritdoc />
         public override string ToText()
         {
             var builder = new StringBuilder();

@@ -12,6 +12,7 @@ namespace CppAst.CodeGen.CSharp
     {
         private const string BitFieldName = "__bitfield__";
 
+        /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.FieldConverters.Add(ConvertField);
@@ -127,7 +128,7 @@ namespace CppAst.CodeGen.CSharp
                 csProperty.ReturnType = converter.GetCSharpType(cppField.Type, csProperty);
                 csProperty.GetBody = (writer, element) =>
                 {
-                    writer.Write($"return unchecked((");
+                    writer.Write("return unchecked((");
                     csProperty.ReturnType.DumpReferenceTo(writer);
                     writer.Write(")");
                     writer.Write($"(({csBitFieldStorage.Name} >> {currentBitOffset}) & {bitmaskStr})");
@@ -149,49 +150,47 @@ namespace CppAst.CodeGen.CSharp
                 csContainer.Members.Add(csProperty);
                 return csProperty;
             }
-            else
+
+            var parentName = cppField.Parent is CppClass cppClass ? cppClass.Name : string.Empty;
+            var csField = new CSharpField(csFieldName) { CppElement = cppField };
+            converter.ApplyDefaultVisibility(csField, csContainer);
+
+            if (isConst)
             {
-                var parentName = cppField.Parent is CppClass cppClass ? cppClass.Name : string.Empty;
-                var csField = new CSharpField(csFieldName) { CppElement = cppField };
-                converter.ApplyDefaultVisibility(csField, csContainer);
-
-                if (isConst)
+                if (isParentClass)
                 {
-                    if (isParentClass)
-                    {
-                        csField.Modifiers |= CSharpModifiers.ReadOnly;
-                    }
-                    else
-                    {
-                        csField.Modifiers |= CSharpModifiers.Const;
-                    }
+                    csField.Modifiers |= CSharpModifiers.ReadOnly;
                 }
-
-                csContainer.Members.Add(csField);
-
-                csField.Comment = converter.GetCSharpComment(cppField, csField);
-
-                if (isUnion)
+                else
                 {
-                    csField.Attributes.Add(new CSharpFreeAttribute("FieldOffset(0)"));
-                    converter.AddUsing(csContainer, "System.Runtime.InteropServices");
+                    csField.Modifiers |= CSharpModifiers.Const;
                 }
-                csField.FieldType = converter.GetCSharpType(cppField.Type, csField);
-
-                if (cppField.InitExpression != null)
-                {
-                    if (cppField.InitExpression.Kind == CppExpressionKind.Unexposed)
-                    {
-                        csField.InitValue = cppField.InitValue?.Value?.ToString();
-                    }
-                    else
-                    {
-                        csField.InitValue = converter.ConvertExpression(cppField.InitExpression, context, csField.FieldType);
-                    }
-                }
-
-                return csField;
             }
+
+            csContainer.Members.Add(csField);
+
+            csField.Comment = converter.GetCSharpComment(cppField, csField);
+
+            if (isUnion)
+            {
+                csField.Attributes.Add(new CSharpFreeAttribute("FieldOffset(0)"));
+                converter.AddUsing(csContainer, "System.Runtime.InteropServices");
+            }
+            csField.FieldType = converter.GetCSharpType(cppField.Type, csField);
+
+            if (cppField.InitExpression != null)
+            {
+                if (cppField.InitExpression.Kind == CppExpressionKind.Unexposed)
+                {
+                    csField.InitValue = cppField.InitValue?.Value?.ToString();
+                }
+                else
+                {
+                    csField.InitValue = converter.ConvertExpression(cppField.InitExpression, context, csField.FieldType);
+                }
+            }
+
+            return csField;
         }
     }
 }

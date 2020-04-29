@@ -218,6 +218,7 @@ namespace CppAst.CodeGen.Common
             return this;
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return CurrentWriter != null ? CurrentWriter.ToString() : string.Empty;

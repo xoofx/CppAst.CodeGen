@@ -22,6 +22,7 @@ namespace CppAst.CodeGen.CSharp
 
         public List<CSharpAttribute> Attributes { get; }
 
+        /// <inheritdoc />
         public CSharpVisibility Visibility { get; set; }
 
         public CSharpModifiers Modifiers { get; set; }
@@ -36,11 +37,13 @@ namespace CppAst.CodeGen.CSharp
 
         public Action<CodeWriter, CSharpElement> Body { get; set; }
 
+        /// <inheritdoc />
         public virtual IEnumerable<CSharpAttribute> GetAttributes()
         {
             return Attributes;
         }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             var mode = writer.Mode;
@@ -118,7 +121,7 @@ namespace CppAst.CodeGen.CSharp
             // Remove the comment from the original method
             csMethod.Comment = null;
             // Rename it to avoid naming clash
-            csMethod.Name = csMethod.Name + "__";
+            csMethod.Name += "__";
             // Make it private
             csMethod.Visibility = CSharpVisibility.Private;
 

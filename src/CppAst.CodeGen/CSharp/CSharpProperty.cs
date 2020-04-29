@@ -16,10 +16,12 @@ namespace CppAst.CodeGen.CSharp
             Attributes = new List<CSharpAttribute>();
         }
 
+        /// <inheritdoc />
         public CSharpComment Comment { get; set; }
 
         public List<CSharpAttribute> Attributes { get; }
 
+        /// <inheritdoc />
         public CSharpVisibility Visibility { get; set; }
 
         public CSharpModifiers Modifiers { get; set; }
@@ -34,11 +36,10 @@ namespace CppAst.CodeGen.CSharp
 
         public Action<CodeWriter, CSharpElement> SetBody { get; set; }
 
-        public virtual IEnumerable<CSharpAttribute> GetAttributes()
-        {
-            return Attributes;
-        }
+        /// <inheritdoc />
+        public virtual IEnumerable<CSharpAttribute> GetAttributes() => Attributes;
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             var mode = writer.Mode;

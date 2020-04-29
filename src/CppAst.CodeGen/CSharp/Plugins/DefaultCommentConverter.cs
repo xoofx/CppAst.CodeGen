@@ -9,6 +9,7 @@ namespace CppAst.CodeGen.CSharp
 {
     public class DefaultCommentConverter : ICSharpConverterPlugin
     {
+        /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.CommentConverters.Add(ConvertComment);
@@ -22,7 +23,7 @@ namespace CppAst.CodeGen.CSharp
             }
 
             var comment = cppDecl.Comment;
-            if (comment == null || comment.Children == null)
+            if (comment?.Children == null)
             {
                 return null;
             }

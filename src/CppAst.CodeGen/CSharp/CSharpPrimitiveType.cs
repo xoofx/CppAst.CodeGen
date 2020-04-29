@@ -33,6 +33,7 @@ namespace CppAst.CodeGen.CSharp
 
         public CSharpPrimitiveKind Kind { get; }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             switch (Kind)
@@ -91,9 +92,7 @@ namespace CppAst.CodeGen.CSharp
 
         }
 
-        public override void DumpReferenceTo(CodeWriter writer)
-        {
-            DumpTo(writer);
-        }
+        /// <inheritdoc />
+        public override void DumpReferenceTo(CodeWriter writer) => DumpTo(writer);
     }
 }

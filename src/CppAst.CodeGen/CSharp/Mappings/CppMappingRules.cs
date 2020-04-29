@@ -32,6 +32,7 @@ namespace CppAst.CodeGen.CSharp
             StandardRules.Add(e(this));
         }
 
+        /// <inheritdoc />
         public IEnumerator<CppElementMappingRuleBase> GetEnumerator()
         {
             foreach (var rule in MacroRules)

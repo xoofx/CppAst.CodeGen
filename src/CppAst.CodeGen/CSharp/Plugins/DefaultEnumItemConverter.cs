@@ -5,6 +5,7 @@ namespace CppAst.CodeGen.CSharp
 {
     public class DefaultEnumItemConverter : ICSharpConverterPlugin
     {
+        /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.EnumItemConverters.Add(ConvertEnumItem);

@@ -4,6 +4,7 @@ namespace CppAst.CodeGen.CSharp
 {
     public class DefaultGetCSharpNamePlugin : ICSharpConverterPlugin
     {
+        /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.GetCSharpNameResolvers.Add(DefaultGetCSharpName);

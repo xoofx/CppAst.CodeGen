@@ -9,6 +9,7 @@ namespace CppAst.CodeGen.CSharp
     [StructLayout(LayoutKind.Explicit)]
     public class DefaultParameterConverter : ICSharpConverterPlugin
     {
+        /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.ParameterConverters.Add(ConvertParameter);

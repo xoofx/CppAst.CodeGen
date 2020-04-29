@@ -8,6 +8,7 @@ namespace CppAst.CodeGen.CSharp
 {
     public class DefaultFunctionTypeConverter : ICSharpConverterPlugin
     {
+        /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.FunctionTypeConverters.Add(ConvertAnonymousFunctionType);
@@ -50,7 +51,7 @@ namespace CppAst.CodeGen.CSharp
             }
 
             var csDelegate = new CSharpDelegate(name) { CppElement = cppType };
-            var cppFunctionType = (CppFunctionType)cppType;
+            var cppFunctionType = cppType;
 
             // Add calling convention
             var csCallingConvention = cppFunctionType.CallingConvention.GetCSharpCallingConvention();

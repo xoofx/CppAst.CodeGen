@@ -17,10 +17,13 @@ namespace CppAst.CodeGen.CSharp
 
         public string Name { get; set; }
 
+        /// <inheritdoc />
         public CSharpContainerList<CSharpElement> Members { get; }
 
+        /// <inheritdoc />
         ICSharpContainer ICSharpContainer.Parent => Parent as ICSharpContainer;
 
+        /// <inheritdoc />
         public void ValidateMember(CSharpElement element)
         {
             if (element is CSharpCompilation || element is CSharpGeneratedFile)
@@ -29,6 +32,7 @@ namespace CppAst.CodeGen.CSharp
             }
         }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             writer.Write("namespace ");

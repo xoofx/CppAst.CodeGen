@@ -11,15 +11,11 @@ namespace CppAst.CodeGen.Common
 {
     public class CodeWriterOptions
     {
-        public CodeWriterOptions() : this(GetDefaultFileSystem(), CodeWriterMode.Full)
+        public CodeWriterOptions() : this(GetDefaultFileSystem())
         {
         }
 
-        public CodeWriterOptions(IFileSystem fileSystem) : this(fileSystem, CodeWriterMode.Full)
-        {
-        }
-
-        public CodeWriterOptions(IFileSystem fileSystem, CodeWriterMode mode)
+        public CodeWriterOptions(IFileSystem fileSystem, CodeWriterMode mode = CodeWriterMode.Full)
         {
             FileSystem = fileSystem;
             Mode = mode;

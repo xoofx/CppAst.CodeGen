@@ -14,8 +14,11 @@ namespace CppAst.CodeGen.CSharp
             Attributes = new List<CSharpAttribute>();
             Parameters = new List<CSharpParameter>();
         }
+
+        /// <inheritdoc />
         public CSharpComment Comment { get; set; }
 
+        /// <inheritdoc />
         public CSharpVisibility Visibility { get; set; }
 
         public List<CSharpAttribute> Attributes { get; }
@@ -24,6 +27,7 @@ namespace CppAst.CodeGen.CSharp
 
         public List<CSharpParameter> Parameters { get; }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             if (writer.Mode == CodeWriterMode.Full) Comment?.DumpTo(writer);
@@ -39,9 +43,7 @@ namespace CppAst.CodeGen.CSharp
             writer.WriteLine();
         }
 
-        public virtual IEnumerable<CSharpAttribute> GetAttributes()
-        {
-            return Attributes;
-        }
+        /// <inheritdoc />
+        public virtual IEnumerable<CSharpAttribute> GetAttributes() => Attributes;
     }
 }

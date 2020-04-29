@@ -30,6 +30,7 @@ namespace CppAst.CodeGen.CSharp
 
         public bool IsParams { get; set; }
 
+        /// <inheritdoc />
         public string Name { get; set; }
 
         public string DefaultValue { get; set; }
@@ -66,6 +67,7 @@ namespace CppAst.CodeGen.CSharp
             writer.Write(Name);
         }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             this.DumpAttributesTo(writer);
@@ -88,9 +90,7 @@ namespace CppAst.CodeGen.CSharp
             }
         }
 
-        public virtual IEnumerable<CSharpAttribute> GetAttributes()
-        {
-            return Attributes;
-        }
+        /// <inheritdoc />
+        public virtual IEnumerable<CSharpAttribute> GetAttributes() => Attributes;
     }
 }

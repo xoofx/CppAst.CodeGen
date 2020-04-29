@@ -15,6 +15,7 @@ namespace CppAst.CodeGen.CSharp
 
         public CSharpType ElementType { get; set; }
 
+        /// <inheritdoc />
         public override void DumpReferenceTo(CodeWriter writer)
         {
             DumpTo(writer);

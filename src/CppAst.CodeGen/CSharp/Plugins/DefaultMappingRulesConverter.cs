@@ -16,6 +16,7 @@ namespace CppAst.CodeGen.CSharp
     {
         private const string CachedRulesKey = nameof(DefaultMappingRulesConverter) + "_" + nameof(CachedRulesKey);
 
+        /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             var cachedRules = GetCachedRules(converter);
@@ -205,8 +206,7 @@ namespace CppAst.CodeGen.CSharp
                     if (rule.CSharpElementActions.Count > 0)
                     {
                         // save the match for later
-                        List<CppElementMatch> listCppElementMatch;
-                        if (!cachedRules.ElementToMatches.TryGetValue(cppElement, out listCppElementMatch))
+                        if (!cachedRules.ElementToMatches.TryGetValue(cppElement, out var listCppElementMatch))
                         {
                             listCppElementMatch = new List<CppElementMatch>();
                             cachedRules.ElementToMatches.Add(cppElement, listCppElementMatch);

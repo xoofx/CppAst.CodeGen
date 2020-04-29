@@ -22,31 +22,34 @@ namespace CppAst.CodeGen.CSharp
 
         public List<CSharpAttribute> Attributes { get; }
 
+        /// <inheritdoc />
         public CSharpVisibility Visibility { get; set; }
 
         public CSharpModifiers Modifiers { get; set; }
 
         public List<CSharpType> BaseTypes { get; }
 
+        /// <inheritdoc />
         public CSharpContainerList<CSharpElement> Members { get; }
 
+        /// <inheritdoc />
         ICSharpContainer ICSharpContainer.Parent => Parent as ICSharpContainer;
 
+        /// <inheritdoc />
         public void ValidateMember(CSharpElement element)
         {
             if (element is CSharpCompilation || element is CSharpGeneratedFile || element is CSharpNamespace)
             {
-                throw new ArgumentException($"Cannot add a {element.GetType().Name} to members of a {this.GetType().Name}");
+                throw new ArgumentException($"Cannot add a {element.GetType().Name} to members of a {GetType().Name}");
             }
         }
 
-        public virtual IEnumerable<CSharpAttribute> GetAttributes()
-        {
-            return Attributes;
-        }
+        /// <inheritdoc />
+        public virtual IEnumerable<CSharpAttribute> GetAttributes() => Attributes;
 
         protected abstract string DeclarationKind { get; }
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             var mode = writer.Mode;

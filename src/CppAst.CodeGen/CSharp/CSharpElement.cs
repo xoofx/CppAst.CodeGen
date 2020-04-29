@@ -15,6 +15,7 @@ namespace CppAst.CodeGen.CSharp
 
         public abstract void DumpTo(CodeWriter writer);
 
+        /// <inheritdoc />
         public override string ToString()
         {
             var writer = new CodeWriter(new CodeWriterOptions(new MemoryFileSystem(), CodeWriterMode.Simple));

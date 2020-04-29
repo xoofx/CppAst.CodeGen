@@ -18,10 +18,12 @@ namespace CppAst.CodeGen.CSharp
             Visibility = CSharpVisibility.Public;
         }
 
+        /// <inheritdoc />
         public CSharpComment Comment { get; set; }
 
         public List<CSharpAttribute> Attributes { get; }
 
+        /// <inheritdoc />
         public CSharpVisibility Visibility { get; set; }
 
         public CSharpModifiers Modifiers { get; set; }
@@ -30,13 +32,13 @@ namespace CppAst.CodeGen.CSharp
 
         public string InitValue { get; set; }
 
+        /// <inheritdoc />
         public string Name { get; set; }
 
-        public virtual IEnumerable<CSharpAttribute> GetAttributes()
-        {
-            return Attributes;
-        }
+        /// <inheritdoc />
+        public virtual IEnumerable<CSharpAttribute> GetAttributes() => Attributes;
 
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             if (writer.Mode == CodeWriterMode.Full) Comment?.DumpTo(writer);
