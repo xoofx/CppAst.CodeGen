@@ -26,7 +26,7 @@ jobs:
         dotnet-version: 3.0.100
 
     - name: Build & test (Release)
-      run: dotnet test src -c Release
+      run: dotnet test src -c Release --runtime win-x64
 
     - name: Pack
       run: dotnet pack src -c Release
