@@ -78,9 +78,7 @@ namespace CppAst.CodeGen.CSharp
             if (mode == CodeWriterMode.Full)
             {
                 writer.OpenBraceBlock();
-                {
-                    this.DumpMembersTo(writer);
-                }
+                this.DumpMembersTo(writer);
                 writer.CloseBraceBlock();
             }
             else

@@ -16,7 +16,7 @@ namespace CppAst.CodeGen.CSharp
             for (var i = 0; i < members.Count; i++)
             {
                 var elementMember = members[i];
-                if (i > 0) writer.WriteLine();
+                if (i > 0) { writer.WriteLine(); }
                 elementMember.DumpTo(writer);
             }
         }
@@ -125,17 +125,19 @@ namespace CppAst.CodeGen.CSharp
 
         public static void DumpContextualAttributesTo(this CSharpElement element, CodeWriter writer, bool inline = false, CSharpAttributeScope? scopeOverride = null)
         {
-            var provider = element as ICSharpContextualAttributesProvider;
-            if (provider == null)
+            if (!(element is ICSharpContextualAttributesProvider provider))
             {
                 return;
             }
+
             var mode = writer.Mode;
-            if (mode == CodeWriterMode.Simple) return;
+
+            if (mode == CodeWriterMode.Simple) { return; }
 
             if (inline)
             {
                 bool isFirst = true;
+
                 foreach (var attr in provider.GetContextualAttributes())
                 {
                     if (isFirst)
@@ -156,6 +158,7 @@ namespace CppAst.CodeGen.CSharp
                     {
                         attr.DumpTo(writer);
                     }
+
                     writer.Write("] ");
                 }
             }
@@ -184,7 +187,7 @@ namespace CppAst.CodeGen.CSharp
             for (var i = 0; i < parameters.Count; i++)
             {
                 var param = parameters[i];
-                if (i > 0) writer.Write(", ");
+                if (i > 0) { writer.Write(", "); }
                 param.DumpTo(writer);
             }
 

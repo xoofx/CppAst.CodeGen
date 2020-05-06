@@ -18,7 +18,7 @@ namespace CppAst.CodeGen.CSharp
             _regexString = regexString ?? throw new ArgumentNullException(nameof(regexString));
 
             _regexParts = new List<Regex>();
-            var regexTxtParts = _regexString.Split(new string[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
+            var regexTxtParts = _regexString.Split(new[] { "::" }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var regexTxtPart in regexTxtParts)
             {
                 try
@@ -83,6 +83,7 @@ namespace CppAst.CodeGen.CSharp
             return true;
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return $"MapRegexName: `{_regexString}`";

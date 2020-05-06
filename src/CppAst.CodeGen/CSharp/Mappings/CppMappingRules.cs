@@ -18,9 +18,7 @@ namespace CppAst.CodeGen.CSharp
 
         public List<CppMacroMappingRule> MacroRules { get; }
 
-
         public List<CppElementMappingRule> StandardRules { get; }
-
 
         public void Add(Func<CppMappingRules, CppMacroMappingRule> e)
         {
