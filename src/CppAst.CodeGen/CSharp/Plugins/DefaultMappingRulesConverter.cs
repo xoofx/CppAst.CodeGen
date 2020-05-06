@@ -93,8 +93,7 @@ namespace CppAst.CodeGen.CSharp
                                     var macroName = cppMacro.Name;
                                     if (regexMatch != null && macroToConst.ConstFieldName != null)
                                     {
-                                        macroName = Regex.Replace(regexMatch.RegexInput, regexMatch.RegexPattern,
-                                            macroToConst.ConstFieldName);
+                                        macroName = Regex.Replace(regexMatch.RegexInput, regexMatch.RegexPattern, macroToConst.ConstFieldName);
                                     }
 
                                     foreach (var token in cppMacro.Tokens)
@@ -132,8 +131,7 @@ namespace CppAst.CodeGen.CSharp
                                     var enumItemName = macroToEnum.CppEnumItemName;
                                     if (regexMatch != null)
                                     {
-                                        enumItemName = Regex.Replace(regexMatch.RegexInput, regexMatch.RegexPattern,
-                                            enumItemName);
+                                        enumItemName = Regex.Replace(regexMatch.RegexInput, regexMatch.RegexPattern, enumItemName);
                                     }
 
                                     AppendPragmaLine(cppMacroRule, macrosAsEnumText);
