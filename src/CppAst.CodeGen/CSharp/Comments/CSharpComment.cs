@@ -19,16 +19,21 @@ namespace CppAst.CodeGen.CSharp
 
         public string ChildrenToFullString()
         {
-            var writer = new CodeWriter(new CodeWriterOptions(new MemoryFileSystem(), CodeWriterMode.Full));
+            var writer = new CodeWriter(new CodeWriterOptions(new MemoryFileSystem()));
             DumpChildrenTo(writer);
             return writer.CurrentWriter.ToString();
         }
 
-        protected internal void DumpChildrenTo(CodeWriter writer)
+        protected internal void DumpChildrenTo(CodeWriter writer, bool inline = true)
         {
-            foreach (var children in Children)
+            for (var i = 0; i < Children.Count; i++)
             {
-                children.DumpTo(writer);
+                Children[i].DumpTo(writer);
+
+                if (!inline && i != Children.Count - 1)
+                {
+                    writer.WriteLine();
+                }
             }
         }
     }

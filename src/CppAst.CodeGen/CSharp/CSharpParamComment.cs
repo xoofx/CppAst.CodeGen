@@ -19,7 +19,15 @@ namespace CppAst.CodeGen.CSharp
         /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
-            writer.Write("<param name=\"").Write(Name).Write("\">");
+            writer.Write("<param name=\"")
+                  .Write(Name
+                  .Replace("&", "&amp;")
+                  .Replace("<", "&lt;")
+                  .Replace(">", "&gt;")
+                  .Replace(".", "")
+                  .Replace("#", "")
+                  .Replace("()", ""))
+                  .Write("\">");
             DumpChildrenTo(writer);
             writer.WriteLine("</param>");
         }

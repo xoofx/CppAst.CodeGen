@@ -3,6 +3,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System;
 using System.Text;
 
 namespace CppAst.CodeGen.CSharp
@@ -23,6 +24,7 @@ namespace CppAst.CodeGen.CSharp
             }
 
             var comment = cppDecl.Comment;
+
             if (comment?.Children == null)
             {
                 return null;
@@ -30,104 +32,205 @@ namespace CppAst.CodeGen.CSharp
 
             var csFullComment = new CSharpFullComment();
 
-            CSharpXmlComment csRemarks = null;
+            var summary = new CSharpXmlComment("summary");
+            var remarks = new CSharpXmlComment("remarks");
 
             for (var i = 0; i < comment.Children.Count; i++)
             {
                 var childComment = comment.Children[i];
+
                 if (i == 0)
                 {
-                    var summary = new CSharpXmlComment("summary");
-                    summary.Children.Add(GetAsCSharpComment(childComment));
-                    csFullComment.Children.Add(summary);
-                    continue;
+                    if (TryGetAsCSharpComment(childComment, out var summaryComment))
+                    {
+                        summary.Children.Add(summaryComment);
+                        continue;
+                    }
                 }
 
                 switch (childComment.Kind)
                 {
                     case CppCommentKind.ParamCommand:
+
                         var paramComment = (CppCommentParamCommand)childComment;
 
-                        var csParamComment = new CSharpParamComment(paramComment.ParamName);
-                        csParamComment.Children.Add(GetChildAsCSharpComment(paramComment));
-                        csFullComment.Children.Add(csParamComment);
+                        if (TryGetChildAsCSharpComment(paramComment, out var paramChildComment))
+                        {
+                            var csParamComment = new CSharpParamComment(paramComment.ParamName);
+                            csParamComment.Children.Add(paramChildComment);
+                            csFullComment.Children.Add(csParamComment);
+                        }
+
                         break;
 
                     case CppCommentKind.BlockCommand:
                         var blockCommand = (CppCommentBlockCommand)childComment;
-                        if (blockCommand.CommandName == "return")
+
+                        switch (blockCommand.CommandName)
                         {
-                            var returnComment = new CSharpReturnComment();
-                            returnComment.Children.Add(GetChildAsCSharpComment(blockCommand));
-                            csFullComment.Children.Add(returnComment);
-                        }
-                        else if (blockCommand.CommandName == "see")
-                        {
-                            var seealso = new CSharpXmlComment("seealso") { IsSelfClosing = true };
-                            seealso.Attributes.Add(new CSharpXmlAttribute("cref", GetChildAsText(childComment)));
-                            csFullComment.Children.Add(seealso);
-                        }
-                        else
-                        {
-                            if (csRemarks == null) csRemarks = new CSharpXmlComment("remarks");
-                            AddComment(csRemarks, childComment);
+                            case "return":
+                                if (TryGetChildAsCSharpComment(blockCommand, out var blockCommandComment))
+                                {
+                                    var returnComment = new CSharpReturnComment();
+                                    returnComment.Children.Add(blockCommandComment);
+                                    csFullComment.Children.Add(returnComment);
+                                }
+                                break;
+                            case "ref":
+                            case "see":
+                                if (TryGetChildAsText(childComment, out var attribute))
+                                {
+                                    var seeAlso = new CSharpXmlComment("seealso")
+                                    {
+                                        IsSelfClosing = true
+                                    };
+
+                                    seeAlso.Attributes.Add(new CSharpXmlAttribute("cref", attribute));
+                                    csFullComment.Children.Add(seeAlso);
+                                }
+
+                                break;
+                            case "note":
+                            case "deprecated":
+                                if (TryGetChildAsText(childComment, out var noteText))
+                                {
+                                    remarks.Children.Add(new CSharpTextComment(noteText));
+                                }
+                                break;
+                            default:
+                                if (TryGetChildAsCSharpComment(childComment, out var summaryComment))
+                                {
+                                    summary.Children.Add(summaryComment);
+                                }
+
+                                break;
                         }
                         break;
+                    case CppCommentKind.Paragraph:
+                        if (TryGetAsText(childComment, out var paragraphText))
+                        {
+                            if (paragraphText.Contains("@retval"))
+                            {
+                                paragraphText = paragraphText.Replace("@retval ", "@");
+
+                                var entries = paragraphText.Split(new[] { '@' }, StringSplitOptions.RemoveEmptyEntries);
+                                var returnComment = new CSharpReturnComment();
+
+                                foreach (var entry in entries)
+                                {
+                                    var returnTextComment = new CSharpTextComment($"{entry}");
+                                    returnComment.Children.Add(returnTextComment);
+                                }
+
+                                csFullComment.Children.Add(returnComment);
+                            }
+                            else
+                            {
+                                remarks.Children.Add(new CSharpTextComment(paragraphText));
+                            }
+                        }
+
+                        break;
+                    case CppCommentKind.Full:
+                    case CppCommentKind.HtmlStartTag:
+                    case CppCommentKind.HtmlEndTag:
+                    case CppCommentKind.InlineCommand:
+                    case CppCommentKind.Text:
+                    case CppCommentKind.Null:
+                    case CppCommentKind.TemplateParamCommand:
+                    case CppCommentKind.VerbatimBlockCommand:
+                    case CppCommentKind.VerbatimBlockLine:
+                    case CppCommentKind.VerbatimLine:
+                        {
+                            if (TryGetAsCSharpComment(childComment, out var summaryComment))
+                            {
+                                summary.Children.Add(summaryComment);
+                            }
+
+                            break;
+                        }
                     default:
-                        if (csRemarks == null) csRemarks = new CSharpXmlComment("remarks");
-                        AddComment(csRemarks, childComment);
-                        break;
+                        throw new ArgumentOutOfRangeException();
                 }
             }
 
-            if (csRemarks != null && csRemarks.Children.Count > 0)
+            csFullComment.Children.Insert(0, summary);
+
+            if (remarks.Children.Count > 0)
             {
-                csFullComment.Children.Add(csRemarks);
+                csFullComment.Children.Add(remarks);
             }
 
             return csFullComment;
         }
 
-        private static CSharpTextComment GetAsCSharpComment(CppComment comment, bool trimEnd = true)
+        private static bool TryGetAsCSharpComment(CppComment comment, out CSharpTextComment textComment, bool trimEnd = true)
         {
-            if (comment == null) return null;
-            return new CSharpTextComment(GetAsText(comment, trimEnd));
-        }
-
-        private static string GetAsText(CppComment comment, bool trimEnd = true)
-        {
-            if (comment == null) return null;
-            var text = comment.ToString();
-            return trimEnd ? text.TrimEnd() : text;
-        }
-
-        private static CSharpTextComment GetChildAsCSharpComment(CppComment comment, bool trimEnd = true)
-        {
-            if (comment?.Children == null) return null;
-            return new CSharpTextComment(GetChildAsText(comment, trimEnd));
-        }
-
-        private static void AddComment(CSharpComment dest, CppComment comment)
-        {
-            var text = GetAsText(comment);
-            if (!string.IsNullOrEmpty(text))
+            if (TryGetAsText(comment, out var text, trimEnd))
             {
-                dest.Children.Add(new CSharpTextComment(text));
+                textComment = new CSharpTextComment(text);
+                return true;
             }
+
+            textComment = null;
+            return false;
         }
 
-        private static string GetChildAsText(CppComment comment, bool trimEnd = true)
+        private static bool TryGetChildAsCSharpComment(CppComment comment, out CSharpTextComment textComment, bool trimEnd = true)
         {
-            if (comment?.Children == null) return null;
+            if (TryGetChildAsText(comment, out var text, trimEnd))
+            {
+                textComment = new CSharpTextComment(text);
+                return true;
+            }
+
+            textComment = null;
+            return false;
+        }
+
+        private static bool TryGetAsText(CppComment comment, out string text, bool trimEnd = true)
+        {
+            text = null;
+
+            if (comment == null)
+            {
+                return false;
+            }
+
+            text = comment.ToString();
+
+            if (trimEnd)
+            {
+                text = text.TrimEnd();
+            }
+
+            return !string.IsNullOrEmpty(text);
+        }
+
+        private static bool TryGetChildAsText(CppComment comment, out string text, bool trimEnd = true)
+        {
+            text = null;
             var builder = new StringBuilder();
-            foreach (var child in comment.Children)
+
+            if (comment?.Children != null)
             {
-                builder.Append(child);
+                foreach (var child in comment.Children)
+                {
+                    if (TryGetAsText(child, out var childText, trimEnd))
+                    {
+                        builder.Append(childText);
+                    }
+                }
             }
 
-            var text = builder.ToString();
-            if (trimEnd) text = text.TrimEnd();
-            return text;
+            text = builder.ToString();
+
+            if (trimEnd)
+            {
+                text = text.TrimEnd();
+            }
+
+            return !string.IsNullOrEmpty(text);
         }
     }
 }

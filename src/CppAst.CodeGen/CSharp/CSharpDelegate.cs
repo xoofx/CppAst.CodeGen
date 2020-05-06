@@ -30,9 +30,14 @@ namespace CppAst.CodeGen.CSharp
         /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
-            if (writer.Mode == CodeWriterMode.Full) Comment?.DumpTo(writer);
             this.DumpAttributesTo(writer);
             ReturnType?.DumpContextualAttributesTo(writer, false, CSharpAttributeScope.Return);
+
+            if (writer.Mode == CodeWriterMode.Full)
+            {
+                Comment?.DumpTo(writer);
+            }
+
             Visibility.DumpTo(writer);
             writer.Write("delegate ");
             ReturnType?.DumpReferenceTo(writer);

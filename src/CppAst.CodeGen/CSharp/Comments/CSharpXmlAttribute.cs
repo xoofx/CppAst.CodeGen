@@ -21,7 +21,16 @@ namespace CppAst.CodeGen.CSharp
 
         public void DumpTo(CodeWriter writer)
         {
-            writer.Write(Name).Write("=\"").Write(Value).Write("\"");
+            writer.Write(Name)
+                  .Write("=\"")
+                  .Write(Value
+                      .Replace("&", "&amp;")
+                      .Replace("<", "&lt;")
+                      .Replace(">", "&gt;")
+                      .Replace(".", "")
+                      .Replace("#", "")
+                      .Replace("()", ""))
+                  .Write("\"");
         }
     }
 }

@@ -23,16 +23,24 @@ namespace CppAst.CodeGen.CSharp
         public bool IsSelfClosing { get; set; }
 
         public List<CSharpXmlAttribute> Attributes { get; }
+
+        /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             writer.Write("<").Write(TagName);
+
             for (var i = 0; i < Attributes.Count; i++)
             {
                 var attr = Attributes[i];
                 writer.Write(" ");
                 attr.DumpTo(writer);
             }
-            if (IsSelfClosing) writer.Write("/");
+
+            if (IsSelfClosing)
+            {
+                writer.Write("/");
+            }
+
             writer.Write(">");
 
             if (!IsInline)
@@ -42,11 +50,13 @@ namespace CppAst.CodeGen.CSharp
 
             if (!IsSelfClosing)
             {
-                DumpChildrenTo(writer);
+                DumpChildrenTo(writer, IsInline);
+
                 if (!IsInline)
                 {
                     writer.WriteLine();
                 }
+
                 writer.Write("</").Write(TagName).Write(">");
             }
 
