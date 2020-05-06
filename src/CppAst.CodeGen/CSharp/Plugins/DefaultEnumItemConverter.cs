@@ -28,7 +28,7 @@ namespace CppAst.CodeGen.CSharp
             // Process any enum item value expression (e.g ENUM_ITEM = 1 << 2)
             if (cppEnumItem.ValueExpression != null)
             {
-                var integerValue = converter.ConvertExpression(cppEnumItem.ValueExpression, csEnumItem, csEnum.IntegerBaseType);
+                var integerValue = converter.ConvertExpression(cppEnumItem.ValueExpression);
 
                 csEnumItem.Value = $"unchecked(({csEnum.IntegerBaseType}){(string.IsNullOrEmpty(integerValue) ? cppEnumItem.Value + "" : integerValue)})";
 
