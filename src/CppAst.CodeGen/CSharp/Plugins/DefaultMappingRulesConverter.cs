@@ -88,62 +88,60 @@ namespace CppAst.CodeGen.CSharp
                             switch (cppMacroRule)
                             {
                                 case CppMacroToConstMappingRule macroToConst:
+                                    AppendPragmaLine(cppMacroRule, additionalHeaders);
+
+                                    var macroName = cppMacro.Name;
+                                    if (regexMatch != null && macroToConst.ConstFieldName != null)
                                     {
-                                        AppendPragmaLine(cppMacroRule, additionalHeaders);
-
-                                        var macroName = cppMacro.Name;
-                                        if (regexMatch != null && macroToConst.ConstFieldName != null)
-                                        {
-                                            macroName = Regex.Replace(regexMatch.RegexInput, regexMatch.RegexPattern, macroToConst.ConstFieldName);
-                                        }
-
-                                        foreach (var token in cppMacro.Tokens)
-                                        {
-                                            if (token.Kind == CppTokenKind.Comment && !string.IsNullOrEmpty(token.Text))
-                                            {
-                                                additionalHeaders.AppendLine(token.Text);
-                                            }
-                                        }
-
-                                        additionalHeaders.AppendLine(macroToConst.ExplicitCast
-                                            ? $"const {macroToConst.ConstFieldTypeName} {cachedRules.Prefix}{macroName} = ({macroToConst.ConstFieldTypeName}){cppMacro.Value};"
-                                            : $"const {macroToConst.ConstFieldTypeName} {cachedRules.Prefix}{macroName} = {cppMacro.Value};");
-                                        break;
+                                        macroName = Regex.Replace(regexMatch.RegexInput, regexMatch.RegexPattern,
+                                            macroToConst.ConstFieldName);
                                     }
-                                case CppMacroToEnumMappingRule macroToEnum:
+
+                                    foreach (var token in cppMacro.Tokens)
                                     {
-                                        if (!enumToMacros.TryGetValue(macroToEnum, out var macrosAsEnumText))
+                                        if (token.Kind == CppTokenKind.Comment && !string.IsNullOrEmpty(token.Text))
                                         {
-                                            macrosAsEnumText = new StringBuilder();
-
-                                            var enumTypeName = macroToEnum.CppEnumTypeName;
-
-                                            AppendPragmaLine(cppMacroRule, macrosAsEnumText);
-                                            macrosAsEnumText.Append($"enum {enumTypeName}");
-                                            if (macroToEnum.CppIntegerTypeName != "int")
-                                            {
-                                                macrosAsEnumText.Append(" : ").Append(macroToEnum.CppIntegerTypeName);
-                                            }
-
-                                            macrosAsEnumText.AppendLine();
-                                            macrosAsEnumText.AppendLine("{");
-
-                                            enumToMacros.Add(macroToEnum, macrosAsEnumText);
+                                            additionalHeaders.AppendLine(token.Text);
                                         }
+                                    }
 
-                                        var enumItemName = macroToEnum.CppEnumItemName;
-                                        if (regexMatch != null)
-                                        {
-                                            enumItemName = Regex.Replace(regexMatch.RegexInput, regexMatch.RegexPattern, enumItemName);
-                                        }
+                                    additionalHeaders.AppendLine(macroToConst.ExplicitCast
+                                        ? $"const {macroToConst.ConstFieldTypeName} {cachedRules.Prefix}{macroName} = ({macroToConst.ConstFieldTypeName}){cppMacro.Value};"
+                                        : $"const {macroToConst.ConstFieldTypeName} {cachedRules.Prefix}{macroName} = {cppMacro.Value};");
+                                    break;
+                                case CppMacroToEnumMappingRule macroToEnum:
+                                    if (!enumToMacros.TryGetValue(macroToEnum, out var macrosAsEnumText))
+                                    {
+                                        macrosAsEnumText = new StringBuilder();
+
+                                        var enumTypeName = macroToEnum.CppEnumTypeName;
 
                                         AppendPragmaLine(cppMacroRule, macrosAsEnumText);
-                                        macrosAsEnumText.AppendLine(macroToEnum.ExplicitCast
-                                            ? $"    {cachedRules.Prefix}{enumItemName} = ({macroToEnum.CppIntegerTypeName}){cppMacro.Value},"
-                                            : $"    {cachedRules.Prefix}{enumItemName} = {cppMacro.Value},");
+                                        macrosAsEnumText.Append($"enum {enumTypeName}");
+                                        if (macroToEnum.CppIntegerTypeName != "int")
+                                        {
+                                            macrosAsEnumText.Append(" : ").Append(macroToEnum.CppIntegerTypeName);
+                                        }
 
-                                        break;
+                                        macrosAsEnumText.AppendLine();
+                                        macrosAsEnumText.AppendLine("{");
+
+                                        enumToMacros.Add(macroToEnum, macrosAsEnumText);
                                     }
+
+                                    var enumItemName = macroToEnum.CppEnumItemName;
+                                    if (regexMatch != null)
+                                    {
+                                        enumItemName = Regex.Replace(regexMatch.RegexInput, regexMatch.RegexPattern,
+                                            enumItemName);
+                                    }
+
+                                    AppendPragmaLine(cppMacroRule, macrosAsEnumText);
+                                    macrosAsEnumText.AppendLine(macroToEnum.ExplicitCast
+                                        ? $"    {cachedRules.Prefix}{enumItemName} = ({macroToEnum.CppIntegerTypeName}){cppMacro.Value},"
+                                        : $"    {cachedRules.Prefix}{enumItemName} = {cppMacro.Value},");
+
+                                    break;
                             }
                         }
                     }
