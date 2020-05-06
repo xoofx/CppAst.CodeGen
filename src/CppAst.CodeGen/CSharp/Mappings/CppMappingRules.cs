@@ -44,10 +44,8 @@ namespace CppAst.CodeGen.CSharp
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     public static class Yoyo
