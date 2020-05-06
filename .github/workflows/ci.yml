@@ -26,7 +26,7 @@ jobs:
         dotnet-version: 3.0.100
 
     - name: Build & test (Release)
-      run: dotnet test src -c Release
+      run: dotnet test src -c Release --runtime win-x64
 
     - name: Pack
       run: dotnet pack src -c Release
@@ -34,7 +34,7 @@ jobs:
     - name: Publish
       if: github.event_name == 'push'
       run: |      
-          if ( "${{github.ref}}" -match "^refs/tags/[0-9]+\.[0-9]+\.[0-9]+$" ) {
+          if ( "${{github.ref}}" -match "^refs/tags/[0-9]+\.[0-9]+\.[0-9]+" ) {
               dotnet nuget push src\${{env.PROJECT_NAME}}\bin\Release\*.nupkg -s nuget.org -k ${{secrets.NUGET_TOKEN}}
           } else {
               echo "publish is only enabled by tagging with a release tag"

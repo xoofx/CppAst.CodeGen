@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.0-alpha-001 (2 May 2020)
+- Use CppAst 0.8 with libclang 10.0
+
 ## 0.4.1 (8 Mar 2020)
 - Fix name parameters for delegate callbacks with multiple unnamed parameters
 - Fix invalid casting of enum values
