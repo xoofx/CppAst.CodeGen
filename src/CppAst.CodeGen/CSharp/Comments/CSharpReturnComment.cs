@@ -12,9 +12,9 @@ namespace CppAst.CodeGen.CSharp
         /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
-            writer.Write($"<returns>{Environment.NewLine}");
+            writer.Write("<returns>\n");
             DumpChildrenTo(writer);
-            writer.WriteLine($"{Environment.NewLine}</returns>");
+            writer.WriteLine("\n</returns>");
         }
     }
 }
