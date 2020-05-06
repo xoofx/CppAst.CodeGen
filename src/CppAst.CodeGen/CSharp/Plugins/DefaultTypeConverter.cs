@@ -76,7 +76,7 @@ namespace CppAst.CodeGen.CSharp
                                 csType = new CSharpRefType(CSharpRefKind.Ref, pointedCSharpType);
                                 break;
                             case CppTypeKind.StructOrClass:
-                                // Is the struct is an opaque definition (which can is transformed into passing the struct directly as 
+                                // Is the struct is an opaque definition (which can is transformed into passing the struct directly as
                                 // the struct contains the pointer)
                                 if (pointedCSharpType is CSharpStruct csStruct && csStruct.IsOpaque)
                                 {
@@ -122,7 +122,7 @@ namespace CppAst.CodeGen.CSharp
                             case CppTypeKind.Typedef:
                                 break;
                             case CppTypeKind.StructOrClass:
-                                // Is the struct is an opaque definition (which can is transformed into passing the struct directly as 
+                                // Is the struct is an opaque definition (which can is transformed into passing the struct directly as
                                 // the struct contains the pointer)
                                 if (pointedCSharpType is CSharpStruct csStruct && csStruct.IsOpaque)
                                 {
