@@ -68,7 +68,7 @@ namespace CppAst.CodeGen.CSharp
 
             csStruct.Members.Add(new CSharpLineElement($"public {name}({csElementTypeName} value) => this.Value = value;"));
             csStruct.Members.Add(new CSharpLineElement($"{attachedAttributes}public readonly {csElementTypeName} Value;"));
-            csStruct.Members.Add(new CSharpLineElement($"public bool Equals({name} other) =>  Value.Equals(other.Value);"));
+            csStruct.Members.Add(new CSharpLineElement($"public bool Equals({name} other) => Value.Equals(other.Value);"));
             csStruct.Members.Add(new CSharpLineElement($"public override bool Equals(object obj) => obj is {name} other && Equals(other);"));
             csStruct.Members.Add(new CSharpLineElement("public override int GetHashCode() => Value.GetHashCode();"));
             csStruct.Members.Add(new CSharpLineElement("public override string ToString() => Value.ToString();"));
