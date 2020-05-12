@@ -59,6 +59,7 @@ namespace CppAst.CodeGen.CSharp
 //     the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
+
 using System;
 ");
                     }

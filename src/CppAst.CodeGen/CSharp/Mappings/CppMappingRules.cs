@@ -18,9 +18,7 @@ namespace CppAst.CodeGen.CSharp
 
         public List<CppMacroMappingRule> MacroRules { get; }
 
-
         public List<CppElementMappingRule> StandardRules { get; }
-
 
         public void Add(Func<CppMappingRules, CppMacroMappingRule> e)
         {
@@ -46,10 +44,8 @@ namespace CppAst.CodeGen.CSharp
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     public static class Yoyo

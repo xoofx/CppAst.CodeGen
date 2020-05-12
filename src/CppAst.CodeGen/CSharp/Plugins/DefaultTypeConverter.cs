@@ -26,12 +26,9 @@ namespace CppAst.CodeGen.CSharp
             if (cppType is CppPrimitiveType cppPrimitiveType)
             {
                 // Special case for bool
-                if (cppPrimitiveType.Kind == CppPrimitiveKind.Bool)
-                {
-                    return GetBoolType(converter);
-                }
-
-                return CSharpHelper.GetCSharpPrimitive(cppPrimitiveType);
+                return cppPrimitiveType.Kind == CppPrimitiveKind.Bool
+                    ? GetBoolType(converter)
+                    : CSharpHelper.GetCSharpPrimitive(cppPrimitiveType);
             }
 
             // Check if a particular CppType has been already converted
@@ -42,7 +39,7 @@ namespace CppAst.CodeGen.CSharp
             }
 
             // Pre-decode the type by extracting any const/pointer and get the element type directly
-            DecodeSimpleType(cppType, out bool isConst, out bool isPointer, out CppType elementType);
+            DecodeSimpleType(cppType, out var isConst, out var isPointer, out var elementType);
 
             if (isPointer)
             {

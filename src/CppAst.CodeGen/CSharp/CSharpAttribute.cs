@@ -37,10 +37,7 @@ namespace CppAst.CodeGen.CSharp
         }
 
         /// <inheritdoc />
-        public override void DumpTo(CodeWriter writer)
-        {
-            DumpTo(writer, Scope);
-        }
+        public override void DumpTo(CodeWriter writer) => DumpTo(writer, Scope);
 
         public void DumpTo(CodeWriter writer, CSharpAttributeScope scopeOverride)
         {

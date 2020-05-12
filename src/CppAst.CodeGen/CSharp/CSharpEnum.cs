@@ -16,11 +16,14 @@ namespace CppAst.CodeGen.CSharp
 
         public bool IsFlags { get; set; }
 
+        /// <inheritdoc />
         protected override string DeclarationKind => "enum";
 
+        /// <inheritdoc />
         public override IEnumerable<CSharpAttribute> GetAttributes()
         {
-            foreach (var attr in base.GetAttributes()) yield return attr;
+            foreach (var attr in base.GetAttributes()) { yield return attr; }
+
             if (IsFlags)
             {
                 yield return new CSharpFreeAttribute("Flags");
