@@ -153,7 +153,7 @@ namespace CppAst.CodeGen.CSharp
                 if (csField == null && csParam == null && csMethod == null) return;
 
                 var type = csField?.FieldType ?? csParam?.ParameterType ?? csMethod?.ReturnType;
-                // Should not happen, but in case 
+                // Should not happen, but in case
                 if (type == null) return;
 
                 if (type is CSharpTypeWithAttributes cppTypeWithAttributes)
