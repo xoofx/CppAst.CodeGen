@@ -36,7 +36,7 @@ namespace CppAst.CodeGen.Tests
             codeWriter.Write("f\r\ng\n");
 
             Assert.AreEqual("abc\nd\ne\nf\ng\n", codeWriter.ToString());
-            
+
             codeWriter.Write("h\ni");
 
             Assert.AreEqual("abc\nd\ne\nf\ng\nh\ni", codeWriter.ToString());

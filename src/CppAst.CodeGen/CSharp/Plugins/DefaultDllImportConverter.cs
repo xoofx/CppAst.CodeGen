@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace CppAst.CodeGen.CSharp
@@ -17,17 +18,11 @@ namespace CppAst.CodeGen.CSharp
 
         public static void AddDefaultDllImport(CSharpConverter converter, CSharpElement element, CSharpElement context)
         {
-            if (!(element is CSharpMethod method) || (method.Modifiers & CSharpModifiers.Extern) == 0)
+            if (!(element is CSharpMethod method) ||
+                (method.Modifiers & CSharpModifiers.Extern) == 0 ||
+                method.Attributes.OfType<CSharpDllImportAttribute>().Any())
             {
                 return;
-            }
-
-            foreach (var attr in method.Attributes)
-            {
-                if (attr is CSharpDllImportAttribute)
-                {
-                    return;
-                }
             }
 
             var callingConvention = (method.CppElement as CppFunction)?.CallingConvention ?? CppCallingConvention.Default;

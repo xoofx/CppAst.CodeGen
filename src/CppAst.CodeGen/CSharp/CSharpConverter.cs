@@ -14,11 +14,10 @@ namespace CppAst.CodeGen.CSharp
     public sealed class CSharpConverter
     {
         private readonly CodeWriter _csTempWriter;
-        private readonly Dictionary<CppElement, CSharpElement> _mapCppToCSharp;
+        private readonly CSharpConverterPipeline _pipeline;
         private readonly HashSet<CppElement> _cppElementsToDiscard;
         private readonly Stack<ICSharpContainer> _currentContainers;
-
-        private readonly CSharpConverterPipeline _pipeline;
+        private readonly Dictionary<CppElement, CSharpElement> _mapCppToCSharp;
 
         private CSharpConverter(CSharpConverterOptions options)
         {
@@ -661,7 +660,7 @@ namespace CppAst.CodeGen.CSharp
             throw new InvalidOperationException($"Unable to find or create a CSharp container for the element `{element}`");
         }
 
-        public string ConvertExpression(CppExpression expression, CSharpElement context, CSharpType expressionType)
+        public string ConvertExpression(CppExpression expression)
         {
             return expression.ToString();
         }

@@ -53,7 +53,6 @@ namespace CppAst.CodeGen.CSharp
         LPUTF8Str = 0x30,   // UTF8 string
     }
 
-
     public class CSharpMarshalAttribute : CSharpAttribute
     {
         public CSharpMarshalAttribute(CSharpUnmanagedKind unmanagedType)

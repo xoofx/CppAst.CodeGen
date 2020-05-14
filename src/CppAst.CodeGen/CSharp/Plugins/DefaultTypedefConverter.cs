@@ -78,7 +78,6 @@ namespace CppAst.CodeGen.CSharp
             csStruct.Members.Add(new CSharpLineElement($"public static bool operator !=({name} left, {name} right) => !left.Equals(right);"));
 
             return csStruct;
-
         }
     }
 }

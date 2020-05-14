@@ -186,7 +186,7 @@ namespace CppAst.CodeGen.CSharp
                 }
                 else
                 {
-                    csField.InitValue = converter.ConvertExpression(cppField.InitExpression, context, csField.FieldType);
+                    csField.InitValue = converter.ConvertExpression(cppField.InitExpression);
                 }
             }
 

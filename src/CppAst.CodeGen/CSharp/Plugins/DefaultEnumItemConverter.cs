@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
+
 namespace CppAst.CodeGen.CSharp
 {
     public class DefaultEnumItemConverter : ICSharpConverterPlugin
@@ -27,7 +28,7 @@ namespace CppAst.CodeGen.CSharp
             // Process any enum item value expression (e.g ENUM_ITEM = 1 << 2)
             if (cppEnumItem.ValueExpression != null)
             {
-                var integerValue = converter.ConvertExpression(cppEnumItem.ValueExpression, csEnumItem, csEnum.IntegerBaseType);
+                var integerValue = converter.ConvertExpression(cppEnumItem.ValueExpression);
 
                 csEnumItem.Value = $"unchecked(({csEnum.IntegerBaseType}){(string.IsNullOrEmpty(integerValue) ? cppEnumItem.Value + "" : integerValue)})";
 
