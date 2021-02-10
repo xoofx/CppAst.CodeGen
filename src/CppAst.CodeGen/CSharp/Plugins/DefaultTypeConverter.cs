@@ -140,7 +140,7 @@ namespace CppAst.CodeGen.CSharp
                     }
 
                     // Any pointers that is not decoded to a simpler form is exposed as an IntPtr
-                    csType = csType ?? CSharpPrimitiveType.IntPtr;
+                    csType = csType ?? CSharpPrimitiveType.IntPtr();
                 }
             }
             else
@@ -159,7 +159,7 @@ namespace CppAst.CodeGen.CSharp
                         }
                         else if (arrayType.Size > 0 && (arrayElementType.Equals(CppPrimitiveType.Char) || arrayElementType.Equals(CppPrimitiveType.WChar)))
                         {
-                            var fixedStrType = new CSharpTypeWithAttributes(CSharpPrimitiveType.String);
+                            var fixedStrType = new CSharpTypeWithAttributes(CSharpPrimitiveType.String());
                             fixedStrType.Attributes.Add(new CSharpMarshalAttribute(CSharpUnmanagedKind.ByValTStr) { SizeConst = arrayType.Size });
                             csType = fixedStrType;
                         }
@@ -247,10 +247,10 @@ namespace CppAst.CodeGen.CSharp
 
         public static CSharpType GetBoolType(CSharpConverter converter)
         {
-            CSharpType boolType = CSharpPrimitiveType.Bool;
+            CSharpType boolType = CSharpPrimitiveType.Bool();
             if (converter.Options.DefaultMarshalForBool != null)
             {
-                var boolTypeWithMarshal = new CSharpTypeWithAttributes(CSharpPrimitiveType.Bool);
+                var boolTypeWithMarshal = new CSharpTypeWithAttributes(boolType);
                 boolTypeWithMarshal.Attributes.Add(converter.Options.DefaultMarshalForBool.Clone());
                 boolType = boolTypeWithMarshal;
             }
@@ -259,10 +259,10 @@ namespace CppAst.CodeGen.CSharp
 
         public static CSharpType GetStringType(CSharpConverter converter)
         {
-            CSharpType strType = CSharpPrimitiveType.String;
+            CSharpType strType = CSharpPrimitiveType.String();
             if (converter.Options.DefaultMarshalForString != null)
             {
-                var boolTypeWithMarshal = new CSharpTypeWithAttributes(CSharpPrimitiveType.String);
+                var boolTypeWithMarshal = new CSharpTypeWithAttributes(strType);
                 boolTypeWithMarshal.Attributes.Add(converter.Options.DefaultMarshalForString.Clone());
                 strType = boolTypeWithMarshal;
             }

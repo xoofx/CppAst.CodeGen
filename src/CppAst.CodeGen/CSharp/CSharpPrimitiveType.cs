@@ -9,24 +9,24 @@ namespace CppAst.CodeGen.CSharp
 {
     public class CSharpPrimitiveType : CSharpType
     {
-        public static readonly CSharpPrimitiveType Void = new CSharpPrimitiveType(CSharpPrimitiveKind.Void);
-        public static readonly CSharpPrimitiveType Bool = new CSharpPrimitiveType(CSharpPrimitiveKind.Bool);
-        public static readonly CSharpPrimitiveType Char = new CSharpPrimitiveType(CSharpPrimitiveKind.Char);
-        public static readonly CSharpPrimitiveType SByte = new CSharpPrimitiveType(CSharpPrimitiveKind.SByte);
-        public static readonly CSharpPrimitiveType Byte = new CSharpPrimitiveType(CSharpPrimitiveKind.Byte);
-        public static readonly CSharpPrimitiveType Short = new CSharpPrimitiveType(CSharpPrimitiveKind.Short);
-        public static readonly CSharpPrimitiveType UShort = new CSharpPrimitiveType(CSharpPrimitiveKind.UShort);
-        public static readonly CSharpPrimitiveType Int = new CSharpPrimitiveType(CSharpPrimitiveKind.Int);
-        public static readonly CSharpPrimitiveType UInt = new CSharpPrimitiveType(CSharpPrimitiveKind.UInt);
-        public static readonly CSharpPrimitiveType Long = new CSharpPrimitiveType(CSharpPrimitiveKind.Long);
-        public static readonly CSharpPrimitiveType ULong = new CSharpPrimitiveType(CSharpPrimitiveKind.ULong);
-        public static readonly CSharpPrimitiveType Float = new CSharpPrimitiveType(CSharpPrimitiveKind.Float);
-        public static readonly CSharpPrimitiveType Double = new CSharpPrimitiveType(CSharpPrimitiveKind.Double);
-        public static readonly CSharpPrimitiveType Object = new CSharpPrimitiveType(CSharpPrimitiveKind.Object);
-        public static readonly CSharpPrimitiveType String = new CSharpPrimitiveType(CSharpPrimitiveKind.String);
-        public static readonly CSharpPrimitiveType IntPtr = new CSharpPrimitiveType(CSharpPrimitiveKind.IntPtr);
+        public static CSharpPrimitiveType Void() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Void);
+        public static CSharpPrimitiveType Bool() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Bool);
+        public static CSharpPrimitiveType Char() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Char);
+        public static CSharpPrimitiveType SByte() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.SByte);
+        public static CSharpPrimitiveType Byte() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Byte);
+        public static CSharpPrimitiveType Short() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Short);
+        public static CSharpPrimitiveType UShort() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.UShort);
+        public static CSharpPrimitiveType Int() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Int);
+        public static CSharpPrimitiveType UInt() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.UInt);
+        public static CSharpPrimitiveType Long() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Long);
+        public static CSharpPrimitiveType ULong() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.ULong);
+        public static CSharpPrimitiveType Float() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Float);
+        public static CSharpPrimitiveType Double() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Double);
+        public static CSharpPrimitiveType Object() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Object);
+        public static CSharpPrimitiveType String() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.String);
+        public static CSharpPrimitiveType IntPtr() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.IntPtr);
 
-        private CSharpPrimitiveType(CSharpPrimitiveKind kind)
+        public CSharpPrimitiveType(CSharpPrimitiveKind kind)
         {
             Kind = kind;
         }

@@ -59,43 +59,43 @@ namespace CppAst.CodeGen.CSharp
                     switch (canonicalType.Kind)
                     {
                         case CppPrimitiveKind.Bool:
-                            csBitFieldStorage.FieldType = CSharpPrimitiveType.Byte;
+                            csBitFieldStorage.FieldType = CSharpPrimitiveType.Byte();
                             csBitFieldStorage.MaxBitWidth = 8;
                             break;
                         case CppPrimitiveKind.WChar:
-                            csBitFieldStorage.FieldType = CSharpPrimitiveType.UShort;
+                            csBitFieldStorage.FieldType = CSharpPrimitiveType.UShort();
                             csBitFieldStorage.MaxBitWidth = 16;
                             break;
                         case CppPrimitiveKind.Char:
-                            csBitFieldStorage.FieldType = CSharpPrimitiveType.Byte;
+                            csBitFieldStorage.FieldType = CSharpPrimitiveType.Byte();
                             csBitFieldStorage.MaxBitWidth = 8;
                             break;
                         case CppPrimitiveKind.Short:
-                            csBitFieldStorage.FieldType = CSharpPrimitiveType.Short;
+                            csBitFieldStorage.FieldType = CSharpPrimitiveType.Short();
                             csBitFieldStorage.MaxBitWidth = 16;
                             break;
                         case CppPrimitiveKind.Int:
-                            csBitFieldStorage.FieldType = CSharpPrimitiveType.Int;
+                            csBitFieldStorage.FieldType = CSharpPrimitiveType.Int();
                             csBitFieldStorage.MaxBitWidth = 32;
                             break;
                         case CppPrimitiveKind.LongLong:
-                            csBitFieldStorage.FieldType = CSharpPrimitiveType.Long;
+                            csBitFieldStorage.FieldType = CSharpPrimitiveType.Long();
                             csBitFieldStorage.MaxBitWidth = 64;
                             break;
                         case CppPrimitiveKind.UnsignedChar:
-                            csBitFieldStorage.FieldType = CSharpPrimitiveType.Byte;
+                            csBitFieldStorage.FieldType = CSharpPrimitiveType.Byte();
                             csBitFieldStorage.MaxBitWidth = 8;
                             break;
                         case CppPrimitiveKind.UnsignedShort:
-                            csBitFieldStorage.FieldType = CSharpPrimitiveType.UShort;
+                            csBitFieldStorage.FieldType = CSharpPrimitiveType.UShort();
                             csBitFieldStorage.MaxBitWidth = 16;
                             break;
                         case CppPrimitiveKind.UnsignedInt:
-                            csBitFieldStorage.FieldType = CSharpPrimitiveType.UInt;
+                            csBitFieldStorage.FieldType = CSharpPrimitiveType.UInt();
                             csBitFieldStorage.MaxBitWidth = 32;
                             break;
                         case CppPrimitiveKind.UnsignedLongLong:
-                            csBitFieldStorage.FieldType = CSharpPrimitiveType.ULong;
+                            csBitFieldStorage.FieldType = CSharpPrimitiveType.ULong();
                             csBitFieldStorage.MaxBitWidth = 64;
                             break;
                         default:

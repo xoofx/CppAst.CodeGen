@@ -325,18 +325,19 @@ namespace CppAst.CodeGen.CSharp
             if (cppType == null) throw new ArgumentNullException(nameof(cppType));
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            CSharpType csType;
+            CSharpType csType = null;
             for (var i = _pipeline.GetCSharpTypeResolvers.Count - 1; i >= 0; i--)
             {
                 var getCSharpTypeDelegate = _pipeline.GetCSharpTypeResolvers[i];
                 csType = getCSharpTypeDelegate(this, cppType, context, nested);
                 if (csType != null)
                 {
-                    return csType;
+                    break;
                 }
             }
-
-            csType = new CSharpFreeType($"unsupported_type /* {cppType} */");
+            
+            csType ??= new CSharpFreeType($"unsupported_type /* {cppType} */");
+            csType.CppElement ??= cppType;
             return csType;
         }
 

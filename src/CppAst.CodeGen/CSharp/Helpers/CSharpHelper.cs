@@ -155,33 +155,33 @@ namespace CppAst.CodeGen.CSharp
             switch (cppType.Kind)
             {
                 case CppPrimitiveKind.Void:
-                    return CSharpPrimitiveType.Void;
+                    return CSharpPrimitiveType.Void();
                 case CppPrimitiveKind.Bool:
-                    return CSharpPrimitiveType.Bool;
+                    return CSharpPrimitiveType.Bool();
                 case CppPrimitiveKind.WChar:
-                    return CSharpPrimitiveType.Char;
+                    return CSharpPrimitiveType.Char();
                 case CppPrimitiveKind.Char:
-                    return CSharpPrimitiveType.SByte;
+                    return CSharpPrimitiveType.SByte();
                 case CppPrimitiveKind.Short:
-                    return CSharpPrimitiveType.Short;
+                    return CSharpPrimitiveType.Short();
                 case CppPrimitiveKind.Int:
-                    return CSharpPrimitiveType.Int;
+                    return CSharpPrimitiveType.Int();
                 case CppPrimitiveKind.LongLong:
-                    return CSharpPrimitiveType.Long;
+                    return CSharpPrimitiveType.Long();
                 case CppPrimitiveKind.UnsignedChar:
-                    return CSharpPrimitiveType.Byte;
+                    return CSharpPrimitiveType.Byte();
                 case CppPrimitiveKind.UnsignedShort:
-                    return CSharpPrimitiveType.UShort;
+                    return CSharpPrimitiveType.UShort();
                 case CppPrimitiveKind.UnsignedInt:
-                    return CSharpPrimitiveType.UInt;
+                    return CSharpPrimitiveType.UInt();
                 case CppPrimitiveKind.UnsignedLongLong:
-                    return CSharpPrimitiveType.ULong;
+                    return CSharpPrimitiveType.ULong();
                 case CppPrimitiveKind.Float:
-                    return CSharpPrimitiveType.Float;
+                    return CSharpPrimitiveType.Float();
                 case CppPrimitiveKind.Double:
-                    return CSharpPrimitiveType.Double;
+                    return CSharpPrimitiveType.Double();
                 case CppPrimitiveKind.LongDouble:
-                    return CSharpPrimitiveType.Double;
+                    return CSharpPrimitiveType.Double();
                 default:
                     throw new ArgumentOutOfRangeException($"The kind {cppType.Kind} is not supported");
             }
