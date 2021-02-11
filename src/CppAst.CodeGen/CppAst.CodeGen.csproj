@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="CppAst" Version="0.8.0-alpha-001" />
-    <PackageReference Include="Zio" Version="0.8.0" />
+    <PackageReference Include="Zio" Version="0.11.0" />
   </ItemGroup>
 
   <ItemGroup>
