@@ -15,7 +15,18 @@ namespace CppAst.CodeGen.CSharp
             Children = new List<CSharpComment>();
         }
 
-        public List<CSharpComment> Children { get; }
+        public List<CSharpComment> Children { get; private set; }
+
+        public virtual CSharpComment Clone()
+        {
+            var copy = (CSharpComment)MemberwiseClone();
+            copy.Children = new List<CSharpComment>();
+            foreach (var child in Children)
+            {
+                copy.Children.Add(child.Clone());
+            }
+            return copy;
+        }
 
         public string ChildrenToFullString()
         {

@@ -19,6 +19,12 @@ namespace CppAst.CodeGen.CSharp
 
         public string Value { get; set; }
 
+        public virtual CSharpXmlAttribute Clone()
+        {
+            var attr = (CSharpXmlAttribute) MemberwiseClone();
+            return attr;
+        }
+
         public void DumpTo(CodeWriter writer)
         {
             writer.Write(Name).Write("=\"").Write(Value).Write("\"");

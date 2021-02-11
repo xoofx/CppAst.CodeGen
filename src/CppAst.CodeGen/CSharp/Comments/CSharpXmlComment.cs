@@ -22,7 +22,20 @@ namespace CppAst.CodeGen.CSharp
 
         public bool IsSelfClosing { get; set; }
 
-        public List<CSharpXmlAttribute> Attributes { get; }
+        public List<CSharpXmlAttribute> Attributes { get; private set; }
+
+        public override CSharpComment Clone()
+        {
+            var xmlComment = (CSharpXmlComment)base.Clone();
+            xmlComment.Attributes = new List<CSharpXmlAttribute>();
+            foreach (var attr in Attributes)
+            {
+                xmlComment.Attributes.Add(attr.Clone());
+            }
+
+            return xmlComment;
+        }
+
         public override void DumpTo(CodeWriter writer)
         {
             writer.Write("<").Write(TagName);
@@ -48,11 +61,11 @@ namespace CppAst.CodeGen.CSharp
                     writer.WriteLine();
                 }
                 writer.Write("</").Write(TagName).Write(">");
-            }
 
-            if (!IsInline)
-            {
-                writer.WriteLine();
+                if (!IsInline)
+                {
+                    writer.WriteLine();
+                }
             }
         }
     }

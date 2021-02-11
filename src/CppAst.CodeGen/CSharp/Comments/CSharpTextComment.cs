@@ -15,12 +15,12 @@ namespace CppAst.CodeGen.CSharp
 
         public string Text { get; set; }
 
-        public bool IsRawText { get; set; }
+        public bool IsHtmlText { get; set; }
 
         public override void DumpTo(CodeWriter writer)
         {
             if (Text == null) return;
-            writer.Write(Text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;"));
+            writer.Write(IsHtmlText ? Text : Text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;"));
         }
     }
 }
