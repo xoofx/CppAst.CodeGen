@@ -162,12 +162,7 @@ namespace CppAst.CodeGen.Common
 
                 if (_hasNewLine)
                 {
-                    if (!string.IsNullOrWhiteSpace(normalizedLineText))
-                    {
-                        WriteIndent();
-                    }
-
-                    WritePrefix();
+                    WriteIndentAndPrefix();
                     _hasNewLine = false;
                 }
 
