@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0-alpha-001
+- Change CSharpPrimitiveType constructors to always create a new instance
+- Fix issue with new lines in comments
+- Add CSharpGroupComment and CSharpComment.Clone()
+
 ## 0.5.0-alpha-001 (2 May 2020)
 - Use CppAst 0.8 with libclang 10.0
 
