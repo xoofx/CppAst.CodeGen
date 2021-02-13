@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.0-alpha-002
+- Add CSharpFreeMember
+
 ## 0.6.0-alpha-001
 - Change CSharpPrimitiveType constructors to always create a new instance
 - Fix issue with new lines in comments
