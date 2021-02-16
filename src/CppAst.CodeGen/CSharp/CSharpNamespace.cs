@@ -7,7 +7,7 @@ using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
 {
-    public class CSharpNamespace : CSharpElement, ICSharpContainer
+    public class CSharpNamespace : CSharpElement, ICSharpContainer, ICSharpMember
     {
         public CSharpNamespace(string name)
         {

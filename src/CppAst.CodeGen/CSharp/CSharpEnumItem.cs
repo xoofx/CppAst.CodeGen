@@ -8,7 +8,7 @@ using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
 {
-    public class CSharpEnumItem : CSharpElement, ICSharpWithComment, ICSharpAttributesProvider
+    public class CSharpEnumItem : CSharpElement, ICSharpWithComment, ICSharpAttributesProvider, ICSharpMember
     {
         public CSharpEnumItem(string name, string value = null)
         {
