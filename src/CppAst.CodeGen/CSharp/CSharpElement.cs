@@ -9,9 +9,9 @@ namespace CppAst.CodeGen.CSharp
 {
     public abstract class CSharpElement : ICSharpElement
     {
-        public CppElement CppElement { get; internal set; }
+        public CppElement CppElement { get; set; }
 
-        public CSharpElement Parent { get; internal set; }
+        public CSharpElement Parent { get; set; }
 
         public abstract void DumpTo(CodeWriter writer);
 
