@@ -8,7 +8,7 @@ using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
 {
-    public class CSharpProperty : CSharpElement, ICSharpWithComment, ICSharpAttributesProvider, ICSharpElementWithVisibility
+    public class CSharpProperty : CSharpElement, ICSharpWithComment, ICSharpAttributesProvider, ICSharpElementWithVisibility, ICSharpMember
     {
         public CSharpProperty(string name)
         {
