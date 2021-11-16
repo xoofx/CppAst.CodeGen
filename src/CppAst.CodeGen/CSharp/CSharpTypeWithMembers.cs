@@ -29,6 +29,11 @@ namespace CppAst.CodeGen.CSharp
 
         public List<CSharpType> BaseTypes { get; }
 
+        /// <summary>
+        /// Gets or sets a boolean indicating if this type is a record.
+        /// </summary>
+        public bool IsRecord { get; set; }
+
         /// <inheritdoc />
         public CSharpContainerList<CSharpElement> Members { get; }
 
@@ -58,6 +63,10 @@ namespace CppAst.CodeGen.CSharp
             Visibility.DumpTo(writer);
             Modifiers.DumpTo(writer);
 
+            if (IsRecord)
+            {
+                writer.Write("record ");
+            }
             writer.Write(DeclarationKind);
             writer.Write(" ");
 
