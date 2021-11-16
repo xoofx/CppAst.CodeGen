@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <VersionPrefix>0.6.0</VersionPrefix>
-    <VersionSuffix>alpha</VersionSuffix>
-    <BuildNumber>002</BuildNumber>
+    <VersionPrefix>0.7.0</VersionPrefix>
+    <!--<VersionSuffix>alpha</VersionSuffix>
+    <BuildNumber>002</BuildNumber>-->
     <PackageId>CppAst.CodeGen</PackageId>
     <Description>CppAst.CodeGen is an extensible P/Invoke Code Generator from C++ to C# for .NET</Description>
     <Copyright>Alexandre Mutel</Copyright>

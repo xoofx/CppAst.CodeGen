@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.7.0
+- Add CSharpStruct.IsRecord to allow to transform struct to record structs.
+
 ## 0.6.0-alpha-002
 - Add CSharpFreeMember
 
