@@ -1,12 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29001.49
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{EDFB7701-AA1B-434F-A2F9-5DC590CEA517}"
 	ProjectSection(SolutionItems) = preProject
+		..\.gitignore = ..\.gitignore
 		..\changelog.md = ..\changelog.md
 		..\.github\workflows\ci.yml = ..\.github\workflows\ci.yml
+		dotnet-releaser.toml = dotnet-releaser.toml
 		global.json = global.json
 		..\license.txt = ..\license.txt
 		..\readme.md = ..\readme.md

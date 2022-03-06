@@ -1,5 +1,7 @@
 # Changelog
 
+> This changelog is no longer used for newer version. Please visits https://github.com/xoofx/CppAst.CodeGen/releases
+
 ## 0.7.0
 - Add CSharpStruct.IsRecord to allow to transform struct to record structs.
 
