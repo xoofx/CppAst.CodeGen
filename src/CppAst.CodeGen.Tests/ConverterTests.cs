@@ -68,7 +68,8 @@ struct {
 #endif
 #define MYNAME_X 1
 #define MYNAME_Y 2
-#define MYNAME_XYWZ 3
+#define MYNAME_XYWZ MYNAME_X
+#define MYNAME_XY (MYNAME_X|MYNAME_Y)
 
 EXPORT_API void function0(int x);
             ", options);
