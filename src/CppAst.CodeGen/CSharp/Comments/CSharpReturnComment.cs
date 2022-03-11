@@ -6,13 +6,17 @@ using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
 {
-    public class CSharpReturnComment : CSharpComment
+    public class CSharpReturnComment : CSharpXmlComment
     {
+        public CSharpReturnComment() : base("returns")
+        {
+            IsInline = true;
+        }
+
         public override void DumpTo(CodeWriter writer)
         {
-            writer.Write("<returns>");
-            DumpChildrenTo(writer);
-            writer.WriteLine("</returns>");
+            base.DumpTo(writer);
+            writer.WriteLine();
         }
     }
 }
