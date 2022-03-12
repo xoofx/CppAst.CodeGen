@@ -7,21 +7,19 @@ using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
 {
-    public class CSharpParamComment : CSharpComment
+    public class CSharpParamComment : CSharpXmlComment
     {
-        public CSharpParamComment(string name)
+        public CSharpParamComment(string name) : base("param")
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Attributes.Add(new CSharpXmlAttribute("name", name ?? throw new ArgumentNullException(nameof(name))));
+            IsInline = true;
         }
-
-        public string Name { get; set; }
 
         /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
-            writer.Write("<param name=\"").Write(Name).Write("\">");
-            DumpChildrenTo(writer);
-            writer.WriteLine("</param>");
+            base.DumpTo(writer);
+            writer.WriteLine();
         }
     }
 }
