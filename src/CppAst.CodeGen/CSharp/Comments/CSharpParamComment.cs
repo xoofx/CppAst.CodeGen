@@ -9,10 +9,22 @@ namespace CppAst.CodeGen.CSharp
 {
     public class CSharpParamComment : CSharpXmlComment
     {
+        private readonly CSharpXmlAttribute _nameAttribute;
+        
         public CSharpParamComment(string name) : base("param")
         {
-            Attributes.Add(new CSharpXmlAttribute("name", name ?? throw new ArgumentNullException(nameof(name))));
+            _nameAttribute = new CSharpXmlAttribute("name", name ?? throw new ArgumentNullException(nameof(name)));
+            Attributes.Add(_nameAttribute);
             IsInline = true;
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the parameter.
+        /// </summary>
+        public string Name
+        {
+            get => _nameAttribute.Value;
+            set => _nameAttribute.Value = value;
         }
 
         /// <inheritdoc />
