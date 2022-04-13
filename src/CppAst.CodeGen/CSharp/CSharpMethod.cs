@@ -9,7 +9,7 @@ using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
 {
-    public class CSharpMethod : CSharpElement, ICSharpAttributesProvider, ICSharpElementWithVisibility, ICSharpMember
+    public class CSharpMethod : CSharpElement, ICSharpWithComment, ICSharpAttributesProvider, ICSharpElementWithVisibility, ICSharpMember
     {
         public CSharpMethod()
         {
