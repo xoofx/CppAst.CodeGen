@@ -32,19 +32,24 @@ namespace CppAst.CodeGen.CSharp
             // If:
             // - the typedef is from system includes and the underlying type is not a pointer
             // - or the typedef mode is "no-wrap" and is not in the whitelist
+            // - or the typedef is a typedef of an opaque struct
+            // - or the typedef is a typedef of void
             // then we bypass entirely the typedef and return immediately the element type
-            bool is_size_t = isFromSystemIncludes && cppTypedef.Name == "size_t";
-            if (noWrap || (isFromSystemIncludes && elementType.TypeKind != CppTypeKind.Pointer && !is_size_t))
-            {
-                return csElementType;
-            }
+            var is_size_t = isFromSystemIncludes && cppTypedef.Name == "size_t";
 
-            // Otherwise we generate a small wrapper struct
+            var attachedAttributes = string.Empty;
+            var csElementTypeName = is_size_t ? "IntPtr" : converter.ConvertTypeReferenceToString(csElementType, out attachedAttributes);
+
             var csStructName = converter.GetCSharpName(cppTypedef, context);
             var csStruct = new CSharpStruct(csStructName)
             {
                 CppElement = cppTypedef,
             };
+
+            if (noWrap || (isFromSystemIncludes && elementType.TypeKind != CppTypeKind.Pointer && !is_size_t) || csStruct.IsOpaque || csElementTypeName == "void")
+            {
+                return csElementType;
+            }
 
             var container = converter.GetCSharpContainer(cppTypedef, context);
             converter.ApplyDefaultVisibility(csStruct, container);
@@ -63,8 +68,6 @@ namespace CppAst.CodeGen.CSharp
             csStruct.BaseTypes.Add(new CSharpFreeType($"IEquatable<{name}>"));
 
             // Dump the type name and attached attributes for the element type
-            var attachedAttributes = string.Empty;
-            var csElementTypeName = is_size_t ? "IntPtr" : converter.ConvertTypeReferenceToString(csElementType, out attachedAttributes);
 
             csStruct.Members.Add(new CSharpLineElement($"public {name}({csElementTypeName} value) => this.Value = value;"));
             csStruct.Members.Add(new CSharpLineElement($"{attachedAttributes}public readonly {csElementTypeName} Value;"));

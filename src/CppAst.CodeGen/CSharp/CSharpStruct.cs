@@ -14,6 +14,19 @@ namespace CppAst.CodeGen.CSharp
         /// <inheritdoc />
         protected override string DeclarationKind => "struct";
 
-        public bool IsOpaque => CppElement is CppClass cppClass && !cppClass.IsDefinition;
+        public bool IsOpaque
+        {
+            get
+            {
+                var cppElement = CppElement;
+
+                while (cppElement is CppTypedef cppTypedef)
+                {
+                    cppElement = cppTypedef.ElementType;
+                }
+
+                return cppElement is CppClass cppClass && !cppClass.IsDefinition;
+            }
+        }
     }
 }
