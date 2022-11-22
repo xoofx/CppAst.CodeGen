@@ -1,5 +1,6 @@
 using System;
 using CppAst.CodeGen.Common;
+using CppAst.CodeGen.CSharp;
 using NUnit.Framework;
 using Zio.FileSystems;
 
@@ -171,6 +172,30 @@ namespace CppAst.CodeGen.Tests
             codeWriter.PopPrefix();
             codeWriter.WriteLine("b");
             Assert.AreEqual("    /// a\n    //b\n", codeWriter.ToString());
+        }
+
+        [Test]
+        public void TestFunctionPointer()
+        {
+            var codeWriter = GetNewCodeWriter();
+            var functionPointer = new CSharpFunctionPointer(CSharpPrimitiveType.Void());
+            functionPointer.IsUnmanaged = true;
+            functionPointer.UnmanagedCallingConvention.Add("Cdecl");
+            functionPointer.Parameters.Add(CSharpPrimitiveType.Int());
+            functionPointer.Parameters.Add(CSharpPrimitiveType.Bool());
+            functionPointer.DumpTo(codeWriter);
+
+            Assert.AreEqual("delegate*unmanaged[Cdecl]<int, bool, void>", codeWriter.ToString());
+
+            codeWriter = GetNewCodeWriter();
+            functionPointer.IsUnmanaged = false;
+            functionPointer.DumpTo(codeWriter);
+            Assert.AreEqual("delegate*<int, bool, void>", codeWriter.ToString());
+
+            codeWriter = GetNewCodeWriter();
+            functionPointer.Parameters.Clear();
+            functionPointer.DumpTo(codeWriter);
+            Assert.AreEqual("delegate*<void>", codeWriter.ToString());
         }
     }
 }

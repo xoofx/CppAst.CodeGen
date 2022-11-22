@@ -35,6 +35,20 @@ namespace CppAst.CodeGen.CSharp
 
         public List<CSharpParameter> Parameters { get; }
 
+        /// <summary>
+        /// Creates a function pointer that is matching the signature of the method.
+        /// </summary>
+        /// <returns></returns>
+        public CSharpFunctionPointer ToFunctionPointer()
+        {
+            var functionPointer = new CSharpFunctionPointer(ReturnType);
+            foreach (var parameter in Parameters)
+            {
+                functionPointer.Parameters.Add(parameter.ParameterType);
+            }
+            return functionPointer;
+        }
+
         public Action<CodeWriter, CSharpElement> Body { get; set; }
 
         /// <inheritdoc />
