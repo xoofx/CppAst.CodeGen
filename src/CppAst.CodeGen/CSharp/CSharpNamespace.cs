@@ -19,6 +19,11 @@ namespace CppAst.CodeGen.CSharp
 
         /// <inheritdoc />
         public CSharpContainerList<CSharpElement> Members { get; }
+        
+        /// <summary>
+        /// Gets or sets a boolean indicating whether this namespace is using the file scoped syntax.
+        /// </summary>
+        public bool IsFileScoped { get; set; }
 
         /// <inheritdoc />
         ICSharpContainer ICSharpContainer.Parent => Parent as ICSharpContainer;
@@ -39,12 +44,21 @@ namespace CppAst.CodeGen.CSharp
             writer.Write(Name);
             if (writer.Mode == CodeWriterMode.Full)
             {
-                writer.WriteLine();
-                writer.OpenBraceBlock();
+                if (IsFileScoped)
                 {
+                    writer.WriteLine(";");
+                    writer.WriteLine();
                     this.DumpMembersTo(writer);
                 }
-                writer.CloseBraceBlock();
+                else
+                {
+                    writer.WriteLine();
+                    writer.OpenBraceBlock();
+                    {
+                        this.DumpMembersTo(writer);
+                    }
+                    writer.CloseBraceBlock();
+                }
             }
             else
             {
