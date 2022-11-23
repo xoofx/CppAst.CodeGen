@@ -16,6 +16,7 @@ namespace CppAst.CodeGen.CSharp
             Members = new CSharpContainerList<CSharpElement>(this);
             BaseTypes = new List<CSharpType>();
             Visibility = CSharpVisibility.Public;
+            RecordParameters = new List<CSharpParameter>();
         }
 
         public CSharpComment Comment { get; set; }
@@ -33,6 +34,11 @@ namespace CppAst.CodeGen.CSharp
         /// Gets or sets a boolean indicating if this type is a record.
         /// </summary>
         public bool IsRecord { get; set; }
+
+        /// <summary>
+        /// Record Parameters if <see cref="IsRecord"/> is true.
+        /// </summary>
+        public List<CSharpParameter> RecordParameters { get; }
 
         /// <inheritdoc />
         public CSharpContainerList<CSharpElement> Members { get; }
@@ -72,6 +78,18 @@ namespace CppAst.CodeGen.CSharp
 
             writer.Write(Name);
 
+            if (IsRecord && RecordParameters.Count > 0)
+            {
+                writer.Write("(");
+                for (var i = 0; i < RecordParameters.Count; i++)
+                {
+                    var parameter = RecordParameters[i];
+                    if (i > 0) writer.Write(", ");
+                    parameter.DumpTo(writer);
+                }
+                writer.Write(")");
+            }
+
             if (BaseTypes.Count > 0)
             {
                 writer.Write(" : ");
@@ -82,17 +100,25 @@ namespace CppAst.CodeGen.CSharp
                     baseType.DumpReferenceTo(writer);
                 }
             }
-            writer.WriteLine();
 
-            if (mode == CodeWriterMode.Full)
+            if (IsRecord && Members.Count == 0)
             {
-                writer.OpenBraceBlock();
-                this.DumpMembersTo(writer);
-                writer.CloseBraceBlock();
+                writer.WriteLine(";");
             }
             else
             {
-                writer.WriteLine(" { ... }");
+                writer.WriteLine();
+
+                if (mode == CodeWriterMode.Full)
+                {
+                    writer.OpenBraceBlock();
+                    this.DumpMembersTo(writer);
+                    writer.CloseBraceBlock();
+                }
+                else
+                {
+                    writer.WriteLine(" { ... }");
+                }
             }
         }
     }
