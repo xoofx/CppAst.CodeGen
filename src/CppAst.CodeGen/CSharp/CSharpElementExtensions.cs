@@ -111,10 +111,15 @@ namespace CppAst.CodeGen.CSharp
 
         public static void DumpAttributesTo(this ICSharpAttributesProvider element, CodeWriter writer)
         {
+            element.GetAttributes().DumpAttributesTo(writer);
+        }
+
+        public static void DumpAttributesTo(this IEnumerable<CSharpAttribute> attributes, CodeWriter writer)
+        {
             var mode = writer.Mode;
             if (mode == CodeWriterMode.Simple) return;
 
-            foreach (var attr in element.GetAttributes())
+            foreach (var attr in attributes)
             {
                 writer.Write("[");
                 attr.DumpTo(writer);

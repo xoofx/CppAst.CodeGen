@@ -14,6 +14,8 @@ namespace CppAst.CodeGen.CSharp
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Attributes = new List<CSharpAttribute>();
+            AttributesForGet = new List<CSharpAttribute>();
+            AttributesForSet = new List<CSharpAttribute>();
         }
 
         /// <inheritdoc />
@@ -27,6 +29,10 @@ namespace CppAst.CodeGen.CSharp
         public CSharpModifiers Modifiers { get; set; }
 
         public CSharpType ReturnType { get; set; }
+
+        public List<CSharpAttribute> AttributesForGet { get; }
+
+        public List<CSharpAttribute> AttributesForSet { get; }
 
         public string Name { get; set; }
 
@@ -70,6 +76,7 @@ namespace CppAst.CodeGen.CSharp
                     {
                         if (GetBody != null)
                         {
+                            AttributesForGet.DumpAttributesTo(writer);
                             writer.WriteLine("get");
                             writer.OpenBraceBlock();
                             GetBody(writer, this);
@@ -77,6 +84,7 @@ namespace CppAst.CodeGen.CSharp
                         }
                         if (SetBody != null)
                         {
+                            AttributesForSet.DumpAttributesTo(writer);
                             writer.WriteLine("set");
                             writer.OpenBraceBlock();
                             SetBody(writer, this);
