@@ -64,7 +64,7 @@ namespace CppAst.CodeGen.CSharp
             {
                 var parameterType = Parameters[i];
                 if (i > 0) writer.Write(", ");
-                parameterType.DumpTo(writer);
+                parameterType.DumpReferenceTo(writer);
             }
             if (Parameters.Count > 0) writer.Write(", ");
 
