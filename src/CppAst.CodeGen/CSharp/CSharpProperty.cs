@@ -38,6 +38,8 @@ namespace CppAst.CodeGen.CSharp
 
         public CSharpField LinkedField { get; set; }
 
+        public string GetBodyInlined { get; set; }
+
         public Action<CodeWriter, CSharpElement> GetBody { get; set; }
 
         public Action<CodeWriter, CSharpElement> SetBody { get; set; }
@@ -57,7 +59,11 @@ namespace CppAst.CodeGen.CSharp
             writer.Write(" ");
             writer.Write(Name);
 
-            if (GetBody == null && SetBody == null)
+            if (GetBodyInlined != null)
+            {
+                writer.Write(" => ").Write(GetBodyInlined).WriteLine(";");
+            }
+            else if (GetBody == null && SetBody == null)
             {
                 writer.Write(" { get; set; }");
                 writer.WriteLine();
@@ -73,23 +79,22 @@ namespace CppAst.CodeGen.CSharp
                 {
                     writer.WriteLine();
                     writer.OpenBraceBlock();
+                    if (GetBody != null)
                     {
-                        if (GetBody != null)
-                        {
-                            AttributesForGet.DumpAttributesTo(writer);
-                            writer.WriteLine("get");
-                            writer.OpenBraceBlock();
-                            GetBody(writer, this);
-                            writer.CloseBraceBlock();
-                        }
-                        if (SetBody != null)
-                        {
-                            AttributesForSet.DumpAttributesTo(writer);
-                            writer.WriteLine("set");
-                            writer.OpenBraceBlock();
-                            SetBody(writer, this);
-                            writer.CloseBraceBlock();
-                        }
+                        AttributesForGet.DumpAttributesTo(writer);
+                        writer.WriteLine("get");
+                        writer.OpenBraceBlock();
+                        GetBody(writer, this);
+                        writer.CloseBraceBlock();
+                    }
+
+                    if (SetBody != null)
+                    {
+                        AttributesForSet.DumpAttributesTo(writer);
+                        writer.WriteLine("set");
+                        writer.OpenBraceBlock();
+                        SetBody(writer, this);
+                        writer.CloseBraceBlock();
                     }
                     writer.CloseBraceBlock();
                 }
