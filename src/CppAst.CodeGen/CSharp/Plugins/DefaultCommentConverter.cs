@@ -16,7 +16,7 @@ namespace CppAst.CodeGen.CSharp
             pipeline.CommentConverters.Add(ConvertComment);
         }
 
-        public static CSharpComment ConvertComment(CSharpConverter converter, CppElement element, CSharpElement context)
+        public static CSharpComment? ConvertComment(CSharpConverter converter, CppElement element, CSharpElement context)
         {
             if (!(element is ICppDeclaration cppDecl))
             {
@@ -32,8 +32,8 @@ namespace CppAst.CodeGen.CSharp
 
             var csFullComment = new CSharpFullComment();
 
-            CSharpXmlComment csSummary = null;
-            CSharpXmlComment csRemarks = null;
+            CSharpXmlComment? csSummary = null;
+            CSharpXmlComment? csRemarks = null;
 
             var uncategorized = new List<CppComment>();
 
@@ -47,7 +47,11 @@ namespace CppAst.CodeGen.CSharp
                         var paramComment = (CppCommentParamCommand)childComment;
 
                         var csParamComment = new CSharpParamComment(paramComment.ParamName);
-                        csParamComment.Children.Add(GetChildAsCSharpComment(paramComment));
+                        var csChildParamComment = GetChildAsCSharpComment(paramComment);
+                        if (csChildParamComment != null)
+                        {
+                            csParamComment.Children.Add(csChildParamComment);
+                        }
                         csFullComment.Children.Add(csParamComment);
                         break;
 
@@ -59,7 +63,11 @@ namespace CppAst.CodeGen.CSharp
                             case "return":
                             case "returns":
                                 var returnComment = new CSharpReturnComment();
-                                returnComment.Children.Add(GetChildAsCSharpComment(childComment));
+                                var returnChildComment = GetChildAsCSharpComment(childComment);
+                                if (returnChildComment != null)
+                                {
+                                    returnComment.Children.Add(returnChildComment);
+                                }
                                 csFullComment.Children.Add(returnComment);
                                 break;
                             case "see":
@@ -73,21 +81,37 @@ namespace CppAst.CodeGen.CSharp
 
                             case "brief":
                                 csSummary ??= new CSharpXmlComment("summary");
-                                csSummary.Children.Add(GetChildAsCSharpComment(childComment));
+                                var csChildSummary = GetChildAsCSharpComment(childComment);
+                                if (csChildSummary != null)
+                                {
+                                    csSummary.Children.Add(csChildSummary);
+                                }
                                 break;
                             case "remark":
                             case "remarks":
                                 csRemarks ??= new CSharpXmlComment("remarks");
-                                csRemarks.Children.Add(GetChildAsCSharpComment(childComment));
+                                var csChildRemarks = GetChildAsCSharpComment(childComment);
+                                if (csChildRemarks != null)
+                                {
+                                    csRemarks.Children.Add(csChildRemarks);
+                                }
                                 break;
                             case "since":
                                 var since = new CSharpSinceComment();
-                                since.Children.Add(GetChildAsCSharpComment(childComment));
+                                var sinceChild = GetChildAsCSharpComment(childComment);
+                                if (sinceChild != null)
+                                {
+                                    since.Children.Add(sinceChild);
+                                }
                                 csFullComment.Children.Add(since);
                                 break;
                             default:
                                 var genericComment = new CSharpXmlComment(blockCommand.CommandName);
-                                genericComment.Children.Add(GetChildAsCSharpComment(childComment));
+                                var genericChildComment = GetChildAsCSharpComment(childComment);
+                                if (genericChildComment != null)
+                                {
+                                    genericComment.Children.Add(genericChildComment);
+                                }
                                 csFullComment.Children.Add(genericComment);
                                 break;
                         }
@@ -152,26 +176,30 @@ namespace CppAst.CodeGen.CSharp
             return csFullComment;
         }
 
-        private static CSharpTextComment GetAsCSharpComment(CppComment comment, bool trimEnd = true)
+        private static CSharpTextComment? GetAsCSharpComment(CppComment? comment, bool trimEnd = true)
         {
             if (comment == null) return null;
-            return new CSharpTextComment(GetAsText(comment, trimEnd));
+            var text = GetAsText(comment, trimEnd);
+            if (text is null) return null;
+            return new CSharpTextComment(text);
         }
 
-        private static string GetAsText(CppComment comment, bool trimEnd = true)
+        private static string? GetAsText(CppComment? comment, bool trimEnd = true)
         {
             if (comment == null) return null;
             var text = comment.ToString();
             return trimEnd ? text.TrimEnd() : text;
         }
 
-        private static CSharpTextComment GetChildAsCSharpComment(CppComment comment, bool trimEnd = true)
+        private static CSharpTextComment? GetChildAsCSharpComment(CppComment? comment, bool trimEnd = true)
         {
             if (comment?.Children == null) return null;
-            return new CSharpTextComment(GetChildAsText(comment, trimEnd));
+            var text = GetAsText(comment, trimEnd);
+            if (text is null) return null;
+            return new CSharpTextComment(text);
         }
 
-        private static void AddComment(CSharpComment dest, CppComment comment)
+        private static void AddComment(CSharpComment dest, CppComment? comment)
         {
             var text = GetAsText(comment);
 
@@ -181,7 +209,7 @@ namespace CppAst.CodeGen.CSharp
             }
         }
 
-        private static string GetChildAsText(CppComment comment, bool trimEnd = true)
+        private static string? GetChildAsText(CppComment? comment, bool trimEnd = true)
         {
             if (comment?.Children == null) return null;
             var builder = new StringBuilder();

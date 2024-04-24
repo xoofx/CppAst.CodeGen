@@ -26,7 +26,7 @@ namespace CppAst.CodeGen.CSharp
         public bool IsFileScoped { get; set; }
 
         /// <inheritdoc />
-        ICSharpContainer ICSharpContainer.Parent => Parent as ICSharpContainer;
+        ICSharpContainer? ICSharpContainer.Parent => Parent as ICSharpContainer;
 
         /// <inheritdoc />
         public void ValidateMember(CSharpElement element)

@@ -9,9 +9,11 @@ namespace CppAst.CodeGen.CSharp
 {
     public abstract class CSharpElement : ICSharpElement
     {
-        public CppElement CppElement { get; set; }
+        public static readonly CSharpElement Empty = new CSharpEmptyElement();
 
-        public CSharpElement Parent { get; set; }
+        public CppElement? CppElement { get; set; }
+
+        public CSharpElement? Parent { get; set; }
 
         public abstract void DumpTo(CodeWriter writer);
 
@@ -20,14 +22,21 @@ namespace CppAst.CodeGen.CSharp
         {
             var writer = new CodeWriter(new CodeWriterOptions(new MemoryFileSystem(), CodeWriterMode.Simple));
             DumpTo(writer);
-            return writer.CurrentWriter.ToString();
+            return writer.CurrentWriter!.ToString()!;
         }
 
         public string ToFullString()
         {
             var writer = new CodeWriter(new CodeWriterOptions(new MemoryFileSystem(), CodeWriterMode.Full));
             DumpTo(writer);
-            return writer.CurrentWriter.ToString();
+            return writer.CurrentWriter!.ToString()!;
+        }
+
+        private sealed class CSharpEmptyElement : CSharpElement
+        {
+            public override void DumpTo(CodeWriter writer)
+            {
+            }
         }
     }
 }

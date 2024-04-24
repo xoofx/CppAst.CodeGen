@@ -19,7 +19,7 @@ namespace CppAst.CodeGen.CSharp
         }
 
         /// <inheritdoc />
-        public CSharpComment Comment { get; set; }
+        public CSharpComment? Comment { get; set; }
 
         public List<CSharpAttribute> Attributes { get; }
 
@@ -28,9 +28,9 @@ namespace CppAst.CodeGen.CSharp
 
         public CSharpModifiers Modifiers { get; set; }
 
-        public CSharpType FieldType { get; set; }
+        public CSharpType? FieldType { get; set; }
 
-        public string InitValue { get; set; }
+        public string? InitValue { get; set; }
 
         /// <inheritdoc />
         public string Name { get; set; }

@@ -16,7 +16,7 @@ namespace CppAst.CodeGen.CSharp
 
         public string DllName { get; set; }
 
-        public string EntryPoint { get; set; }
+        public string? EntryPoint { get; set; }
         public CharSet? CharSet { get; set; }
         public bool? SetLastError { get; set; }
         public bool? ExactSpelling { get; set; }

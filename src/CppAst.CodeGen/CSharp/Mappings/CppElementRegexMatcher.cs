@@ -38,7 +38,7 @@ namespace CppAst.CodeGen.CSharp
         {
             var iterator = cppElement;
             int matchIndex = 0;
-            List<Match> matches = null;
+            List<Match>? matches = null;
             while (iterator != null)
             {
                 if (iterator is ICppMember member)
@@ -73,7 +73,7 @@ namespace CppAst.CodeGen.CSharp
             }
 
             // We expect to match all the parts
-            if (matchIndex != _regexParts.Count)
+            if (matchIndex != _regexParts.Count || matches is null)
             {
                 return false;
             }

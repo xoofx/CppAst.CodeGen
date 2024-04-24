@@ -12,7 +12,7 @@ namespace CppAst.CodeGen.CSharp
 {
     public static class CppMappingRulesExtensions
     {
-        public static TMatch FindMatch<TMatch>(this List<ICppElementMatch> matches) where TMatch : class
+        public static TMatch? FindMatch<TMatch>(this List<ICppElementMatch> matches) where TMatch : class
         {
             foreach (var cppElementMatch in matches)
             {
@@ -176,7 +176,7 @@ namespace CppAst.CodeGen.CSharp
                     typeWithAttributes.Attributes.Add(clonedAttribute);
                     if (csField != null) csField.FieldType = typeWithAttributes;
                     else if (csParam != null) csParam.ParameterType = typeWithAttributes;
-                    else csMethod.ReturnType = typeWithAttributes;
+                    else if (csMethod != null) csMethod.ReturnType = typeWithAttributes;
                 }
             });
 
@@ -232,7 +232,7 @@ namespace CppAst.CodeGen.CSharp
             return mappingRule;
         }
 
-        public static CppElementMappingRule Map(this CppMappingRules dispatcher, string cppRegexName, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
+        public static CppElementMappingRule Map(this CppMappingRules dispatcher, string cppRegexName, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
         {
             return new CppElementMappingRule(new CppElementRegexMatcher(cppRegexName))
             {
@@ -241,7 +241,7 @@ namespace CppAst.CodeGen.CSharp
             };
         }
 
-        public static CppElementMappingRule MapAll<TCppElement>(this CppMappingRules dispatcher, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0) where TCppElement : CppElement
+        public static CppElementMappingRule MapAll<TCppElement>(this CppMappingRules dispatcher, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0) where TCppElement : CppElement
         {
             return new CppElementMappingRule(new CppElementTypeMatcher<TCppElement>())
             {
@@ -250,7 +250,7 @@ namespace CppAst.CodeGen.CSharp
             };
         }
 
-        public static CppElementMappingRule Map<TCppElement>(this CppMappingRules dispatcher, string cppRegexName, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0) where TCppElement : CppElement
+        public static CppElementMappingRule Map<TCppElement>(this CppMappingRules dispatcher, string cppRegexName, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0) where TCppElement : CppElement
         {
             return new CppElementMappingRule(new CppElementTypeMatcher<TCppElement>(), new CppElementRegexMatcher(cppRegexName))
             {
@@ -259,7 +259,7 @@ namespace CppAst.CodeGen.CSharp
             };
         }
 
-        public static CppMacroToConstMappingRule MapMacroToConst(this CppMappingRules dispatcher, string cppRegexMatchMacroName, string cppType, bool explicitCast = false, string enumItemName = null, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
+        public static CppMacroToConstMappingRule MapMacroToConst(this CppMappingRules dispatcher, string cppRegexMatchMacroName, string cppType, bool explicitCast = false, string? enumItemName = null, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
         {
             return new CppMacroToConstMappingRule(new CppElementRegexMatcher(cppRegexMatchMacroName))
             {
@@ -271,7 +271,7 @@ namespace CppAst.CodeGen.CSharp
             };
         }
 
-        public static CppMacroToEnumMappingRule MapMacroToEnum(this CppMappingRules dispatcher, string cppRegexName, string cppEnumTypeName, string cppEnumItemName = null, string integerType = "int", bool explicitCast = false, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
+        public static CppMacroToEnumMappingRule MapMacroToEnum(this CppMappingRules dispatcher, string cppRegexName, string cppEnumTypeName, string? cppEnumItemName = null, string integerType = "int", bool explicitCast = false, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
         {
             return new CppMacroToEnumMappingRule(new CppElementRegexMatcher(cppRegexName))
             {
@@ -284,12 +284,12 @@ namespace CppAst.CodeGen.CSharp
             };
         }
 
-        public static CppElementMappingRule MapType(this CppMappingRules dispatcher, string cppType, string csType, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
+        public static CppElementMappingRule MapType(this CppMappingRules dispatcher, string cppType, string csType, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
         {
             throw new NotImplementedException();
         }
 
-        public static CppElementMappingRule MapArrayType(this CppMappingRules dispatcher, string cppElementType, int arraySize, string csType, [CallerFilePath] string mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
+        public static CppElementMappingRule MapArrayType(this CppMappingRules dispatcher, string cppElementType, int arraySize, string csType, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
         {
             throw new NotImplementedException();
         }

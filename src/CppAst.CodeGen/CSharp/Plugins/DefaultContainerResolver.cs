@@ -18,7 +18,7 @@ namespace CppAst.CodeGen.CSharp
             pipeline.GetCSharpContainerResolvers.Add(GetSharpContainer);
         }
 
-        public static ICSharpContainer GetSharpContainer(CSharpConverter converter, CppElement element, CSharpElement context)
+        public static ICSharpContainer? GetSharpContainer(CSharpConverter converter, CppElement element, CSharpElement context)
         {
             var cacheContainer = converter.GetTagValueOrDefault<CacheContainer>(CacheContainerKey);
 
@@ -36,17 +36,14 @@ namespace CppAst.CodeGen.CSharp
                 {
                     var fileName = Path.GetFileNameWithoutExtension(element.Span.Start.File);
 
-                    if (fileName != null)
+                    if (cacheContainer.IncludeToClass.TryGetValue(fileName, out var csClassLib))
                     {
-                        if (cacheContainer.IncludeToClass.TryGetValue(fileName, out var csClassLib))
-                        {
-                            return csClassLib;
-                        }
-
-                        csClassLib = CreateClassLib(converter, UPath.Combine(UPath.Root, fileName + ".generated.cs"));
-                        cacheContainer.IncludeToClass.Add(fileName, csClassLib);
                         return csClassLib;
                     }
+
+                    csClassLib = CreateClassLib(converter, UPath.Combine(UPath.Root, fileName + ".generated.cs"));
+                    cacheContainer.IncludeToClass.Add(fileName, csClassLib);
+                    return csClassLib;
                 }
             }
 
@@ -55,7 +52,7 @@ namespace CppAst.CodeGen.CSharp
 
         private static CSharpClass CreateClassLib(CSharpConverter converter, UPath? subFilePathOverride = null)
         {
-            var compilation = converter.CurrentCSharpCompilation;
+            var compilation = converter.CurrentCSharpCompilation!;
 
             var path = converter.Options.DefaultOutputFilePath;
 
@@ -80,14 +77,9 @@ namespace CppAst.CodeGen.CSharp
 
         private class CacheContainer
         {
-            public CacheContainer()
-            {
-                IncludeToClass = new Dictionary<string, CSharpClass>();
-            }
+            public CSharpClass? DefaultClass { get; set; }
 
-            public CSharpClass DefaultClass { get; set; }
-
-            public Dictionary<string, CSharpClass> IncludeToClass { get; }
+            public Dictionary<string, CSharpClass> IncludeToClass { get; } = new Dictionary<string, CSharpClass>();
         }
     }
 }

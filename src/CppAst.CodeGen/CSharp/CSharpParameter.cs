@@ -12,6 +12,7 @@ namespace CppAst.CodeGen.CSharp
     {
         public CSharpParameter()
         {
+            Name = string.Empty;
             Attributes = new List<CSharpAttribute>();
         }
 
@@ -24,7 +25,7 @@ namespace CppAst.CodeGen.CSharp
 
         public int Index { get; set; }
 
-        public CSharpType ParameterType { get; set; }
+        public CSharpType? ParameterType { get; set; }
 
         public bool IsThis { get; set; }
 
@@ -33,7 +34,7 @@ namespace CppAst.CodeGen.CSharp
         /// <inheritdoc />
         public string Name { get; set; }
 
-        public string DefaultValue { get; set; }
+        public string? DefaultValue { get; set; }
 
         public CSharpParameter Clone()
         {

@@ -7,7 +7,7 @@ namespace CppAst.CodeGen.CSharp
 
     public interface ICSharpContainer : ICSharpElement
     {
-        ICSharpContainer Parent { get; }
+        ICSharpContainer? Parent { get; }
 
         CSharpContainerList<CSharpElement> Members { get; }
 

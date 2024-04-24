@@ -12,7 +12,7 @@ namespace CppAst.CodeGen.CSharp
             pipeline.EnumItemConverters.Add(ConvertEnumItem);
         }
 
-        public static CSharpElement ConvertEnumItem(CSharpConverter converter, CppEnumItem cppEnumItem, CSharpElement context)
+        public static CSharpElement? ConvertEnumItem(CSharpConverter converter, CppEnumItem cppEnumItem, CSharpElement context)
         {
             // If the context is not an enum, we don't support this scenario.
             if (!(context is CSharpEnum csEnum)) return null;

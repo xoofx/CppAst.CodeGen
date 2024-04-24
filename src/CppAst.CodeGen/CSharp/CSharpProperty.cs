@@ -19,7 +19,7 @@ namespace CppAst.CodeGen.CSharp
         }
 
         /// <inheritdoc />
-        public CSharpComment Comment { get; set; }
+        public CSharpComment? Comment { get; set; }
 
         public List<CSharpAttribute> Attributes { get; }
 
@@ -28,7 +28,7 @@ namespace CppAst.CodeGen.CSharp
 
         public CSharpModifiers Modifiers { get; set; }
 
-        public CSharpType ReturnType { get; set; }
+        public CSharpType? ReturnType { get; set; }
 
         public List<CSharpAttribute> AttributesForGet { get; }
 
@@ -36,13 +36,13 @@ namespace CppAst.CodeGen.CSharp
 
         public string Name { get; set; }
 
-        public CSharpField LinkedField { get; set; }
+        public CSharpField? LinkedField { get; set; }
 
-        public string GetBodyInlined { get; set; }
+        public string? GetBodyInlined { get; set; }
 
-        public Action<CodeWriter, CSharpElement> GetBody { get; set; }
+        public Action<CodeWriter, CSharpElement>? GetBody { get; set; }
 
-        public Action<CodeWriter, CSharpElement> SetBody { get; set; }
+        public Action<CodeWriter, CSharpElement>? SetBody { get; set; }
 
         /// <inheritdoc />
         public virtual IEnumerable<CSharpAttribute> GetAttributes() => Attributes;

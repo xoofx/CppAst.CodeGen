@@ -71,17 +71,17 @@ namespace CppAst.CodeGen.CSharp
         /// <summary>
         /// Gets or sets a custom marshal type as a string
         /// </summary>
-        public string MarshalType { get; set; }
+        public string? MarshalType { get; set; }
 
         /// <summary>
         /// Gets or sets a custom marshal type as a System.Type
         /// </summary>
-        public string MarshalTypeRef { get; set; }
+        public string? MarshalTypeRef { get; set; }
 
         /// <summary>
         /// Gets or sets the custom Marshal cookie.
         /// </summary>
-        public string MarshalCookie { get; set; }
+        public string? MarshalCookie { get; set; }
 
         /// <inheritdoc />
         public override string ToText()

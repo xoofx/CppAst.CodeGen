@@ -21,7 +21,7 @@ namespace CppAst.CodeGen.CSharp
             CSharpElementActions = new List<CSharpElementModifierDelegate>();
         }
 
-        public string TypeRemap { get; set; }
+        public string? TypeRemap { get; set; }
 
         public int? TypeRemapArraySize { get; set; }
 

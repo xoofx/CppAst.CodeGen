@@ -29,7 +29,7 @@ namespace CppAst.CodeGen.Common
 
         public CodeWriterMode Mode => Options.Mode;
 
-        public TextWriter CurrentWriter => _backendWriters.Count > 0 ? _backendWriters.Peek().Writer : null;
+        public TextWriter? CurrentWriter => _backendWriters.Count > 0 ? _backendWriters.Peek().Writer : null;
 
         public virtual void PushOutput(TextWriter writer, bool autoDispose = false)
         {
@@ -242,7 +242,7 @@ namespace CppAst.CodeGen.Common
         /// <inheritdoc />
         public override string ToString()
         {
-            return CurrentWriter != null ? CurrentWriter.ToString() : string.Empty;
+            return CurrentWriter != null ? CurrentWriter.ToString()! : string.Empty;
         }
 
         private readonly struct WriterOutput

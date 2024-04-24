@@ -12,7 +12,7 @@ namespace CppAst.CodeGen.CSharp
         {
         }
 
-        public CSharpType IntegerBaseType => BaseTypes.Count > 0 ? BaseTypes[0] : null;
+        public CSharpType? IntegerBaseType => BaseTypes.Count > 0 ? BaseTypes[0] : null;
 
         public bool IsFlags { get; set; }
 

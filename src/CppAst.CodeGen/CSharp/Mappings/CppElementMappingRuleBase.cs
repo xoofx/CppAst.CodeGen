@@ -9,12 +9,7 @@ namespace CppAst.CodeGen.CSharp
 {
     public abstract class CppElementMappingRuleBase : CppElementMatcher
     {
-        private readonly List<CppElementMatcher> _matchers;
-
-        protected CppElementMappingRuleBase()
-        {
-            _matchers = new List<CppElementMatcher>();
-        }
+        private readonly List<CppElementMatcher> _matchers = new List<CppElementMatcher>();
 
         public IReadOnlyList<CppElementMatcher> Matchers => _matchers;
 
@@ -32,7 +27,7 @@ namespace CppAst.CodeGen.CSharp
             _matchers.Add(matcher);
         }
 
-        public string DeclarationFileName { get; set; }
+        public string? DeclarationFileName { get; set; }
 
         public int DeclarationLineNumber { get; set; }
 

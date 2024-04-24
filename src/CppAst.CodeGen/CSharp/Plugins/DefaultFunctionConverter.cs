@@ -15,7 +15,7 @@ namespace CppAst.CodeGen.CSharp
             pipeline.FunctionConverters.Add(ConvertFunction);
         }
 
-        public static CSharpElement ConvertFunction(CSharpConverter converter, CppFunction cppFunction, CSharpElement context)
+        public static CSharpElement? ConvertFunction(CSharpConverter converter, CppFunction cppFunction, CSharpElement context)
         {
             // We process only public export functions
             if (!cppFunction.IsPublicExport() || ((cppFunction.Flags & (CppFunctionFlags.Inline | CppFunctionFlags.Method | CppFunctionFlags.Constructor | CppFunctionFlags.Destructor)) != 0 && (cppFunction.Flags & CppFunctionFlags.Virtual) == 0))
@@ -24,7 +24,7 @@ namespace CppAst.CodeGen.CSharp
             }
 
             // Register the struct as soon as possible
-            var csFunction = new CSharpMethod() { CppElement = cppFunction };
+            var csFunction = new CSharpMethod(string.Empty) { CppElement = cppFunction };
 
             var container = converter.GetCSharpContainer(cppFunction, context);
 

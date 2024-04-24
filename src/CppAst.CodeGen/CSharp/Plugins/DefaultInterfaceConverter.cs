@@ -16,7 +16,7 @@ namespace CppAst.CodeGen.CSharp
             pipeline.ClassConverters.Add(ConvertClass);
         }
 
-        public static CSharpElement ConvertClass(CSharpConverter converter, CppClass cppClass, CSharpElement context)
+        public static CSharpElement? ConvertClass(CSharpConverter converter, CppClass cppClass, CSharpElement context)
         {
             if (cppClass.ClassKind != CppClassKind.Class)
             {

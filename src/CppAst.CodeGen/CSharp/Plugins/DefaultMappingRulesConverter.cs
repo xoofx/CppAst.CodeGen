@@ -43,7 +43,7 @@ namespace CppAst.CodeGen.CSharp
             {
                 var matchTypeDef = new Regex($@"^{cachedRules.Prefix}(\d+)_typedef$");
 
-                var typedefs = converter.CurrentCppCompilation.Typedefs;
+                var typedefs = converter.CurrentCppCompilation!.Typedefs;
                 for (var i = typedefs.Count - 1; i >= 0; i--)
                 {
                     var cppTypedef = typedefs[i];
@@ -120,11 +120,11 @@ namespace CppAst.CodeGen.CSharp
                         var cppMacroRule = cppMacroRuleToNamePair.Key;
                         var name = cppMacroRuleToNamePair.Value;
 
-                        StringBuilder stringBuilder = null;
+                        StringBuilder? stringBuilder = null;
                         bool explicitCast = false;
-                        string typeName = null;
-                        string rulePrefix = null;
-                        string ruleSuffix = null;
+                        string? typeName = null;
+                        string? rulePrefix = null;
+                        string? ruleSuffix = null;
 
                         switch (cppMacroRule)
                         {
@@ -229,7 +229,7 @@ namespace CppAst.CodeGen.CSharp
 
         private static void AppendPragmaLine(CppElementMappingRuleBase rule, StringBuilder builder)
         {
-            builder.AppendLine($"#line {rule.DeclarationLineNumber} \"{rule.DeclarationFileName.Replace(@"\", @"\\")}\"");
+            builder.AppendLine($"#line {rule.DeclarationLineNumber} \"{rule.DeclarationFileName?.Replace(@"\", @"\\")}\"");
         }
 
         private static void ProcessCppElementMappingRules(CSharpConverter converter, CppElement cppElement, CSharpElement context)
@@ -326,7 +326,7 @@ namespace CppAst.CodeGen.CSharp
             }
         }
 
-        internal static CppType GetCppTypeRemap(CSharpConverter converter, string typeName, int? typeRemapArraySize = null)
+        internal static CppType? GetCppTypeRemap(CSharpConverter converter, string typeName, int? typeRemapArraySize = null)
         {
             var cachedRules = GetCachedRules(converter);
 
@@ -420,13 +420,13 @@ namespace CppAst.CodeGen.CSharp
 
         private readonly struct TypeRemapKey
         {
-            public TypeRemapKey(string typeRemap, int? typeRemapArraySize)
+            public TypeRemapKey(string? typeRemap, int? typeRemapArraySize)
             {
                 TypeRemap = typeRemap;
                 TypeRemapArraySize = typeRemapArraySize;
             }
 
-            public readonly string TypeRemap;
+            public readonly string? TypeRemap;
 
             public readonly int? TypeRemapArraySize;
 
@@ -436,7 +436,7 @@ namespace CppAst.CodeGen.CSharp
             }
 
             /// <inheritdoc />
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 return obj is TypeRemapKey other && Equals(other);
             }

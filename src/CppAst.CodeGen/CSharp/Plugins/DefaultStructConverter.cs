@@ -15,7 +15,7 @@ namespace CppAst.CodeGen.CSharp
             pipeline.ClassConverters.Add(ConvertClass);
         }
 
-        public static CSharpElement ConvertClass(CSharpConverter converter, CppClass cppClass, CSharpElement context)
+        public static CSharpElement? ConvertClass(CSharpConverter converter, CppClass cppClass, CSharpElement context)
         {
             // This converter supports only plain struct or union
             if (cppClass.ClassKind == CppClassKind.Class && cppClass.Functions.Any(x => (x.Flags & CppFunctionFlags.Virtual) != 0))
@@ -36,7 +36,8 @@ namespace CppAst.CodeGen.CSharp
             {
                 container = container.Parent;
             }
-            container.Members.Add(csStruct);
+
+            container!.Members.Add(csStruct);
 
             csStruct.Comment = converter.GetCSharpComment(cppClass, csStruct);
 

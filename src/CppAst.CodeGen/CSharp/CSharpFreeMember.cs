@@ -8,7 +8,7 @@ namespace CppAst.CodeGen.CSharp
 {
     public class CSharpFreeMember: CSharpElement
     {
-        public string Text { get; set; }
+        public string Text { get; set; } = string.Empty;
 
         public override void DumpTo(CodeWriter writer)
         {

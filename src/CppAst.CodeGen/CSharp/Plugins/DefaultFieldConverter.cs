@@ -18,7 +18,7 @@ namespace CppAst.CodeGen.CSharp
             pipeline.FieldConverters.Add(ConvertField);
         }
 
-        public static CSharpElement ConvertField(CSharpConverter converter, CppField cppField, CSharpElement context)
+        public static CSharpElement? ConvertField(CSharpConverter converter, CppField cppField, CSharpElement context)
         {
             // Early exit if this is a global variable (we don't handle dllexport)
             bool isConst = cppField.Type is CppQualifiedType qualifiedType && qualifiedType.Qualifier == CppTypeQualifier.Const;
@@ -38,7 +38,7 @@ namespace CppAst.CodeGen.CSharp
 
             if (cppField.IsBitField)
             {
-                CSharpBitField csBitFieldStorage = null;
+                CSharpBitField? csBitFieldStorage = null;
                 for (var index = csContainer.Members.Count - 1; index >= 0; index--)
                 {
                     var member = csContainer.Members[index];
@@ -138,11 +138,11 @@ namespace CppAst.CodeGen.CSharp
                 csProperty.SetBody = (writer, element) =>
                 {
                     writer.Write($"{csBitFieldStorage.Name} = ({csBitFieldStorage.Name} & unchecked((");
-                    csBitFieldStorage.FieldType.DumpReferenceTo(writer);
+                    csBitFieldStorage.FieldType?.DumpReferenceTo(writer);
                     writer.Write($")0b{notBitMaskStr})) | ((((");
-                    csBitFieldStorage.FieldType.DumpReferenceTo(writer);
+                    csBitFieldStorage.FieldType?.DumpReferenceTo(writer);
                     writer.Write(")value) & (unchecked((");
-                    csBitFieldStorage.FieldType.DumpReferenceTo(writer);
+                    csBitFieldStorage.FieldType?.DumpReferenceTo(writer);
                     writer.Write($"){bitmaskStr})) << {currentBitOffset}));");
                     writer.WriteLine();
                 };

@@ -6,6 +6,6 @@ namespace CppAst.CodeGen.CSharp
 {
     public interface ICSharpWithComment
     {
-        CSharpComment Comment { get; set; }
+        CSharpComment? Comment { get; set; }
     }
 }

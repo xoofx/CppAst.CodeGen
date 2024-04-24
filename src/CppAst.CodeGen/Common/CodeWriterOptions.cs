@@ -15,36 +15,33 @@ namespace CppAst.CodeGen.Common
         {
         }
 
-        public CodeWriterOptions(IFileSystem fileSystem, CodeWriterMode mode = CodeWriterMode.Full)
+        public CodeWriterOptions(IFileSystem? fileSystem, CodeWriterMode mode = CodeWriterMode.Full)
         {
             FileSystem = fileSystem;
             Mode = mode;
             IndentSize = 4;
             NewLine = Environment.NewLine;
-            Tags = new Dictionary<string, object>();
+            Tags = new Dictionary<string, object?>();
         }
 
         public CodeWriterMode Mode { get; set; }
 
         public int IndentSize { get; set; }
 
-        public string NewLine { get; set; }
+        public string? NewLine { get; set; }
 
-        public IFileSystem FileSystem { get; }
+        public IFileSystem? FileSystem { get; }
 
-        public Dictionary<string, object> Tags { get; }
+        public Dictionary<string, object?> Tags { get; }
 
-        public object this[string tagName]
+        public object? this[string tagName]
         {
             get
             {
                 Tags.TryGetValue(tagName, out var obj);
                 return obj;
             }
-            set
-            {
-                Tags[tagName] = value;
-            }
+            set => Tags[tagName] = value;
         }
 
         private static IFileSystem GetDefaultFileSystem()

@@ -19,7 +19,7 @@ namespace CppAst.CodeGen.CSharp
             RecordParameters = new List<CSharpParameter>();
         }
 
-        public CSharpComment Comment { get; set; }
+        public CSharpComment? Comment { get; set; }
 
         public List<CSharpAttribute> Attributes { get; }
 
@@ -44,7 +44,7 @@ namespace CppAst.CodeGen.CSharp
         public CSharpContainerList<CSharpElement> Members { get; }
 
         /// <inheritdoc />
-        ICSharpContainer ICSharpContainer.Parent => Parent as ICSharpContainer;
+        ICSharpContainer? ICSharpContainer.Parent => Parent as ICSharpContainer;
 
         /// <inheritdoc />
         public void ValidateMember(CSharpElement element)

@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CppAst.CodeGen.CSharp
 {
@@ -14,7 +15,7 @@ namespace CppAst.CodeGen.CSharp
             pipeline.FunctionTypeConverters.Add(ConvertAnonymousFunctionType);
         }
 
-        public static bool IsFunctionType(CppType type, out CppFunctionType cppFunctionType)
+        public static bool IsFunctionType(CppType type, [NotNullWhen(true)]  out CppFunctionType? cppFunctionType)
         {
             type = type.GetCanonicalType();
             cppFunctionType = type as CppFunctionType;
@@ -39,18 +40,18 @@ namespace CppAst.CodeGen.CSharp
             return ConvertNamedFunctionType(converter, cppFunctionType, context, null);
         }
 
-        public static CSharpType ConvertNamedFunctionType(CSharpConverter converter, CppFunctionType cppType, CSharpElement context, CppTypedef typedef)
+        public static CSharpType ConvertNamedFunctionType(CSharpConverter converter, CppFunctionType cppType, CSharpElement context, CppTypedef? typedef)
         {
             if (cppType == null) throw new ArgumentNullException(nameof(cppType));
 
-            string name = typedef?.Name;
+            string? name = typedef?.Name;
 
             if (typedef == null)
             {
                 name = converter.GetCSharpName(cppType, context);
             }
 
-            var csDelegate = new CSharpDelegate(name) { CppElement = cppType };
+            var csDelegate = new CSharpDelegate(name!) { CppElement = cppType };
             var cppFunctionType = cppType;
 
             // Add calling convention
@@ -66,8 +67,8 @@ namespace CppAst.CodeGen.CSharp
                 container = container.Parent;
             }
 
-            converter.ApplyDefaultVisibility(csDelegate, container);
-            container.Members.Add(csDelegate);
+            converter.ApplyDefaultVisibility(csDelegate, container!);
+            container!.Members.Add(csDelegate);
 
             converter.AddUsing(container, "System.Runtime.InteropServices");
 

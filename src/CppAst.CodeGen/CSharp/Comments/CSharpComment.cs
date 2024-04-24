@@ -32,7 +32,7 @@ namespace CppAst.CodeGen.CSharp
         {
             var writer = new CodeWriter(new CodeWriterOptions(new MemoryFileSystem(), CodeWriterMode.Full));
             DumpChildrenTo(writer);
-            return writer.CurrentWriter.ToString();
+            return writer.CurrentWriter!.ToString()!;
         }
 
         protected internal void DumpChildrenTo(CodeWriter writer)

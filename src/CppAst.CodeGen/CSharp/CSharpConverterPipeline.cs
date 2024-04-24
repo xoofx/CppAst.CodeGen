@@ -10,35 +10,35 @@ namespace CppAst.CodeGen.CSharp
 {
     public delegate void GlobalProcessingDelegate(CSharpConverter converter);
 
-    public delegate ICSharpContainer GetCSharpContainerDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
+    public delegate ICSharpContainer? GetCSharpContainerDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
 
-    public delegate CSharpComment ConvertCommentDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
+    public delegate CSharpComment? ConvertCommentDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
 
-    public delegate string GetCSharpNameDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
+    public delegate string? GetCSharpNameDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
 
-    public delegate CSharpType GetCSharpTypeDelegate(CSharpConverter converter, CppType cppType, CSharpElement context, bool nested);
+    public delegate CSharpType? GetCSharpTypeDelegate(CSharpConverter converter, CppType cppType, CSharpElement context, bool nested);
 
-    public delegate CSharpCompilation ConvertCompilationDelegate(CSharpConverter converter, CppCompilation cppCompilation, CSharpElement context);
+    public delegate CSharpCompilation? ConvertCompilationDelegate(CSharpConverter converter, CppCompilation cppCompilation, CSharpElement context);
 
     public delegate void AfterPreprocessingDelegate(CSharpConverter converter, CppCompilation cppCompilation, StringBuilder additionalHeaders);
 
-    public delegate CSharpElement ConvertEnumDelegate(CSharpConverter converter, CppEnum cppEnum, CSharpElement context);
+    public delegate CSharpElement? ConvertEnumDelegate(CSharpConverter converter, CppEnum cppEnum, CSharpElement context);
 
-    public delegate CSharpElement ConvertEnumItemDelegate(CSharpConverter converter, CppEnumItem cppEnumItem, CSharpElement context);
+    public delegate CSharpElement? ConvertEnumItemDelegate(CSharpConverter converter, CppEnumItem cppEnumItem, CSharpElement context);
 
-    public delegate CSharpElement ConvertClassDelegate(CSharpConverter converter, CppClass cppClass, CSharpElement context);
+    public delegate CSharpElement? ConvertClassDelegate(CSharpConverter converter, CppClass cppClass, CSharpElement context);
 
-    public delegate CSharpElement ConvertFieldDelegate(CSharpConverter converter, CppField cppField, CSharpElement context);
+    public delegate CSharpElement? ConvertFieldDelegate(CSharpConverter converter, CppField cppField, CSharpElement context);
 
-    public delegate CSharpElement ConvertFunctionDelegate(CSharpConverter converter, CppFunction cppFunction, CSharpElement context);
+    public delegate CSharpElement? ConvertFunctionDelegate(CSharpConverter converter, CppFunction cppFunction, CSharpElement context);
 
-    public delegate CSharpElement ConvertFunctionTypeDelegate(CSharpConverter converter, CppFunctionType cppFunctionType, CSharpElement context);
+    public delegate CSharpElement? ConvertFunctionTypeDelegate(CSharpConverter converter, CppFunctionType cppFunctionType, CSharpElement context);
 
-    public delegate CSharpElement ConvertParameterDelegate(CSharpConverter converter, CppParameter cppParameter, int index, CSharpElement context);
+    public delegate CSharpElement? ConvertParameterDelegate(CSharpConverter converter, CppParameter cppParameter, int index, CSharpElement context);
 
-    public delegate CSharpElement ConvertTypedefDelegate(CSharpConverter converter, CppTypedef cppTypedef, CSharpElement context);
+    public delegate CSharpElement? ConvertTypedefDelegate(CSharpConverter converter, CppTypedef cppTypedef, CSharpElement context);
 
-    public delegate CSharpElement ConvertNamespaceDelegate(CSharpConverter converter, CppNamespace cppNamespace, CSharpElement context);
+    public delegate CSharpElement? ConvertNamespaceDelegate(CSharpConverter converter, CppNamespace cppNamespace, CSharpElement context);
 
     public delegate void ProcessBeforeConvertDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
 

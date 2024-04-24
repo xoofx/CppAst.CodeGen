@@ -20,7 +20,7 @@ namespace CppAst.CodeGen.CSharp
             pipeline.GetCSharpTypeResolvers.Add(GetCSharpType);
         }
 
-        public static CSharpType GetCSharpType(CSharpConverter converter, CppType cppType, CSharpElement context, bool nested)
+        public static CSharpType? GetCSharpType(CSharpConverter converter, CppType cppType, CSharpElement context, bool nested)
         {
             // Early exit for primitive types
             if (cppType is CppPrimitiveType cppPrimitiveType)
@@ -167,14 +167,14 @@ namespace CppAst.CodeGen.CSharp
                         {
                             if (converter.Options.AllowFixedSizeBuffers && arrayType.Size > 0 && context is CSharpField csField && arrayElementType.GetCanonicalType() is CppPrimitiveType cppPrimitive && cppPrimitive.Kind != CppPrimitiveKind.Bool)
                             {
-                                var csParent = (CSharpTypeWithMembers)csField.Parent;
+                                var csParent = (CSharpTypeWithMembers)csField.Parent!;
                                 csParent.Modifiers |= CSharpModifiers.Unsafe;
 
                                 var csArrayElementType = converter.GetCSharpType(arrayElementType, context, true);
 
                                 if (csArrayElementType is CSharpTypeWithMembers csArrayElementWithMembers)
                                 {
-                                    csType = new CSharpFixedArrayType(csArrayElementWithMembers.BaseTypes.FirstOrDefault(), arrayType.Size);
+                                    csType = new CSharpFixedArrayType(csArrayElementWithMembers.BaseTypes.First(), arrayType.Size);
                                 }
                                 else
                                 {
@@ -190,7 +190,7 @@ namespace CppAst.CodeGen.CSharp
                                 if (csArrayElementType is CSharpTypeWithAttributes csArrayElementTypeWithAttributes)
                                 {
                                     var marshalAttributeForArrayElementType = GetMarshalAttributeOrNull(csArrayElementTypeWithAttributes.Attributes);
-                                    attr.ArraySubType = marshalAttributeForArrayElementType.UnmanagedType;
+                                    attr.ArraySubType = marshalAttributeForArrayElementType?.UnmanagedType;
                                 }
 
                                 if (arrayType.Size >= 0)
@@ -232,7 +232,7 @@ namespace CppAst.CodeGen.CSharp
             return csType;
         }
 
-        private static CSharpMarshalAttribute GetMarshalAttributeOrNull(List<CSharpAttribute> attributes)
+        private static CSharpMarshalAttribute? GetMarshalAttributeOrNull(List<CSharpAttribute> attributes)
         {
             foreach (var cSharpAttribute in attributes)
             {

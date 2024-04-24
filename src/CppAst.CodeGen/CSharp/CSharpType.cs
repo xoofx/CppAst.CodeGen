@@ -15,7 +15,7 @@ namespace CppAst.CodeGen.CSharp
         {
             var writer = new CodeWriter(new CodeWriterOptions(new MemoryFileSystem(), CodeWriterMode.Simple));
             DumpReferenceTo(writer);
-            return writer.CurrentWriter.ToString();
+            return writer.CurrentWriter!.ToString()!;
         }
     }
 }

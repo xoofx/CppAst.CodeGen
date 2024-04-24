@@ -47,7 +47,7 @@ namespace CppAst.CodeGen.CSharp
             GenerateEnumItemAsFields = true;
             TypedefCodeGenKind = CppTypedefCodeGenKind.Wrap;
             TypedefWrapWhiteList = new HashSet<string>();
-            Tags = new Dictionary<string, object>();
+            Tags = new Dictionary<string, object?>();
             DefaultCharSet = CharSet.Ansi;
             AllowFixedSizeBuffers = true;
             DefaultMarshalForString = new CSharpMarshalAttribute(CSharpUnmanagedKind.LPStr);
@@ -70,9 +70,9 @@ namespace CppAst.CodeGen.CSharp
 
         public bool DispatchOutputPerInclude { get; set; }
 
-        public CSharpMarshalAttribute DefaultMarshalForString { get; set; }
+        public CSharpMarshalAttribute? DefaultMarshalForString { get; set; }
 
-        public CSharpMarshalAttribute DefaultMarshalForBool { get; set; }
+        public CSharpMarshalAttribute? DefaultMarshalForBool { get; set; }
 
         public bool GenerateEnumItemAsFields { get; set; }
 
@@ -80,23 +80,20 @@ namespace CppAst.CodeGen.CSharp
 
         public HashSet<string> TypedefWrapWhiteList { get; }
 
-        public Dictionary<string, object> Tags { get; private set; }
+        public Dictionary<string, object?> Tags { get; private set; }
 
         public CppMappingRules MappingRules { get; private set; }
 
         public List<ICSharpConverterPlugin> Plugins { get; private set; }
 
-        public object this[string tagName]
+        public object? this[string tagName]
         {
             get
             {
                 Tags.TryGetValue(tagName, out var obj);
                 return obj;
             }
-            set
-            {
-                Tags[tagName] = value;
-            }
+            set => Tags[tagName] = value;
         }
 
         public override CppParserOptions Clone()
@@ -110,10 +107,10 @@ namespace CppAst.CodeGen.CSharp
             csConverterOptions.Plugins = new List<ICSharpConverterPlugin>(Plugins);
 
             // TODO: value behind tags are not cloned
-            csConverterOptions.Tags = new Dictionary<string, object>(Tags);
+            csConverterOptions.Tags = new Dictionary<string, object?>(Tags);
 
-            csConverterOptions.DefaultMarshalForString = (CSharpMarshalAttribute)DefaultMarshalForString?.Clone();
-            csConverterOptions.DefaultMarshalForBool = (CSharpMarshalAttribute)DefaultMarshalForBool?.Clone();
+            csConverterOptions.DefaultMarshalForString = (CSharpMarshalAttribute?)DefaultMarshalForString?.Clone();
+            csConverterOptions.DefaultMarshalForBool = (CSharpMarshalAttribute?)DefaultMarshalForBool?.Clone();
 
             return csConverterOptions;
         }

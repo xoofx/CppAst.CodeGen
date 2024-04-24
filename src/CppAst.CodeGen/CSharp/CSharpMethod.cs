@@ -11,14 +11,15 @@ namespace CppAst.CodeGen.CSharp
 {
     public class CSharpMethod : CSharpElement, ICSharpWithComment, ICSharpAttributesProvider, ICSharpElementWithVisibility, ICSharpMember
     {
-        public CSharpMethod()
+        public CSharpMethod(string name)
         {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
             Attributes = new List<CSharpAttribute>();
             Parameters = new List<CSharpParameter>();
             Visibility = CSharpVisibility.Public;
         }
 
-        public CSharpComment Comment { get; set; }
+        public CSharpComment? Comment { get; set; }
 
         public List<CSharpAttribute> Attributes { get; }
 
@@ -27,7 +28,7 @@ namespace CppAst.CodeGen.CSharp
 
         public CSharpModifiers Modifiers { get; set; }
 
-        public CSharpType ReturnType { get; set; }
+        public CSharpType? ReturnType { get; set; }
 
         public bool IsConstructor { get; set; }
 
@@ -39,17 +40,22 @@ namespace CppAst.CodeGen.CSharp
         /// Creates a function pointer that is matching the signature of the method.
         /// </summary>
         /// <returns></returns>
-        public CSharpFunctionPointer ToFunctionPointer()
+        public CSharpFunctionPointer? ToFunctionPointer()
         {
+            if (ReturnType == null)
+            {
+                return null;
+            }
             var functionPointer = new CSharpFunctionPointer(ReturnType);
             foreach (var parameter in Parameters)
             {
-                functionPointer.Parameters.Add(parameter.ParameterType);
+                if (parameter.ParameterType != null)
+                    functionPointer.Parameters.Add(parameter.ParameterType);
             }
             return functionPointer;
         }
 
-        public Action<CodeWriter, CSharpElement> Body { get; set; }
+        public Action<CodeWriter, CSharpElement>? Body { get; set; }
 
         /// <inheritdoc />
         public virtual IEnumerable<CSharpAttribute> GetAttributes()
@@ -68,13 +74,13 @@ namespace CppAst.CodeGen.CSharp
             Modifiers.DumpTo(writer);
             if (IsConstructor)
             {
-                writer.Write((Parent as CSharpNamedType)?.Name);
+                writer.Write(((CSharpNamedType)Parent!).Name);
             }
             else
             {
                 ReturnType?.DumpReferenceTo(writer);
                 writer.Write(" ");
-                writer.Write(Name);
+                writer.Write(Name ?? string.Empty);
             }
             Parameters.DumpTo(writer);
 
@@ -106,9 +112,8 @@ namespace CppAst.CodeGen.CSharp
             var dllImport = csMethod.Attributes.OfType<CSharpDllImportAttribute>().FirstOrDefault();
 
             // Create a new method
-            var clonedMethod = new CSharpMethod
+            var clonedMethod = new CSharpMethod(csMethod.Name)
             {
-                Name = csMethod.Name,
                 ReturnType = csMethod.ReturnType,
                 Modifiers = csMethod.Modifiers,
                 Comment = csMethod.Comment,
@@ -140,7 +145,7 @@ namespace CppAst.CodeGen.CSharp
             csMethod.Visibility = CSharpVisibility.Private;
 
             // Insert the new function right before
-            var members = ((ICSharpContainer)csMethod.Parent).Members;
+            var members = ((ICSharpContainer)csMethod.Parent!).Members;
             int index = members.IndexOf(csMethod);
             members.Insert(index, clonedMethod);
 

@@ -10,9 +10,9 @@ namespace CppAst.CodeGen.CSharp
         {
         }
 
-        public string ConstFieldTypeName { get; set; }
+        public string? ConstFieldTypeName { get; set; }
 
-        public string ConstFieldName { get; set; }
+        public string? ConstFieldName { get; set; }
 
         public bool ExplicitCast { get; set; }
     }

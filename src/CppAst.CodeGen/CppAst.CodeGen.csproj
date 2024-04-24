@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Description>CppAst.CodeGen is an extensible P/Invoke Code Generator from C++ to C# for .NET</Description>
     <Copyright>Alexandre Mutel</Copyright>
     <Authors>Alexandre Mutel</Authors>
+    <Nullable>enable</Nullable>
     <PackageTags>parser;c++;c#;codegen;pinvoke</PackageTags>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageIcon>logo.png</PackageIcon>
@@ -22,8 +23,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CppAst" Version="0.9.0" />
-    <PackageReference Include="Zio" Version="0.16.1" />
+    <PackageReference Include="CppAst" Version="0.16.0" />
+    <PackageReference Include="Zio" Version="0.17.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,12 +33,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MinVer" Version="4.2.0">
+    <PackageReference Include="MinVer" Version="5.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <!--Add support for sourcelink-->
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <Target Name="PatchVersion" AfterTargets="MinVer">

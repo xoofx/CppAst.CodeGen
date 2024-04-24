@@ -16,7 +16,7 @@ namespace CppAst.CodeGen.CSharp
 
         public bool IsStatic { get; set; }
 
-        public string Alias { get; set; }
+        public string? Alias { get; set; }
 
         public string Reference { get; set; }
 

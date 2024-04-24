@@ -17,7 +17,7 @@ namespace CppAst.CodeGen.CSharp
         }
 
         /// <inheritdoc />
-        ICSharpContainer ICSharpContainer.Parent => Parent as ICSharpContainer;
+        ICSharpContainer? ICSharpContainer.Parent => Parent as ICSharpContainer;
 
         public CppDiagnosticBag Diagnostics { get; }
 

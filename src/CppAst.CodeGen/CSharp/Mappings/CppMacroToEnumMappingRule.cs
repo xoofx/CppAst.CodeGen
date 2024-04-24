@@ -10,11 +10,11 @@ namespace CppAst.CodeGen.CSharp
         {
         }
 
-        public string CppEnumTypeName { get; set; }
+        public string? CppEnumTypeName { get; set; }
 
-        public string CppEnumItemName { get; set; }
+        public string? CppEnumItemName { get; set; }
 
-        public string CppIntegerTypeName { get; set; }
+        public string? CppIntegerTypeName { get; set; }
 
         public bool ExplicitCast { get; set; }
     }

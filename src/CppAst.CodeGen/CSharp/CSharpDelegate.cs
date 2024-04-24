@@ -16,14 +16,14 @@ namespace CppAst.CodeGen.CSharp
         }
 
         /// <inheritdoc />
-        public CSharpComment Comment { get; set; }
+        public CSharpComment? Comment { get; set; }
 
         /// <inheritdoc />
         public CSharpVisibility Visibility { get; set; }
 
         public List<CSharpAttribute> Attributes { get; }
 
-        public CSharpType ReturnType { get; set; }
+        public CSharpType? ReturnType { get; set; }
 
         public List<CSharpParameter> Parameters { get; }
 

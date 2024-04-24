@@ -15,9 +15,9 @@ namespace CppAst.CodeGen.CSharp
             pipeline.ParameterConverters.Add(ConvertParameter);
         }
 
-        public static CSharpElement ConvertParameter(CSharpConverter converter, CppParameter cppParam, int index, CSharpElement context)
+        public static CSharpElement? ConvertParameter(CSharpConverter converter, CppParameter cppParam, int index, CSharpElement context)
         {
-            var parent = ((CSharpElement)(context as CSharpMethod) ?? (context as CSharpDelegate));
+            var parent = ((CSharpElement?)(context as CSharpMethod) ?? (context as CSharpDelegate));
             var parameters = (context as CSharpMethod)?.Parameters ?? (context as CSharpDelegate)?.Parameters;
             if (parameters == null)
             {

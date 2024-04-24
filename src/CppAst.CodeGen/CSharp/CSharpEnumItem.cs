@@ -10,7 +10,7 @@ namespace CppAst.CodeGen.CSharp
 {
     public class CSharpEnumItem : CSharpElement, ICSharpWithComment, ICSharpAttributesProvider, ICSharpMember
     {
-        public CSharpEnumItem(string name, string value = null)
+        public CSharpEnumItem(string name, string? value = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Value = value;
@@ -20,11 +20,11 @@ namespace CppAst.CodeGen.CSharp
         public List<CSharpAttribute> Attributes { get; }
 
         /// <inheritdoc />
-        public CSharpComment Comment { get; set; }
+        public CSharpComment? Comment { get; set; }
 
         public string Name { get; set; }
 
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
         /// <inheritdoc />
         public virtual IEnumerable<CSharpAttribute> GetAttributes() => Attributes;
