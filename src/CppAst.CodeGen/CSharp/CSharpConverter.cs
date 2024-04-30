@@ -8,6 +8,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using CppAst.CodeGen.Common;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CppAst.CodeGen.CSharp
 {
@@ -40,6 +41,8 @@ namespace CppAst.CodeGen.CSharp
         public CSharpConverterOptions Options { get; }
 
         public Dictionary<string, object> Tags { get; }
+
+        public CSharpRefKind? CurrentParameterRefKind { get; set; }
 
         public static CSharpCompilation? Convert(List<string> files, CSharpConverterOptions options)
         {
@@ -237,6 +240,26 @@ namespace CppAst.CodeGen.CSharp
                 if (csElement != null)
                 {
                     ProcessConverted(csElement, context);
+
+                    if (CurrentCSharpCompilation != null)
+                    {
+                        if (csElement is CSharpStruct csStruct)
+                        {
+                            CurrentCSharpCompilation.AllStructs.Add(csStruct);
+                        }
+                        else if (csElement is CSharpMethod csMethod)
+                        {
+                            CurrentCSharpCompilation.AllFunctions.Add(csMethod);
+                        }
+                        else if (csElement is CSharpEnum csEnum)
+                        {
+                            CurrentCSharpCompilation.AllEnums.Add(csEnum);
+                        }
+                        else if (csElement is CSharpFunctionPointer csFunctionPointer)
+                        {
+                            CurrentCSharpCompilation.AllFunctionPointers.Add(csFunctionPointer);
+                        }
+                    }
                 }
             }
             finally
@@ -245,6 +268,9 @@ namespace CppAst.CodeGen.CSharp
                 {
                     ProcessConvertEnd();
 
+                    // Once we have transformed all the structs, we can compute the final marshalling usage
+                    ComputeFinalMarshallingUsageForAllStructs();
+                    
                     // Reset current CppCompilation and current CSharpCompilation
                     CurrentCppCompilation = null;
                     CurrentCSharpCompilation = null;
@@ -372,8 +398,8 @@ namespace CppAst.CodeGen.CSharp
         {
             for (var i = _pipeline.ConvertBegin.Count - 1; i >= 0; i--)
             {
-                var converting = _pipeline.ConvertBegin[i];
-                converting(this);
+                var convertBegin = _pipeline.ConvertBegin[i];
+                convertBegin(this);
             }
         }
 
@@ -381,8 +407,8 @@ namespace CppAst.CodeGen.CSharp
         {
             for (var i = _pipeline.ConvertEnd.Count - 1; i >= 0; i--)
             {
-                var converting = _pipeline.ConvertEnd[i];
-                converting(this);
+                var convertEnd = _pipeline.ConvertEnd[i];
+                convertEnd(this);
             }
         }
 
@@ -613,6 +639,18 @@ namespace CppAst.CodeGen.CSharp
             return (CSharpType?)FindCSharpElement(cppType);
         }
 
+        public ICSharpContainer? GetCSharpContainer(CSharpElement element)
+        {
+            var nextElement = element;
+            while (nextElement != null)
+            {
+                if (nextElement is ICSharpContainer container) return container;
+                nextElement = nextElement.Parent;
+            }
+
+            return null;
+        }
+
         public ICSharpContainer GetCSharpContainer(CppElement element, CSharpElement context)
         {
             if (CurrentCppCompilation != null && !ReferenceEquals(element.Parent, CurrentCppCompilation) && !ReferenceEquals(element.Parent, CurrentCppCompilation.System))
@@ -661,6 +699,122 @@ namespace CppAst.CodeGen.CSharp
         public string ConvertExpression(CppExpression expression)
         {
             return expression.ToString()!;
+        }
+
+        private void ComputeFinalMarshallingUsageForAllStructs()
+        {
+            if (CurrentCSharpCompilation == null) return;
+
+            // Visit function parameters
+            CurrentCSharpCompilation.AllFunctions.Sort((left, right) => string.CompareOrdinal(left.Name, right.Name));
+            foreach (var csFunction in CurrentCSharpCompilation.AllFunctions)
+            {
+                foreach (var csParameter in csFunction.Parameters)
+                {
+                    ComputeStructMarshallingUsageFromParameter(csParameter.ParameterType!, csParameter);
+                }
+
+                ComputeStructMarshallingUsageFromParameter(csFunction.ReturnType!, csFunction);
+            }
+
+            // Visit function pointers parameters
+            foreach (var csFunctionType in CurrentCSharpCompilation.AllFunctionPointers)
+            {
+                foreach (var csParameter in csFunctionType.Parameters)
+                {
+                    ComputeStructMarshallingUsageFromParameter(csParameter.ParameterType!, csParameter);
+                }
+
+                ComputeStructMarshallingUsageFromParameter(csFunctionType.ReturnType!, csFunctionType);
+            }
+            
+            // Visit structs to apply transitive usage
+            var visited = new HashSet<CSharpStruct>(ReferenceEqualityComparer.Instance);
+            CurrentCSharpCompilation.AllStructs.Sort((left, right) => string.CompareOrdinal(left.Name, right.Name));
+            foreach (var csStruct in CurrentCSharpCompilation.AllStructs)
+            {
+                visited.Clear();
+                ComputeFinalMarshallingUsageForStruct(csStruct, CSharpStructMarshallingUsage.None, visited);
+            }
+        }
+
+        private static void ComputeStructMarshallingUsageFromParameter(CSharpType csType, CSharpElement context)
+        {
+            var isParam = context is CSharpParameter && context.Parent is CSharpMethod;
+            var isReturn = context is CSharpMethod;
+            
+            // Check if we are in the context of a regular function, otherwise it is a function pointer
+            var isRegularFunction = isParam ? ((CSharpParameter)context).Parent is CSharpMethod : context is CSharpMethod;
+            ComputeStructMarshallingUsage(csType,
+                isRegularFunction
+                    ? (isReturn ? CSharpStructMarshallingUsage.NativeToManaged : CSharpStructMarshallingUsage.ManagedToNative)
+                    : (isReturn ? CSharpStructMarshallingUsage.ManagedToNative : CSharpStructMarshallingUsage.NativeToManaged)
+            );
+        }
+
+        private static void ComputeStructMarshallingUsage(CSharpType csType, CSharpStructMarshallingUsage currentUsage)
+        {
+            if (csType is CSharpStruct csStruct)
+            {
+                csStruct.MarshallingUsage |= currentUsage;
+            }
+            else if (csType is CSharpPointerType csPointerType)
+            {
+                ComputeStructMarshallingUsage(csPointerType.ElementType, CSharpStructMarshallingUsage.Both);
+            }
+            else if (csType is CSharpRefType csRefType)
+            {
+                // Should only happen for function parameters, not for function pointers
+                var usage = csRefType.Kind switch
+                {
+                    CSharpRefKind.In => CSharpStructMarshallingUsage.ManagedToNative,
+                    CSharpRefKind.Out => CSharpStructMarshallingUsage.NativeToManaged,
+                    CSharpRefKind.Ref => CSharpStructMarshallingUsage.Both,
+                    CSharpRefKind.RefReadOnly => CSharpStructMarshallingUsage.ManagedToNative,
+                    _ => currentUsage
+                };
+
+                ComputeStructMarshallingUsage(csRefType.ElementType, usage);
+            }
+            else if (csType is CSharpTypeWithElement csTypeWithElement)
+            {
+                ComputeStructMarshallingUsage(csTypeWithElement.ElementType, currentUsage);
+            }
+        }
+
+        private void ComputeFinalMarshallingUsageForStruct(CSharpType csType, CSharpStructMarshallingUsage inputUsage, HashSet<CSharpStruct> visited)
+        {
+            if (csType is CSharpStruct csStruct)
+            {
+                // Check if we have already visited this struct
+                if (!visited.Add(csStruct))
+                {
+                    // To avoid circular dependencies through pointers, if we have already visited this struct, we don't need to go further
+                    return;
+                }
+
+                csStruct.MarshallingUsage |= inputUsage;
+
+                // If the struct is still not used, we don't need to go further
+                if (csStruct.MarshallingUsage == CSharpStructMarshallingUsage.None)
+                {
+                    return;
+                }
+
+                inputUsage = csStruct.MarshallingUsage;
+
+                foreach (var member in csStruct.Members)
+                {
+                    if (member is CSharpField csField && csField.FieldType is CSharpStruct fieldStruct)
+                    {
+                        ComputeFinalMarshallingUsageForStruct(fieldStruct, inputUsage, visited);
+                    }
+                }
+            }
+            else if (csType is CSharpTypeWithElement csTypeWithElementType)
+            {
+                ComputeFinalMarshallingUsageForStruct(csTypeWithElementType, inputUsage, visited);
+            }
         }
     }
 

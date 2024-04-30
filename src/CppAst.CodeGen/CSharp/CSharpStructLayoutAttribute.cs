@@ -26,7 +26,7 @@ namespace CppAst.CodeGen.CSharp
         public override string ToText()
         {
             var builder = new StringBuilder();
-            builder.Append("StructLayout(LayoutKind.");
+            builder.Append("global::System.Runtime.InteropServices.StructLayout(LayoutKind.");
             builder.Append(LayoutKind.ToString());
             if (CharSet.HasValue)
             {

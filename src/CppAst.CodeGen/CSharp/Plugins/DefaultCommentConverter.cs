@@ -187,7 +187,7 @@ namespace CppAst.CodeGen.CSharp
         private static string? GetAsText(CppComment? comment, bool trimEnd = true)
         {
             if (comment == null) return null;
-            var text = comment.ToString();
+            var text = comment is CppCommentParamCommand paramCommand ? paramCommand.ChildrenToString() : comment.ToString();
             return trimEnd ? text.TrimEnd() : text;
         }
 

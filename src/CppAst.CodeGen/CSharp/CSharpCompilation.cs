@@ -3,8 +3,10 @@
 // See license.txt file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using CppAst.CodeGen.Common;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CppAst.CodeGen.CSharp
 {
@@ -25,6 +27,14 @@ namespace CppAst.CodeGen.CSharp
 
         /// <inheritdoc />
         public CSharpContainerList<CSharpElement> Members { get; }
+        
+        public List<CSharpStruct> AllStructs { get; } = new();
+
+        public List<CSharpEnum> AllEnums { get; } = new();
+
+        public List<CSharpMethod> AllFunctions { get; } = new();
+
+        public List<CSharpFunctionPointer> AllFunctionPointers { get; } = new();
 
         /// <inheritdoc />
         void ICSharpContainer.ValidateMember(CSharpElement element)

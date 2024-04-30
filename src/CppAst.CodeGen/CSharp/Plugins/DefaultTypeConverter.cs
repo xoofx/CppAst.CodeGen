@@ -2,18 +2,17 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using ClangSharp;
+using ClangSharp.Interop;
 
 namespace CppAst.CodeGen.CSharp
 {
     [StructLayout(LayoutKind.Explicit)]
     public class DefaultTypeConverter : ICSharpConverterPlugin
     {
-        private static readonly CppQualifiedType ConstChar = new CppQualifiedType(CppTypeQualifier.Const, CppPrimitiveType.Char);
-        private static readonly CppQualifiedType ConstVoid = new CppQualifiedType(CppTypeQualifier.Const, CppPrimitiveType.Void);
-
         /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
@@ -25,10 +24,7 @@ namespace CppAst.CodeGen.CSharp
             // Early exit for primitive types
             if (cppType is CppPrimitiveType cppPrimitiveType)
             {
-                // Special case for bool
-                return cppPrimitiveType.Kind == CppPrimitiveKind.Bool
-                    ? GetBoolType(converter)
-                    : CSharpHelper.GetCSharpPrimitive(cppPrimitiveType);
+                return GetCSharpPrimitiveType(converter, cppPrimitiveType);
             }
 
             // Check if a particular CppType has been already converted
@@ -38,191 +34,115 @@ namespace CppAst.CodeGen.CSharp
                 return csType;
             }
 
-            // Pre-decode the type by extracting any const/pointer and get the element type directly
-            DecodeSimpleType(cppType, out var isConst, out var isPointer, out var elementType);
+            DecodeSimpleType(cppType, out var isConst, out var isPointer, out var isOpaqueStructElementType, out var elementType);
 
-            if (isPointer)
+            var isParamFromFunctionOrFunctionPointer = !nested && context is CSharpParameter;
+            var isReturnFromFunctionOrFunctionPointer = !nested && (context is CSharpMethod || context is CSharpFunctionPointer);
+            var isParam = !nested && context is CSharpParameter csParam && csParam.Parent is CSharpMethod;
+            var isReturn = !nested && context is CSharpMethod;
+            var isConstField = context is CSharpField ctxCsField && (ctxCsField.Modifiers & CSharpModifiers.Const) != 0;
+
+            if (isConst && isPointer && !nested && elementType.Equals(CppPrimitiveType.Char) && (isParam || isReturn || isConstField))
             {
-                if (isConst && elementType.Equals(CppPrimitiveType.Char))
-                {
-                    // const char* => string (with marshal)
-                    csType = GetStringType(converter);
-                }
-                else
-                {
-                    var pointedCSharpType = converter.GetCSharpType(elementType, context, true);
-
-                    var isParam = context is CSharpParameter;
-                    var isReturn = context is CSharpMethod;
-                    if (!nested && (isParam || isReturn))
-                    {
-                        switch (elementType.TypeKind)
-                        {
-                            case CppTypeKind.Array:
-                                break;
-                            case CppTypeKind.Reference:
-                                break;
-                            case CppTypeKind.Qualified:
-                                var qualifiedType = (CppQualifiedType)elementType;
-                                csType = new CSharpRefType(qualifiedType.Qualifier == CppTypeQualifier.Const ? (isParam ? CSharpRefKind.In : CSharpRefKind.RefReadOnly) : CSharpRefKind.Ref, converter.GetCSharpType(qualifiedType.ElementType, context, true));
-                                break;
-                            case CppTypeKind.Function:
-                                csType = pointedCSharpType;
-                                break;
-                            case CppTypeKind.Typedef:
-                                csType = new CSharpRefType(CSharpRefKind.Ref, pointedCSharpType);
-                                break;
-                            case CppTypeKind.StructOrClass:
-                                // Is the struct is an opaque definition (which can is transformed into passing the struct directly as
-                                // the struct contains the pointer)
-                                if (pointedCSharpType is CSharpStruct csStruct && csStruct.IsOpaque)
-                                {
-                                    csType = csStruct;
-                                }
-                                else
-                                {
-                                    csType = new CSharpRefType(isConst ? (isParam ? CSharpRefKind.In : CSharpRefKind.RefReadOnly) : CSharpRefKind.Ref, pointedCSharpType);
-                                }
-                                break;
-                            case CppTypeKind.Enum:
-                                csType = new CSharpRefType(CSharpRefKind.Ref, pointedCSharpType);
-                                break;
-                            case CppTypeKind.TemplateParameterType:
-                                break;
-                            case CppTypeKind.Unexposed:
-                                break;
-                            case CppTypeKind.Primitive:
-                                var cppPrimitive = (CppPrimitiveType)elementType;
-                                if (cppPrimitive.Kind != CppPrimitiveKind.Void && cppPrimitive.Kind != CppPrimitiveKind.Char && cppPrimitive.Kind != CppPrimitiveKind.UnsignedChar)
-                                {
-                                    csType = new CSharpRefType(CSharpRefKind.Ref, pointedCSharpType);
-                                }
-                                break;
-                            case CppTypeKind.Pointer:
-                                csType = isParam ? new CSharpRefType(CSharpRefKind.Out, pointedCSharpType) : null;
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        switch (elementType.TypeKind)
-                        {
-                            case CppTypeKind.Array:
-                                break;
-                            case CppTypeKind.Reference:
-                                break;
-                            case CppTypeKind.Qualified:
-                                break;
-                            case CppTypeKind.Function:
-                                csType = converter.ConvertType(elementType, context);
-                                break;
-                            case CppTypeKind.Typedef:
-                                break;
-                            case CppTypeKind.StructOrClass:
-                                // Is the struct is an opaque definition (which can is transformed into passing the struct directly as
-                                // the struct contains the pointer)
-                                if (pointedCSharpType is CSharpStruct csStruct && csStruct.IsOpaque)
-                                {
-                                    csType = csStruct;
-                                }
-                                break;
-                            case CppTypeKind.Enum:
-                                break;
-                            case CppTypeKind.TemplateParameterType:
-                                break;
-                            case CppTypeKind.Unexposed:
-                                break;
-                            case CppTypeKind.Primitive:
-                                break;
-                            case CppTypeKind.Pointer:
-                                break;
-                        }
-                    }
-
-                    // Any pointers that is not decoded to a simpler form is exposed as an IntPtr
-                    csType = csType ?? CSharpPrimitiveType.IntPtr();
-                }
+                // const char* => string (with marshal)
+                csType = GetStringType(converter, isReturn ? CppStringUsage.Return : isConstField ? CppStringUsage.Const : CppStringUsage.Parameter );
             }
-            else
+
+            if (csType == null)
             {
                 switch (cppType.TypeKind)
                 {
-                    case CppTypeKind.Array:
-
-                        var arrayType = (CppArrayType)cppType;
-                        var arrayElementType = arrayType.ElementType;
-
-                        if (arrayType.Size < 0 && arrayElementType.Equals(ConstChar))
+                    case CppTypeKind.Pointer:
+                        var csElementType = converter.GetCSharpType(((CppPointerType)cppType).ElementType, context, true)!;
+                        if ((converter.Options.DetectOpaquePointers && isOpaqueStructElementType) || csElementType is CSharpFunctionPointer)
                         {
-                            // const char[] => string (with marshal)
-                            csType = GetStringType(converter);
-                        }
-                        else if (arrayType.Size > 0 && (arrayElementType.Equals(CppPrimitiveType.Char) || arrayElementType.Equals(CppPrimitiveType.WChar)))
-                        {
-                            var fixedStrType = new CSharpTypeWithAttributes(CSharpPrimitiveType.String());
-                            fixedStrType.Attributes.Add(new CSharpMarshalAttribute(CSharpUnmanagedKind.ByValTStr) { SizeConst = arrayType.Size });
-                            csType = fixedStrType;
+                            csType = csElementType;
                         }
                         else
                         {
-                            if (converter.Options.AllowFixedSizeBuffers && arrayType.Size > 0 && context is CSharpField csField && arrayElementType.GetCanonicalType() is CppPrimitiveType cppPrimitive && cppPrimitive.Kind != CppPrimitiveKind.Bool)
+                            var manualRefKind = converter.CurrentParameterRefKind;
+                            // Handle auto-ref or manual ref kind
+                            if (isParam && (converter.Options.EnableAutoByRef || manualRefKind.HasValue))
                             {
-                                var csParent = (CSharpTypeWithMembers)csField.Parent!;
-                                csParent.Modifiers |= CSharpModifiers.Unsafe;
+                                // Reset the state
+                                converter.CurrentParameterRefKind = null;
 
-                                var csArrayElementType = converter.GetCSharpType(arrayElementType, context, true);
-
-                                if (csArrayElementType is CSharpTypeWithMembers csArrayElementWithMembers)
+                                if (manualRefKind.HasValue)
                                 {
-                                    csType = new CSharpFixedArrayType(csArrayElementWithMembers.BaseTypes.First(), arrayType.Size);
+                                    if (manualRefKind.Value != CSharpRefKind.None)
+                                    {
+                                        csType = new CSharpRefType(manualRefKind.Value, csElementType);
+                                    }
                                 }
                                 else
                                 {
-                                    csType = new CSharpFixedArrayType(csArrayElementType, arrayType.Size);
+                                    if (isConst && elementType.TypeKind == CppTypeKind.StructOrClass)
+                                    {
+                                        csType = new CSharpRefType(CSharpRefKind.In, csElementType);
+                                    }
+                                    else if (csElementType is CSharpStruct ||
+                                             csElementType is CSharpPointerType ||
+                                             csElementType is CSharpEnum ||
+                                             (csElementType is CSharpPrimitiveType primitiveType && (primitiveType.Kind != CSharpPrimitiveKind.Void && primitiveType.Kind != CSharpPrimitiveKind.Byte))
+                                            )
+                                    {
+                                        csType = new CSharpRefType(CSharpRefKind.Ref, csElementType);
+                                    }
                                 }
+                            }
+
+                            csType ??= new CSharpPointerType(csElementType);
+                        }
+                        break;
+                    case CppTypeKind.Reference:
+                        csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(((CppPointerType)cppType).ElementType, context, true)!);
+                        break;
+                    case CppTypeKind.Array:
+                        var arrayType = (CppArrayType)cppType;
+                        var arrayElementType = arrayType.ElementType;
+                        var csArrayElementType = converter.GetCSharpType(arrayElementType, context, true)!;
+                        if (converter.Options.AllowFixedSizeBuffers && arrayType.Size > 0 && context is CSharpField csField && arrayElementType.GetCanonicalType() is CppPrimitiveType cppPrimitive && cppPrimitive.Kind != CppPrimitiveKind.Bool)
+                        {
+                            var csParent = (CSharpTypeWithMembers)csField.Parent!;
+                            csParent.Modifiers |= CSharpModifiers.Unsafe;
+
+
+                            if (csArrayElementType is CSharpTypeWithMembers csArrayElementWithMembers)
+                            {
+                                csType = new CSharpFixedArrayType(csArrayElementWithMembers.BaseTypes.First(), arrayType.Size);
                             }
                             else
                             {
-                                var csArrayElementType = converter.GetCSharpType(arrayElementType, context, true);
-                                csType = new CSharpArrayType(csArrayElementType);
-                                var typeWithAttributes = new CSharpTypeWithAttributes(csType);
-                                var attr = new CSharpMarshalAttribute(CSharpUnmanagedKind.LPArray);
-                                if (csArrayElementType is CSharpTypeWithAttributes csArrayElementTypeWithAttributes)
-                                {
-                                    var marshalAttributeForArrayElementType = GetMarshalAttributeOrNull(csArrayElementTypeWithAttributes.Attributes);
-                                    attr.ArraySubType = marshalAttributeForArrayElementType?.UnmanagedType;
-                                }
-
-                                if (arrayType.Size >= 0)
-                                {
-                                    attr.SizeConst = arrayType.Size;
-                                }
-                                typeWithAttributes.Attributes.Add(attr);
-                                csType = typeWithAttributes;
+                                csType = new CSharpFixedArrayType(csArrayElementType, arrayType.Size);
+                            }
+                        }
+                        else
+                        {
+                            if (arrayType.Size > 0)
+                            {
+                                csType = new CSharpFreeType($"{converter.Options.FixedArrayPrefix}{arrayType.Size}<{csArrayElementType.GetName()}");
+                            }
+                            else
+                            {
+                                csType = new CSharpPointerType(csArrayElementType);
                             }
                         }
                         break;
-
-                    case CppTypeKind.Reference:
-                        csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(((CppReferenceType)cppType).ElementType, context, true));
-                        break;
                     case CppTypeKind.Qualified:
                         var qualifiedType = (CppQualifiedType)cppType;
-                        csType = converter.GetCSharpType(qualifiedType.ElementType, context, true);
-                        // TODO: Handle in parameters
+                        csType = converter.GetCSharpType(qualifiedType.ElementType, context, true)!;
                         break;
                     case CppTypeKind.Function:
-                        csType = converter.ConvertType(cppType, context);
-                        break;
                     case CppTypeKind.Typedef:
-                        csType = converter.ConvertType(cppType, context);
-                        break;
                     case CppTypeKind.StructOrClass:
-                        csType = converter.ConvertType(cppType, context);
-                        break;
                     case CppTypeKind.Enum:
+                        csType = converter.ConvertType(cppType, context);
                         break;
                     case CppTypeKind.TemplateParameterType:
+                        break;
+                    case CppTypeKind.TemplateParameterNonType:
+                        break;
+                    case CppTypeKind.TemplateArgumentType:
                         break;
                     case CppTypeKind.Unexposed:
                         break;
@@ -231,42 +151,55 @@ namespace CppAst.CodeGen.CSharp
 
             return csType;
         }
-
-        private static CSharpMarshalAttribute? GetMarshalAttributeOrNull(List<CSharpAttribute> attributes)
+        
+        public static CSharpType GetCSharpPrimitiveType(CSharpConverter converter, CppPrimitiveType cppPrimitiveType)
         {
-            foreach (var cSharpAttribute in attributes)
-            {
-                if (cSharpAttribute is CSharpMarshalAttribute csMarshalAttribute)
-                {
-                    return csMarshalAttribute;
-                }
-            }
+            CSharpType? csType = null;
 
-            return null;
-        }
-
-        public static CSharpType GetBoolType(CSharpConverter converter)
-        {
-            CSharpType boolType = CSharpPrimitiveType.Bool();
-            if (converter.Options.DefaultMarshalForBool != null)
+            if (!converter.Options.DisableRuntimeMarshalling && converter.Options.DefaultMarshalForBool != null && cppPrimitiveType.Kind == CppPrimitiveKind.Bool)
             {
-                var boolTypeWithMarshal = new CSharpTypeWithAttributes(boolType);
+                csType = CSharpPrimitiveType.Bool();
+                var boolTypeWithMarshal = new CSharpTypeWithAttributes(csType);
                 boolTypeWithMarshal.Attributes.Add(converter.Options.DefaultMarshalForBool.Clone());
-                boolType = boolTypeWithMarshal;
+                csType = boolTypeWithMarshal;
             }
-            return boolType;
+            else if (converter.Options.CharAsByte && cppPrimitiveType.Kind == CppPrimitiveKind.Char)
+            {
+                csType = CSharpPrimitiveType.Byte();
+            }
+
+            csType ??= CSharpHelper.GetCSharpPrimitive(cppPrimitiveType);
+            return csType;
         }
 
-        public static CSharpType GetStringType(CSharpConverter converter)
+        private static CSharpType? GetStringType(CSharpConverter converter, CppStringUsage usage)
         {
-            CSharpType strType = CSharpPrimitiveType.String();
-            if (converter.Options.DefaultMarshalForString != null)
+            if (!converter.Options.AllowMarshalForString && usage != CppStringUsage.Const)
             {
-                var boolTypeWithMarshal = new CSharpTypeWithAttributes(strType);
-                boolTypeWithMarshal.Attributes.Add(converter.Options.DefaultMarshalForString.Clone());
-                strType = boolTypeWithMarshal;
+                return null;
+            }
+
+            CSharpType strType = usage == CppStringUsage.Parameter && converter.Options.ManagedToUnmanagedStringTypeForParameter != null ? (CSharpType)new CSharpFreeType(converter.Options.ManagedToUnmanagedStringTypeForParameter) : CSharpPrimitiveType.String();
+            if (usage != CppStringUsage.Const && converter.Options.DefaultMarshalForString != null)
+            {
+                var strTypeWithMarshal = new CSharpTypeWithAttributes(strType);
+                var attr = converter.Options.DefaultMarshalForString.Clone();
+                if (usage == CppStringUsage.Return)
+                {
+                    attr.Scope = CSharpAttributeScope.Return;
+                }
+                strTypeWithMarshal.Attributes.Add(attr);
+                strType = strTypeWithMarshal;
             }
             return strType;
+        }
+
+        enum CppStringUsage
+        {
+            Field,
+            Parameter,
+            Return,
+            Const
         }
 
         /// <summary>
@@ -275,8 +208,9 @@ namespace CppAst.CodeGen.CSharp
         /// <param name="type"></param>
         /// <param name="isConst"></param>
         /// <param name="isPointer"></param>
+        /// <param name="isOpaqueElementType"></param>
         /// <param name="elementType"></param>
-        private static void DecodeSimpleType(CppType type, out bool isConst, out bool isPointer, out CppType elementType)
+        public static void DecodeSimpleType(CppType type, out bool isConst, out bool isPointer, out bool isOpaqueElementType, out CppType elementType)
         {
             isConst = false;
             isPointer = false;
@@ -293,6 +227,10 @@ namespace CppAst.CodeGen.CSharp
                 isConst = qualifiedType.Qualifier == CppTypeQualifier.Const;
                 elementType = qualifiedType.ElementType;
             }
+
+            var canonicalElementType = elementType.GetCanonicalType();
+            isOpaqueElementType = isPointer && canonicalElementType is CppClass cppClass && cppClass.ClassKind == CppClassKind.Struct && !cppClass.IsDefinition && cppClass.Fields.Count == 0;
         }
     }
 }
+

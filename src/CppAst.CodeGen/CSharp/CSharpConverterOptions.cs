@@ -50,8 +50,15 @@ namespace CppAst.CodeGen.CSharp
             Tags = new Dictionary<string, object?>();
             DefaultCharSet = CharSet.Ansi;
             AllowFixedSizeBuffers = true;
-            DefaultMarshalForString = new CSharpMarshalAttribute(CSharpUnmanagedKind.LPStr);
-            DefaultMarshalForBool = new CSharpMarshalAttribute(CSharpUnmanagedKind.U1);
+            DefaultMarshalForString = new CSharpMarshalAsAttribute(UnmanagedType.LPUTF8Str);
+            DefaultMarshalForBool = new CSharpMarshalAsAttribute(UnmanagedType.U1);
+            UseLibraryImport = true;
+            DisableRuntimeMarshalling = false;
+            CharAsByte = true;
+            DetectOpaquePointers = true;
+            AllowMarshalForString = true;
+            ManagedToUnmanagedStringTypeForParameter = null;
+            EnableAutoByRef = true;
         }
 
         public string DefaultNamespace { get; set; }
@@ -66,17 +73,27 @@ namespace CppAst.CodeGen.CSharp
 
         public bool AllowFixedSizeBuffers { get; set; }
 
+        public bool DetectOpaquePointers { get; set; }
+
+        public bool CharAsByte { get; set; }
+
         public CharSet DefaultCharSet { get; set; }
 
         public bool DispatchOutputPerInclude { get; set; }
 
-        public CSharpMarshalAttribute? DefaultMarshalForString { get; set; }
+        public bool AllowMarshalForString { get; set; }
 
-        public CSharpMarshalAttribute? DefaultMarshalForBool { get; set; }
+        public CSharpAttribute? DefaultMarshalForString { get; set; }
+
+        public CSharpAttribute? DefaultMarshalForBool { get; set; }
 
         public bool GenerateEnumItemAsFields { get; set; }
 
         public CppTypedefCodeGenKind TypedefCodeGenKind { get; set; }
+
+        public bool UseLibraryImport { get; set; }
+
+        public bool DisableRuntimeMarshalling { get; set; }
 
         public HashSet<string> TypedefWrapWhiteList { get; }
 
@@ -85,6 +102,12 @@ namespace CppAst.CodeGen.CSharp
         public CppMappingRules MappingRules { get; private set; }
 
         public List<ICSharpConverterPlugin> Plugins { get; private set; }
+
+        public string? ManagedToUnmanagedStringTypeForParameter { get; set; }
+
+        public bool EnableAutoByRef { get; set; }
+
+        public string FixedArrayPrefix { get; set; } = "FixedArray";
 
         public object? this[string tagName]
         {
@@ -109,8 +132,8 @@ namespace CppAst.CodeGen.CSharp
             // TODO: value behind tags are not cloned
             csConverterOptions.Tags = new Dictionary<string, object?>(Tags);
 
-            csConverterOptions.DefaultMarshalForString = (CSharpMarshalAttribute?)DefaultMarshalForString?.Clone();
-            csConverterOptions.DefaultMarshalForBool = (CSharpMarshalAttribute?)DefaultMarshalForBool?.Clone();
+            csConverterOptions.DefaultMarshalForString = (CSharpAttribute?)DefaultMarshalForString?.Clone();
+            csConverterOptions.DefaultMarshalForBool = (CSharpAttribute?)DefaultMarshalForBool?.Clone();
 
             return csConverterOptions;
         }

@@ -14,6 +14,8 @@ namespace CppAst.CodeGen.CSharp
         /// <inheritdoc />
         protected override string DeclarationKind => "struct";
 
+        public CSharpStructMarshallingUsage MarshallingUsage { get; set; }
+
         public bool IsOpaque
         {
             get

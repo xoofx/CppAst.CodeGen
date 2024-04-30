@@ -181,8 +181,8 @@ namespace CppAst.CodeGen.Tests
             var functionPointer = new CSharpFunctionPointer(CSharpPrimitiveType.Void());
             functionPointer.IsUnmanaged = true;
             functionPointer.UnmanagedCallingConvention.Add("Cdecl");
-            functionPointer.Parameters.Add(CSharpPrimitiveType.Int());
-            functionPointer.Parameters.Add(CSharpPrimitiveType.Bool());
+            functionPointer.Parameters.Add(new CSharpParameter() { ParameterType = CSharpPrimitiveType.Int() });
+            functionPointer.Parameters.Add(new CSharpParameter() { ParameterType = CSharpPrimitiveType.Bool() });
             functionPointer.DumpTo(codeWriter);
 
             Assert.AreEqual("delegate*unmanaged[Cdecl]<int, bool, void>", codeWriter.ToString());

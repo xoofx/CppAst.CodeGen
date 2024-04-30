@@ -22,7 +22,11 @@ namespace CppAst.CodeGen.Tests
             var options = new CSharpConverterOptions();
 
             var csCompilation = CSharpConverter.Convert(@"
+typedef struct { int x; } AnotherStruct;
+
 struct {
+    AnotherStruct v;
+    AnotherStruct* pv;
     int a;
     int b;
     void (*ptr)(int arg0, int arg1, void (*arg2)(int arg3));

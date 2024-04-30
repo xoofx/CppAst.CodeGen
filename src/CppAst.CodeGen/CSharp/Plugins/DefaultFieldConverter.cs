@@ -21,7 +21,9 @@ namespace CppAst.CodeGen.CSharp
         public static CSharpElement? ConvertField(CSharpConverter converter, CppField cppField, CSharpElement context)
         {
             // Early exit if this is a global variable (we don't handle dllexport)
-            bool isConst = cppField.Type is CppQualifiedType qualifiedType && qualifiedType.Qualifier == CppTypeQualifier.Const;
+            bool isConst = cppField.Type is CppQualifiedType qualifiedType && qualifiedType.Qualifier == CppTypeQualifier.Const 
+                || cppField.Type is CppPointerType pointerType && pointerType.ElementType is CppQualifiedType qualifiedElementType && qualifiedElementType.Qualifier == CppTypeQualifier.Const;
+
             var isGlobalVariable = (!(cppField.Parent is CppClass) && !isConst) || cppField.StorageQualifier == CppStorageQualifier.Static;
             if (isGlobalVariable)
             {
@@ -155,18 +157,6 @@ namespace CppAst.CodeGen.CSharp
             var csField = new CSharpField(csFieldName) { CppElement = cppField };
             converter.ApplyDefaultVisibility(csField, csContainer);
 
-            if (isConst)
-            {
-                if (isParentClass)
-                {
-                    csField.Modifiers |= CSharpModifiers.ReadOnly;
-                }
-                else
-                {
-                    csField.Modifiers |= CSharpModifiers.Const;
-                }
-            }
-
             csContainer.Members.Add(csField);
 
             csField.Comment = converter.GetCSharpComment(cppField, csField);
@@ -176,8 +166,21 @@ namespace CppAst.CodeGen.CSharp
                 csField.Attributes.Add(new CSharpFreeAttribute("FieldOffset(0)"));
                 converter.AddUsing(csContainer, "System.Runtime.InteropServices");
             }
-            csField.FieldType = converter.GetCSharpType(cppField.Type, csField);
+            
+            if (isConst)
+            {
+                if (isParentClass)
+                {
+                    //csField.Modifiers |= CSharpModifiers.ReadOnly;
+                }
+                else
+                {
+                    csField.Modifiers |= CSharpModifiers.Const;
+                }
+            }
 
+            csField.FieldType = converter.GetCSharpType(cppField.Type, csField);
+            
             if (cppField.InitExpression != null)
             {
                 if (cppField.InitExpression.Kind == CppExpressionKind.Unexposed)
@@ -187,6 +190,12 @@ namespace CppAst.CodeGen.CSharp
                 else
                 {
                     csField.InitValue = converter.ConvertExpression(cppField.InitExpression);
+                }
+
+                var isString = csField.FieldType is CSharpPrimitiveType primitive && primitive.Kind == CSharpPrimitiveKind.String;
+                if (isString)
+                {
+                    csField.InitValue = $"\"{csField.InitValue}\"";
                 }
             }
 

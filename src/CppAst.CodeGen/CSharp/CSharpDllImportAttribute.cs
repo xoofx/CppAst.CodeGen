@@ -30,7 +30,7 @@ namespace CppAst.CodeGen.CSharp
         public override string ToText()
         {
             var builder = new StringBuilder();
-            builder.Append("DllImport(");
+            builder.Append("global::System.Runtime.InteropServices.DllImport(");
             builder.Append(DllName);
             if (EntryPoint != null)
             {

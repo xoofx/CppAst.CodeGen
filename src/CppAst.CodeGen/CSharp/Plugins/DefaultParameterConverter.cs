@@ -17,8 +17,8 @@ namespace CppAst.CodeGen.CSharp
 
         public static CSharpElement? ConvertParameter(CSharpConverter converter, CppParameter cppParam, int index, CSharpElement context)
         {
-            var parent = ((CSharpElement?)(context as CSharpMethod) ?? (context as CSharpDelegate));
-            var parameters = (context as CSharpMethod)?.Parameters ?? (context as CSharpDelegate)?.Parameters;
+            var parent = ((CSharpElement?)(context as CSharpMethod) ?? (CSharpElement?)(context as CSharpDelegate) ?? (context as CSharpFunctionPointer));
+            var parameters = (context as CSharpMethod)?.Parameters ?? (context as CSharpDelegate)?.Parameters ?? (context as CSharpFunctionPointer)?.Parameters;
             if (parameters == null)
             {
                 return null;

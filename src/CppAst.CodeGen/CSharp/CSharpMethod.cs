@@ -35,7 +35,32 @@ namespace CppAst.CodeGen.CSharp
         public string Name { get; set; }
 
         public List<CSharpParameter> Parameters { get; }
+        
+        public CSharpMethod Clone()
+        {
+            var newMethod = new CSharpMethod(Name)
+            {
+                CppElement = CppElement,
+                Comment = Comment,
+                Visibility = Visibility,
+                Modifiers = Modifiers,
+                ReturnType = ReturnType,
+                IsConstructor = IsConstructor,
+            };
 
+            foreach (var attribute in Attributes)
+            {
+                newMethod.Attributes.Add(attribute.Clone());
+            }
+
+            foreach (var parameter in Parameters)
+            {
+                newMethod.Parameters.Add(parameter.Clone());
+            }
+
+            return newMethod;
+        }
+        
         /// <summary>
         /// Creates a function pointer that is matching the signature of the method.
         /// </summary>
@@ -50,7 +75,7 @@ namespace CppAst.CodeGen.CSharp
             foreach (var parameter in Parameters)
             {
                 if (parameter.ParameterType != null)
-                    functionPointer.Parameters.Add(parameter.ParameterType);
+                    functionPointer.Parameters.Add(parameter.Clone());
             }
             return functionPointer;
         }

@@ -14,7 +14,7 @@ namespace CppAst.CodeGen.CSharp
     {
         public CSharpFunctionPointer(CSharpType returnType)
         {
-            Parameters = new List<CSharpType>();
+            Parameters = new List<CSharpParameter>();
             UnmanagedCallingConvention = new List<string>();
             ReturnType = returnType;
         }
@@ -32,7 +32,7 @@ namespace CppAst.CodeGen.CSharp
         /// <summary>
         /// The parameters of this function pointer.
         /// </summary>
-        public List<CSharpType> Parameters { get; }
+        public List<CSharpParameter> Parameters { get; }
         
         /// <summary>
         /// Gets or sets the return type.
@@ -64,7 +64,7 @@ namespace CppAst.CodeGen.CSharp
             {
                 var parameterType = Parameters[i];
                 if (i > 0) writer.Write(", ");
-                parameterType.DumpReferenceTo(writer);
+                parameterType.ParameterType!.DumpReferenceTo(writer);
             }
             if (Parameters.Count > 0) writer.Write(", ");
 

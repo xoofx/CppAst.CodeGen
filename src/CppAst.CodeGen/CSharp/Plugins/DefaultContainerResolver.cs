@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using ClangSharp;
 using Zio;
 
 namespace CppAst.CodeGen.CSharp
@@ -35,6 +36,7 @@ namespace CppAst.CodeGen.CSharp
                 if (!isFromSystemIncludes)
                 {
                     var fileName = Path.GetFileNameWithoutExtension(element.Span.Start.File);
+                    fileName ??= "Unknown";
 
                     if (cacheContainer.IncludeToClass.TryGetValue(fileName, out var csClassLib))
                     {
@@ -68,7 +70,7 @@ namespace CppAst.CodeGen.CSharp
             csFile.Members.Add(csNamespace);
 
             var csClassLib = new CSharpClass(converter.Options.DefaultClassLib);
-            csClassLib.Modifiers |= CSharpModifiers.Partial | CSharpModifiers.Static;
+            csClassLib.Modifiers |= CSharpModifiers.Partial | CSharpModifiers.Static | CSharpModifiers.Unsafe;
             converter.ApplyDefaultVisibility(csClassLib, csNamespace);
 
             csNamespace.Members.Add(csClassLib);

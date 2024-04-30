@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace CppAst.CodeGen.CSharp
@@ -134,16 +135,16 @@ namespace CppAst.CodeGen.CSharp
             return mappingRule;
         }
 
-        public static CppElementMappingRule MarshalAs(this CppElementMappingRule mappingRule, CSharpUnmanagedKind unmanagedKind)
+        public static CppElementMappingRule MarshalAs(this CppElementMappingRule mappingRule, UnmanagedType unmanagedKind)
         {
-            return MarshalAs(mappingRule, new CSharpMarshalAttribute(unmanagedKind));
+            return MarshalAs(mappingRule, new CSharpMarshalAsAttribute(unmanagedKind));
         }
 
-        public static CppElementMappingRule MarshalAs(this CppElementMappingRule mappingRule, CSharpMarshalAttribute marshalAttribute, bool cloneAttribute = true)
+        public static CppElementMappingRule MarshalAs(this CppElementMappingRule mappingRule, CSharpMarshalAsAttribute marshalAsAttribute, bool cloneAttribute = true)
         {
-            if (marshalAttribute == null) throw new ArgumentNullException(nameof(marshalAttribute));
+            if (marshalAsAttribute == null) throw new ArgumentNullException(nameof(marshalAsAttribute));
 
-            var clonedAttribute = cloneAttribute ? marshalAttribute.Clone() : marshalAttribute;
+            var clonedAttribute = cloneAttribute ? marshalAsAttribute.Clone() : marshalAsAttribute;
 
             mappingRule.CSharpElementActions.Add((converter, element, matches) =>
             {
@@ -161,7 +162,7 @@ namespace CppAst.CodeGen.CSharp
                     for (var i = cppTypeWithAttributes.Attributes.Count - 1; i >= 0; i--)
                     {
                         var attr = cppTypeWithAttributes.Attributes[i];
-                        if (attr is CSharpMarshalAttribute)
+                        if (attr is CSharpMarshalAsAttribute)
                         {
                             cppTypeWithAttributes.Attributes.RemoveAt(i);
                             cppTypeWithAttributes.Attributes.Insert(i, clonedAttribute);
@@ -179,6 +180,34 @@ namespace CppAst.CodeGen.CSharp
                     else if (csMethod != null) csMethod.ReturnType = typeWithAttributes;
                 }
             });
+
+            return mappingRule;
+        }
+
+        public static CppElementMappingRule NoByRef(this CppElementMappingRule mappingRule)
+        {
+            mappingRule.CppElementActions.Add(
+                (converter, element, context, matches) =>
+                {
+                    if (element is CppParameter)
+                    {
+                        converter.CurrentParameterRefKind = CSharpRefKind.None;
+                    }
+                });
+
+            return mappingRule;
+        }
+
+        public static CppElementMappingRule ByRef(this CppElementMappingRule mappingRule, CSharpRefKind refKind)
+        {
+            mappingRule.CppElementActions.Add(
+                (converter, element, context, matches) =>
+                {
+                    if (element is CppParameter)
+                    {
+                        converter.CurrentParameterRefKind = refKind;
+                    }
+                });
 
             return mappingRule;
         }
