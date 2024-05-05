@@ -38,10 +38,10 @@ namespace CppAst.CodeGen.CSharp
                     csEnum.IsFlags = true;
                 }
 
-                if (csEnum.IsFlags)
-                {
-                    csEnumItem.Value = csEnumItem.Value.Replace("<<", $" << ({csEnum.IntegerBaseType})");
-                }
+                //if (csEnum.IsFlags)
+                //{
+                //    csEnumItem.Value = csEnumItem.Value.Replace("<<", $" << (int)");
+                //}
             }
 
             if (converter.Options.GenerateEnumItemAsFields && context.Parent is CSharpClass csClass)
