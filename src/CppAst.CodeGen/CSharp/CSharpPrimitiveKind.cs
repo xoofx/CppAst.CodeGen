@@ -22,5 +22,6 @@ namespace CppAst.CodeGen.CSharp
         Object,
         String,
         IntPtr,
+        UIntPtr,
     }
 }

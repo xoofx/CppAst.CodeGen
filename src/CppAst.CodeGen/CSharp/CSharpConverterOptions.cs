@@ -59,6 +59,7 @@ namespace CppAst.CodeGen.CSharp
             AllowMarshalForString = true;
             ManagedToUnmanagedStringTypeForParameter = null;
             EnableAutoByRef = true;
+            AutoConvertStandardCTypes = true;
         }
 
         public string DefaultNamespace { get; set; }
@@ -104,6 +105,8 @@ namespace CppAst.CodeGen.CSharp
         public List<ICSharpConverterPlugin> Plugins { get; private set; }
 
         public string? ManagedToUnmanagedStringTypeForParameter { get; set; }
+
+        public bool AutoConvertStandardCTypes { get; set; }
 
         public bool EnableAutoByRef { get; set; }
 

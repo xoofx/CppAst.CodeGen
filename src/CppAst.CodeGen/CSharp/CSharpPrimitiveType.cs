@@ -25,6 +25,7 @@ namespace CppAst.CodeGen.CSharp
         public static CSharpPrimitiveType Object() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Object);
         public static CSharpPrimitiveType String() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.String);
         public static CSharpPrimitiveType IntPtr() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.IntPtr);
+        public static CSharpPrimitiveType UIntPtr() => new CSharpPrimitiveType(CSharpPrimitiveKind.UIntPtr);
 
         public CSharpPrimitiveType(CSharpPrimitiveKind kind)
         {
@@ -84,7 +85,10 @@ namespace CppAst.CodeGen.CSharp
                     writer.Write("string");
                     break;
                 case CSharpPrimitiveKind.IntPtr:
-                    writer.Write("IntPtr");
+                    writer.Write("nint");
+                    break;
+                case CSharpPrimitiveKind.UIntPtr:
+                    writer.Write("nuint");
                     break;
                 default:
                     throw new InvalidOperationException($"{Kind} is not supported");

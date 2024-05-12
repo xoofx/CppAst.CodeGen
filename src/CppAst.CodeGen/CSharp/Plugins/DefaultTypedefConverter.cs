@@ -2,38 +2,66 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace CppAst.CodeGen.CSharp
 {
     public class DefaultTypedefConverter : ICSharpConverterPlugin
     {
+        public DefaultTypedefConverter()
+        {
+            StandardCTypes = new Dictionary<string, Func<CSharpType>>()
+            {
+                {"int8_t", CSharpPrimitiveType.SByte},
+                {"uint8_t", CSharpPrimitiveType.Byte},
+                {"int16_t", CSharpPrimitiveType.Short},
+                {"uint16_t", CSharpPrimitiveType.UShort},
+                {"int32_t", CSharpPrimitiveType.Int},
+                {"uint32_t", CSharpPrimitiveType.UInt},
+                {"int64_t", CSharpPrimitiveType.Long},
+                {"uint64_t", CSharpPrimitiveType.ULong},
+                {"size_t", CSharpPrimitiveType.UIntPtr},
+                {"ssize_t", CSharpPrimitiveType.IntPtr},
+                {"ptrdiff_t", CSharpPrimitiveType.IntPtr},
+                {"intptr_t", CSharpPrimitiveType.IntPtr},
+                {"uintptr_t", CSharpPrimitiveType.UIntPtr},
+                {"regoff_t", CSharpPrimitiveType.IntPtr},
+                {"register_t", CSharpPrimitiveType.Int}, // Likely not 100% correct for all CPU
+                {"wchar_t", CSharpPrimitiveType.Char},
+                {"nlink_t", CSharpPrimitiveType.Int},
+                {"time_t", CSharpPrimitiveType.Long},
+                {"char16_t", CSharpPrimitiveType.Char},
+                {"char32_t", () => new CSharpFreeType("global::System.Text.Rune")},
+            };
+        }
+
+        public Dictionary<string, Func<CSharpType>> StandardCTypes { get; }
+
+
         /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
             pipeline.TypedefConverters.Add(ConvertTypedef);
         }
 
-        private CSharpElement ConvertTypedef(CSharpConverter converter, CppTypedef cppTypedef, CSharpElement context)
+        public CSharpElement ConvertTypedef(CSharpConverter converter, CppTypedef cppTypedef, CSharpElement context)
         {
             var elementType = cppTypedef.ElementType;
 
             var isFromSystemIncludes = converter.IsFromSystemIncludes(cppTypedef);
 
+            if (isFromSystemIncludes && converter.Options.AutoConvertStandardCTypes && StandardCTypes.TryGetValue(cppTypedef.Name, out var funcStandardType))
+            {
+                return funcStandardType();
+            }
+
             var csElementType = converter.GetCSharpType(elementType, context, true);
 
             var noWrap = converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.NoWrap && !converter.Options.TypedefWrapWhiteList.Contains(cppTypedef.Name);
 
-            // If:
-            // - the typedef is from system includes and the underlying type is not a pointer
-            // - or the typedef mode is "no-wrap" and is not in the whitelist
-            // - or the typedef is a typedef of an opaque struct
-            // - or the typedef is a typedef of void
-            // then we bypass entirely the typedef and return immediately the element type
-            var is_size_t = isFromSystemIncludes && cppTypedef.Name == "size_t";
-
-            var attachedAttributes = string.Empty;
-            var csElementTypeName = is_size_t ? "nint" : converter.ConvertTypeReferenceToString(csElementType, out attachedAttributes);
+            var csElementTypeName = converter.ConvertTypeReferenceToString(csElementType, out var attachedAttributes);
 
             var csStructName = converter.GetCSharpName(cppTypedef, context);
             var csStruct = new CSharpStruct(csStructName)
@@ -41,7 +69,7 @@ namespace CppAst.CodeGen.CSharp
                 CppElement = cppTypedef,
             };
 
-            if (noWrap || (isFromSystemIncludes && elementType.TypeKind != CppTypeKind.Pointer && !is_size_t) || csStruct.IsOpaque || csElementTypeName == "void")
+            if (noWrap || (isFromSystemIncludes && elementType.TypeKind != CppTypeKind.Pointer) || csStruct.IsOpaque || csElementTypeName == "void")
             {
                 return csElementType;
             }
