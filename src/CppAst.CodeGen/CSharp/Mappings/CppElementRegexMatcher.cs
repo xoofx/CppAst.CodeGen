@@ -49,7 +49,15 @@ namespace CppAst.CodeGen.CSharp
                     }
 
                     var regexPart = _regexParts[matchIndex];
-                    var match = regexPart.Match(member.Name);
+
+                    var name = member.Name;
+                    if (string.IsNullOrEmpty(name) && member is CppParameter parameter && parameter.Parent is CppFunction)
+                    {
+                        var function = (CppFunction)parameter.Parent;
+                        name = "arg" + function.Parameters.IndexOf(parameter);
+                    }
+
+                    var match = regexPart.Match(name);
                     if (match.Success)
                     {
                         if (matches == null)
