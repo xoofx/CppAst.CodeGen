@@ -1,4 +1,4 @@
-# CppAst.CodeGen [![Build Status](https://github.com/xoofx/CppAst.CodeGen/workflows/ci/badge.svg?branch=master)](https://github.com/xoofx/CppAst.CodeGen/actions) [![NuGet](https://img.shields.io/nuget/v/CppAst.CodeGen.svg)](https://www.nuget.org/packages/CppAst.CodeGen/)
+# CppAst.CodeGen [![ci](https://github.com/xoofx/CppAst.CodeGen/actions/workflows/ci.yml/badge.svg)](https://github.com/xoofx/CppAst.CodeGen/actions/workflows/ci.yml) [![NuGet](https://img.shields.io/nuget/v/CppAst.CodeGen.svg)](https://www.nuget.org/packages/CppAst.CodeGen/)
 
 <img align="right" width="160px" height="160px" src="https://raw.githubusercontent.com/xoofx/CppAst.CodeGen/master/img/cppast_codegen.png">
 
