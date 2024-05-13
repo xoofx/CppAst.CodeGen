@@ -95,7 +95,7 @@ namespace CppAst.CodeGen.CSharp
                         }
                         break;
                     case CppTypeKind.Reference:
-                        csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(((CppPointerType)cppType).ElementType, context, true)!);
+                        csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(((CppReferenceType)cppType).ElementType, context, true)!);
                         break;
                     case CppTypeKind.Array:
                         var arrayType = (CppArrayType)cppType;
