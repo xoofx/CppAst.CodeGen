@@ -30,16 +30,13 @@ namespace CppAst.CodeGen.CSharp
                 {"regoff_t", CSharpPrimitiveType.IntPtr},
                 {"register_t", CSharpPrimitiveType.Int}, // Likely not 100% correct for all CPU
                 {"wchar_t", CSharpPrimitiveType.Char},
-                {"nlink_t", CSharpPrimitiveType.Int},
-                {"time_t", CSharpPrimitiveType.Long},
                 {"char16_t", CSharpPrimitiveType.Char},
                 {"char32_t", () => new CSharpFreeType("global::System.Text.Rune")},
             };
         }
 
         public Dictionary<string, Func<CSharpType>> StandardCTypes { get; }
-
-
+        
         /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
@@ -50,16 +47,16 @@ namespace CppAst.CodeGen.CSharp
         {
             var elementType = cppTypedef.ElementType;
 
-            var isFromSystemIncludes = converter.IsFromSystemIncludes(cppTypedef);
+            //var isFromSystemIncludes = converter.IsFromSystemIncludes(cppTypedef);
 
-            if (isFromSystemIncludes && converter.Options.AutoConvertStandardCTypes && StandardCTypes.TryGetValue(cppTypedef.Name, out var funcStandardType))
+            if (converter.Options.AutoConvertStandardCTypes && StandardCTypes.TryGetValue(cppTypedef.Name, out var funcStandardType))
             {
                 return funcStandardType();
             }
 
             var csElementType = converter.GetCSharpType(elementType, context, true);
 
-            var noWrap = converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.NoWrap && !converter.Options.TypedefWrapWhiteList.Contains(cppTypedef.Name);
+            var noWrap = converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.NoWrap && !converter.Options.TypedefWrapForceList.Contains(cppTypedef.Name);
 
             var csElementTypeName = converter.ConvertTypeReferenceToString(csElementType, out var attachedAttributes);
 
@@ -69,7 +66,7 @@ namespace CppAst.CodeGen.CSharp
                 CppElement = cppTypedef,
             };
 
-            if (noWrap || (isFromSystemIncludes && elementType.TypeKind != CppTypeKind.Pointer) || csStruct.IsOpaque || csElementTypeName == "void")
+            if (noWrap || csStruct.IsOpaque || csElementTypeName == "void")
             {
                 return csElementType;
             }
