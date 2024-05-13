@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using ClangSharp;
 using Zio;
 
 namespace CppAst.CodeGen.CSharp
@@ -35,16 +34,45 @@ namespace CppAst.CodeGen.CSharp
 
                 if (!isFromSystemIncludes)
                 {
-                    var fileName = Path.GetFileNameWithoutExtension(element.Span.Start.File);
-                    fileName ??= "Unknown";
+                    var filePath = element.Span.Start.File;
+                    string? filePathRelative = null;
+                    if (filePath is not null)
+                    {
+                        filePath = Path.GetFullPath(filePath);
+                        foreach (var folder in converter.Options.IncludeFolders)
+                        {
+                            var folderPath = Path.GetFullPath(folder) + Path.DirectorySeparatorChar;
+                            if (filePath.StartsWith(folderPath))
+                            {
+                                filePathRelative = filePath.Substring(folderPath.Length);
+                                break;
+                            }
+                        }
+                    }
 
-                    if (cacheContainer.IncludeToClass.TryGetValue(fileName, out var csClassLib))
+                    if (filePathRelative is null)
+                    {
+                        return cacheContainer.DefaultClass;
+                    }
+                    else
+                    {
+                        var dir = Path.GetDirectoryName(filePathRelative);
+                        filePathRelative = string.IsNullOrEmpty(dir) ? Path.GetFileNameWithoutExtension(filePathRelative) : Path.Combine(dir, Path.GetFileNameWithoutExtension(filePathRelative));
+                    }
+                    filePathRelative = filePathRelative.Replace('\\', '/');
+
+                    if (filePathRelative.Contains(":"))
+                    {
+
+                    }
+
+                    if (cacheContainer.IncludeToClass.TryGetValue(filePathRelative, out var csClassLib))
                     {
                         return csClassLib;
                     }
 
-                    csClassLib = CreateClassLib(converter, UPath.Combine(UPath.Root, fileName + ".generated.cs"));
-                    cacheContainer.IncludeToClass.Add(fileName, csClassLib);
+                    csClassLib = CreateClassLib(converter, UPath.Combine(UPath.Root, filePathRelative + ".generated.cs"));
+                    cacheContainer.IncludeToClass.Add(filePathRelative, csClassLib);
                     return csClassLib;
                 }
             }
