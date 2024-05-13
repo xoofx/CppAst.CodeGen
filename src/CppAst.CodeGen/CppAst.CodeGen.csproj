@@ -40,6 +40,10 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 
+  <!--<ItemGroup>
+    <ProjectReference Include="..\..\..\CppAst\src\CppAst\CppAst.csproj" />
+  </ItemGroup>-->
+
   <Target Name="PatchVersion" AfterTargets="MinVer">
     <PropertyGroup>
       <!-- Workaround for MinVer, the minor version in this library is like a major version because major is 0 so we need to remove this once this library will be >= 1.0 -->
