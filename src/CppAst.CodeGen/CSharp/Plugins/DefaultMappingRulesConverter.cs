@@ -102,7 +102,7 @@ namespace CppAst.CodeGen.CSharp
                             {
                                 ruleNameByMacro[cppMacro][cppMacroRule] = Regex.Replace(regexMatch.RegexInput, regexMatch.RegexPattern, name);
                             }
-                            else if (cppMacroRule is CppMacroToConstMappingRule)
+                            else
                             {
                                 ruleNameByMacro[cppMacro][cppMacroRule] = cppMacro.Name;
                             }
