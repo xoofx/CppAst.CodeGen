@@ -105,7 +105,7 @@ EXPORT_API void function0(int x);
             {
                 GenerateAsInternal = true,
                 TypedefCodeGenKind = CppTypedefCodeGenKind.Wrap,
-                TypedefWrapWhiteList =
+                TypedefWrapForceList =
                 {
                     "git_my_string"
                 }
