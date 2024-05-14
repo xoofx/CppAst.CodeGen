@@ -27,9 +27,6 @@ namespace CppAst.CodeGen.CSharp
                 {"ptrdiff_t", CSharpPrimitiveType.IntPtr},
                 {"intptr_t", CSharpPrimitiveType.IntPtr},
                 {"uintptr_t", CSharpPrimitiveType.UIntPtr},
-                {"regoff_t", CSharpPrimitiveType.IntPtr},
-                {"register_t", CSharpPrimitiveType.Int}, // Likely not 100% correct for all CPU
-                {"wchar_t", CSharpPrimitiveType.Char},
                 {"char16_t", CSharpPrimitiveType.Char},
                 {"char32_t", () => new CSharpFreeType("global::System.Text.Rune")},
             };
@@ -46,8 +43,6 @@ namespace CppAst.CodeGen.CSharp
         public CSharpElement ConvertTypedef(CSharpConverter converter, CppTypedef cppTypedef, CSharpElement context)
         {
             var elementType = cppTypedef.ElementType;
-
-            //var isFromSystemIncludes = converter.IsFromSystemIncludes(cppTypedef);
 
             if (converter.Options.AutoConvertStandardCTypes && StandardCTypes.TryGetValue(cppTypedef.Name, out var funcStandardType))
             {
