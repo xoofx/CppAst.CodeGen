@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 namespace CppAst.CodeGen.CSharp
 {
     [StructLayout(LayoutKind.Explicit)]
-    public class DefaultMappingRulesConverter : ICSharpConverterPlugin
+    public partial class DefaultMappingRulesConverter : ICSharpConverterPlugin
     {
         private const string CachedRulesKey = nameof(DefaultMappingRulesConverter) + "_" + nameof(CachedRulesKey);
 
@@ -70,7 +70,11 @@ namespace CppAst.CodeGen.CSharp
             {
                 var matches = new List<ICppElementMatch>();
                 var enumToMacros = new Dictionary<CppMacroToEnumMappingRule, StringBuilder>();
-                var macrosByName = cppCompilation.Macros.ToDictionary(m => m.Name, m => m);
+                var macrosByName = new Dictionary<string, CppMacro>();
+                foreach (var cppMacro in macrosByName.Values)
+                {
+                    macrosByName[cppMacro.Name] = cppMacro;
+                }
                 var ruleNameByMacro = new Dictionary<CppMacro, Dictionary<CppMacroMappingRule, string>>();
 
                 // Generate names from rules
@@ -105,6 +109,11 @@ namespace CppAst.CodeGen.CSharp
                             else
                             {
                                 ruleNameByMacro[cppMacro][cppMacroRule] = cppMacro.Name;
+                            }
+
+                            if (!cachedRules.MatchMacros.Contains(cppMacro))
+                            {
+                                cachedRules.MatchMacros.Add(cppMacro);
                             }
                         }
                     }
@@ -153,7 +162,7 @@ namespace CppAst.CodeGen.CSharp
                                 stringBuilder = macrosAsEnumText;
                                 explicitCast = macroToEnum.ExplicitCast;
                                 typeName = macroToEnum.CppIntegerTypeName;
-                                rulePrefix = $"    {cachedRules.Prefix}";
+                                rulePrefix = $"    {cachedRules.GetPrefix(cppMacro)}";
                                 ruleSuffix = ",";
                                 break;
                             }
@@ -161,7 +170,7 @@ namespace CppAst.CodeGen.CSharp
                                 stringBuilder = additionalHeaders;
                                 explicitCast = macroToConst.ExplicitCast;
                                 typeName = macroToConst.ConstFieldTypeName;
-                                rulePrefix = $"const {macroToConst.ConstFieldTypeName} {cachedRules.Prefix}";
+                                rulePrefix = $"const {macroToConst.ConstFieldTypeName} {cachedRules.GetPrefix(cppMacro)}";
                                 ruleSuffix = ";";
                                 break;
                         }
@@ -187,7 +196,7 @@ namespace CppAst.CodeGen.CSharp
                                         .ThenByDescending(kvp => kvp.Key == cppMacroRule)
                                         .First().Value;
 
-                                    token.Text = $"{cachedRules.Prefix}{tokenName}";
+                                    token.Text = $"{cachedRules.GetPrefix(cppMacro)}{tokenName}";
                                 }
                             }
 
@@ -232,6 +241,12 @@ namespace CppAst.CodeGen.CSharp
             builder.AppendLine($"#line {rule.DeclarationLineNumber} \"{rule.DeclarationFileName?.Replace(@"\", @"\\")}\"");
         }
 
+        /// <summary>
+        /// Macro used to match an index of CppMacro and the name of the macro
+        /// </summary>
+        [GeneratedRegex(@"^(\d+)_(.*)")]
+        private static partial Regex RegexMatchMacro();
+
         private static void ProcessCppElementMappingRules(CSharpConverter converter, CppElement cppElement, CSharpElement context)
         {
             var cachedRules = GetCachedRules(converter);
@@ -246,8 +261,15 @@ namespace CppAst.CodeGen.CSharp
                 {
                     return str.Substring(cachedRules.Prefix.Length);
                 }
-
-                member.Name = RemoveRulePrefix(member.Name);
+                
+                var result = RegexMatchMacro().Match(RemoveRulePrefix(member.Name));
+                
+                // Recover the macro index to recover the original SourceSpan to dispatch later to the correct output files
+                var macroIndex = int.Parse(result.Groups[1].Value);
+                var name = result.Groups[2].Value;
+                
+                member.Name = name;
+                cppElement.Span = cachedRules.MatchMacros[macroIndex].Span;
 
                 // Check field and parameter expressions' arguments for the prefix as well
                 var expression = cppElement switch
@@ -255,8 +277,16 @@ namespace CppAst.CodeGen.CSharp
                     CppField cppField => cppField.InitExpression,
                     CppParameter cppParameter => cppParameter.InitExpression,
                     CppEnumItem cppEnumItem => cppEnumItem.ValueExpression,
-                    _ => null
+                    _ => throw new InvalidOperationException($"Unexpected type {cppElement.GetType()}")
                 };
+
+                if (cppElement.Parent is CppEnum cppEnum)
+                {
+                    if (cppEnum.Span.Start.File != cppElement.Span.Start.File && !string.IsNullOrEmpty(cppElement.Span.Start.File))
+                    {
+                        cppEnum.Span = cppElement.Span;
+                    }
+                }
 
                 if (expression != null)
                 {
@@ -426,6 +456,7 @@ namespace CppAst.CodeGen.CSharp
                 TypesToCompile = new List<CppElementMappingRule>();
                 TypesCompiled = new Dictionary<TypeRemapKey, CppType>();
                 Prefix = "cppast_" + Guid.NewGuid().ToString("N") + "_";
+                MatchMacros = new List<CppMacro>();
             }
 
             public string Prefix { get; }
@@ -440,7 +471,16 @@ namespace CppAst.CodeGen.CSharp
 
             public Dictionary<CppElement, List<CppElementMatch>> ElementToMatches { get; }
 
+            public List<CppMacro> MatchMacros { get; }
+
             public bool IsEmpty => MacroRules.Count == 0 && StandardRules.Count == 0;
+
+            public string GetPrefix(CppMacro macro)
+            {
+                var index = MatchMacros.IndexOf(macro);
+                if (index < 0) throw new InvalidOperationException($"Cannot find the macro {macro.Name} in the list of matched macros");
+                return $"{Prefix}{index:0}_";
+            }
         }
 
         private readonly struct TypeRemapKey
