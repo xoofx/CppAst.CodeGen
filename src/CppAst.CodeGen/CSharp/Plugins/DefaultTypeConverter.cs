@@ -100,12 +100,21 @@ namespace CppAst.CodeGen.CSharp
                     case CppTypeKind.Array:
                         var arrayType = (CppArrayType)cppType;
                         var arrayElementType = arrayType.ElementType;
-                        var csArrayElementType = converter.GetCSharpType(arrayElementType, context, true)!;
-                        if (converter.Options.AllowFixedSizeBuffers && arrayType.Size > 0 && context is CSharpField csField && arrayElementType.GetCanonicalType() is CppPrimitiveType cppPrimitive && cppPrimitive.Kind != CppPrimitiveKind.Bool)
+                        var canonicalElementType = arrayElementType.GetCanonicalType();
+                        var isPointerElementType = IsPointerType(canonicalElementType);
+                        if (converter.Options.AllowFixedSizeBuffers && 
+                            arrayType.Size > 0 && 
+                            context is CSharpField csField && 
+                            ((canonicalElementType is CppPrimitiveType cppPrimitive && 
+                              cppPrimitive.Kind != CppPrimitiveKind.Bool && 
+                              ((cppPrimitive.Kind != CppPrimitiveKind.Long && cppPrimitive.Kind != CppPrimitiveKind.UnsignedLong)))
+                            )
+                            )
                         {
                             var csParent = (CSharpTypeWithMembers)csField.Parent!;
                             csParent.Modifiers |= CSharpModifiers.Unsafe;
 
+                            var csArrayElementType = converter.GetCSharpType(arrayElementType, context, true)!;
 
                             if (csArrayElementType is CSharpTypeWithMembers csArrayElementWithMembers)
                             {
@@ -120,10 +129,12 @@ namespace CppAst.CodeGen.CSharp
                         {
                             if (arrayType.Size > 0)
                             {
-                                csType = new CSharpFreeType($"{converter.Options.FixedArrayPrefix}{arrayType.Size}<{csArrayElementType.GetName()}");
+                                var csArrayElementType = isPointerElementType ? CSharpPrimitiveType.IntPtr() : converter.GetCSharpType(arrayElementType, context, true)!;
+                                csType = new CSharpFreeType($"{converter.Options.FixedArrayPrefix}{arrayType.Size}<{csArrayElementType.GetName()}>");
                             }
                             else
                             {
+                                var csArrayElementType = converter.GetCSharpType(arrayElementType, context, true)!;
                                 csType = new CSharpPointerType(csArrayElementType);
                             }
                         }
@@ -168,7 +179,7 @@ namespace CppAst.CodeGen.CSharp
                 csType = CSharpPrimitiveType.Byte();
             }
 
-            csType ??= CSharpHelper.GetCSharpPrimitive(cppPrimitiveType);
+            csType ??= CSharpHelper.GetCSharpPrimitive(converter, cppPrimitiveType);
             return csType;
         }
 
@@ -230,6 +241,11 @@ namespace CppAst.CodeGen.CSharp
 
             var canonicalElementType = elementType.GetCanonicalType();
             isOpaqueElementType = isPointer && canonicalElementType is CppClass cppClass && cppClass.ClassKind == CppClassKind.Struct && !cppClass.IsDefinition && cppClass.Fields.Count == 0;
+        }
+
+        private static bool IsPointerType(CppType type)
+        {
+            return type is CppPointerType || (type is CppQualifiedType qualifiedType && qualifiedType.ElementType is CppPointerType);
         }
     }
 }
