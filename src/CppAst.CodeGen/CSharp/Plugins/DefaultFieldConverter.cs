@@ -198,6 +198,10 @@ namespace CppAst.CodeGen.CSharp
                     csField.InitValue = $"\"{csField.InitValue}\"";
                 }
             }
+            else
+            {
+                csField.InitValue = cppField.InitValue?.Value?.ToString();
+            }
 
             return csField;
         }

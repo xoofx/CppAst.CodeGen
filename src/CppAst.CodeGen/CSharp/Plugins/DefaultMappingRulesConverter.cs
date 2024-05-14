@@ -260,6 +260,7 @@ namespace CppAst.CodeGen.CSharp
 
                 if (expression != null)
                 {
+                    bool expressionWasNotRecovered = false;
                     var expressions = new Stack<CppExpression>();
                     expressions.Push(expression);
 
@@ -282,9 +283,13 @@ namespace CppAst.CodeGen.CSharp
                             }
                             case CppLiteralExpression literalExpression:
                             {
-                                if (literalExpression.Value.StartsWith(cachedRules.Prefix))
+                                if (literalExpression.Value != null && literalExpression.Value.StartsWith(cachedRules.Prefix))
                                 {
                                     literalExpression.Value = RemoveRulePrefix(literalExpression.Value);
+                                }
+                                else if (string.IsNullOrEmpty(literalExpression.Value))
+                                {
+                                    expressionWasNotRecovered = true;
                                 }
                                 break;
                             }
@@ -296,6 +301,26 @@ namespace CppAst.CodeGen.CSharp
                             {
                                 expressions.Push(argument);
                             }
+                        }
+                    }
+
+                    if (expressionWasNotRecovered)
+                    {
+                        switch (cppElement)
+                        {
+                            case CppField cppField:
+                                cppField.InitExpression = null;
+                                break;
+
+                            case CppParameter cppParameter:
+                                cppParameter.InitExpression = null;
+                                break;
+
+                            case CppEnumItem cppEnumItem:
+                                cppEnumItem.ValueExpression = null;
+                                break;
+                            default:
+                                throw new InvalidOperationException($"Unexpected type {cppElement.GetType()}");
                         }
                     }
                 }
