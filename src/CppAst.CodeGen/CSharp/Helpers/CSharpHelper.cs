@@ -150,7 +150,7 @@ namespace CppAst.CodeGen.CSharp
             return CallingConvention.Cdecl;
         }
 
-        public static CSharpType GetCSharpPrimitive(CppPrimitiveType cppType)
+        public static CSharpType GetCSharpPrimitive(CSharpConverter converter, CppPrimitiveType cppType)
         {
             switch (cppType.Kind)
             {
@@ -167,9 +167,9 @@ namespace CppAst.CodeGen.CSharp
                 case CppPrimitiveKind.Int:
                     return CSharpPrimitiveType.Int();
                 case CppPrimitiveKind.Long:
-                    return new CSharpFreeType("global::System.Runtime.InteropServices.CLong");
+                    return converter.Options.MapCLongToIntPtr ? CSharpPrimitiveType.IntPtr() : new CSharpFreeType("global::System.Runtime.InteropServices.CLong");
                 case CppPrimitiveKind.UnsignedLong:
-                    return new CSharpFreeType("global::System.Runtime.InteropServices.CULong");
+                    return converter.Options.MapCLongToIntPtr ? CSharpPrimitiveType.UIntPtr() : new CSharpFreeType("global::System.Runtime.InteropServices.CULong");
                 case CppPrimitiveKind.LongLong:
                     return CSharpPrimitiveType.Long();
                 case CppPrimitiveKind.UnsignedChar:

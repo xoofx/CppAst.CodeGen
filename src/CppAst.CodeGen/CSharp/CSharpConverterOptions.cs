@@ -60,6 +60,7 @@ namespace CppAst.CodeGen.CSharp
             ManagedToUnmanagedStringTypeForParameter = null;
             EnableAutoByRef = true;
             AutoConvertStandardCTypes = true;
+            MapCLongToIntPtr = false;
         }
 
         public string DefaultNamespace { get; set; }
@@ -111,6 +112,8 @@ namespace CppAst.CodeGen.CSharp
         public bool EnableAutoByRef { get; set; }
 
         public string FixedArrayPrefix { get; set; } = "FixedArray";
+
+        public bool MapCLongToIntPtr { get; set; }
 
         public object? this[string tagName]
         {
