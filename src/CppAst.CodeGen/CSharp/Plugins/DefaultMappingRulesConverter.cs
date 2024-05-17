@@ -167,6 +167,7 @@ namespace CppAst.CodeGen.CSharp
                                 break;
                             }
                             case CppMacroToConstMappingRule macroToConst:
+                                
                                 stringBuilder = additionalHeaders;
                                 explicitCast = macroToConst.ExplicitCast;
                                 typeName = macroToConst.ConstFieldTypeName;
@@ -202,9 +203,10 @@ namespace CppAst.CodeGen.CSharp
 
                             cppMacro.UpdateValueFromTokens();
 
+                            var macroValue = cppMacroRule.OverrideValue ?? cppMacro.Value;
                             stringBuilder.AppendLine(explicitCast
-                                ? $"{rulePrefix}{name} = ({typeName}){cppMacro.Value}{ruleSuffix}"
-                                : $"{rulePrefix}{name} = {cppMacro.Value}{ruleSuffix}");
+                                ? $"{rulePrefix}{name} = ({typeName}){macroValue}{ruleSuffix}"
+                                : $"{rulePrefix}{name} = {macroValue}{ruleSuffix}");
                         }
                     }
                 }

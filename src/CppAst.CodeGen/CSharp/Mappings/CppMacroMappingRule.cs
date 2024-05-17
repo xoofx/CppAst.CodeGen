@@ -13,5 +13,7 @@ namespace CppAst.CodeGen.CSharp
             if (macroMatch == null) throw new ArgumentNullException(nameof(macroMatch));
             AddMatcher(macroMatch);
         }
+        
+        public string? OverrideValue { get; set; }
     }
 }

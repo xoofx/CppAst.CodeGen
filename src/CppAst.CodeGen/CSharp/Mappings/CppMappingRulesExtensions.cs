@@ -288,7 +288,7 @@ namespace CppAst.CodeGen.CSharp
             };
         }
 
-        public static CppMacroToConstMappingRule MapMacroToConst(this CppMappingRules dispatcher, string cppRegexMatchMacroName, string cppType, bool explicitCast = false, string? enumItemName = null, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
+        public static CppMacroToConstMappingRule MapMacroToConst(this CppMappingRules dispatcher, string cppRegexMatchMacroName, string cppType, bool explicitCast = false, string? enumItemName = null, string? overrideValue = null, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
         {
             return new CppMacroToConstMappingRule(new CppElementRegexMatcher(cppRegexMatchMacroName))
             {
@@ -297,10 +297,11 @@ namespace CppAst.CodeGen.CSharp
                 DeclarationFileName = mapOriginFilePath,
                 DeclarationLineNumber = mapLineNumber,
                 ExplicitCast = explicitCast,
+                OverrideValue = overrideValue
             };
         }
 
-        public static CppMacroToEnumMappingRule MapMacroToEnum(this CppMappingRules dispatcher, string cppRegexName, string cppEnumTypeName, string? cppEnumItemName = null, string integerType = "int", bool explicitCast = false, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
+        public static CppMacroToEnumMappingRule MapMacroToEnum(this CppMappingRules dispatcher, string cppRegexName, string cppEnumTypeName, string? cppEnumItemName = null, string integerType = "int", bool explicitCast = false, string? overrideValue = null, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
         {
             return new CppMacroToEnumMappingRule(new CppElementRegexMatcher(cppRegexName))
             {
@@ -310,6 +311,7 @@ namespace CppAst.CodeGen.CSharp
                 DeclarationFileName = mapOriginFilePath,
                 DeclarationLineNumber = mapLineNumber,
                 ExplicitCast = explicitCast,
+                OverrideValue = overrideValue
             };
         }
 
