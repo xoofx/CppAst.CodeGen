@@ -44,6 +44,8 @@ namespace CppAst.CodeGen.CSharp
 
         public Action<CodeWriter, CSharpElement>? SetBody { get; set; }
 
+        public bool GetterOnly { get; set; }
+
         /// <inheritdoc />
         public virtual IEnumerable<CSharpAttribute> GetAttributes() => Attributes;
 
@@ -65,7 +67,7 @@ namespace CppAst.CodeGen.CSharp
             }
             else if (GetBody == null && SetBody == null)
             {
-                writer.Write(" { get; set; }");
+                writer.Write(GetterOnly ? " { get; }" : " { get; set; }");
                 writer.WriteLine();
             }
             else
