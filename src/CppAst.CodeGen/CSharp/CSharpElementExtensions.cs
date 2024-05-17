@@ -83,6 +83,15 @@ namespace CppAst.CodeGen.CSharp
                 writer.Write("static ");
             }
 
+            if ((modifiers & CSharpModifiers.Implicit) != 0)
+            {
+                writer.Write("implicit ");
+            }
+            else if ((modifiers & CSharpModifiers.Explicit) != 0)
+            {
+                writer.Write("explicit ");
+            }
+
             if ((modifiers & CSharpModifiers.Abstract) != 0)
             {
                 writer.Write("abstract ");

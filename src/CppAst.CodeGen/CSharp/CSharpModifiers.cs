@@ -17,5 +17,7 @@ namespace CppAst.CodeGen.CSharp
         Const = 1 << 4,
         ReadOnly = 1 << 5,
         Unsafe = 1 << 6,
+        Implicit = 1 << 7,
+        Explicit = 1 << 8,
     }
 }

@@ -9,6 +9,16 @@ using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp
 {
+    public enum CSharpMethodKind
+    {
+        Method,
+        Constructor,
+        Destructor,
+        Operator,
+        Conversion,
+    }
+
+
     public class CSharpMethod : CSharpElement, ICSharpWithComment, ICSharpAttributesProvider, ICSharpElementWithVisibility, ICSharpMember
     {
         public CSharpMethod(string name)
@@ -30,11 +40,17 @@ namespace CppAst.CodeGen.CSharp
 
         public CSharpType? ReturnType { get; set; }
 
-        public bool IsConstructor { get; set; }
+        public CSharpMethodKind Kind { get; set; }
 
         public string Name { get; set; }
 
         public List<CSharpParameter> Parameters { get; }
+
+        public bool IsManaged { get; set; }
+
+        public Action<CodeWriter, CSharpElement>? Body { get; set; }
+
+        public Action<CodeWriter, CSharpElement>? BodyInline { get; set; }
         
         public CSharpMethod Clone()
         {
@@ -45,7 +61,7 @@ namespace CppAst.CodeGen.CSharp
                 Visibility = Visibility,
                 Modifiers = Modifiers,
                 ReturnType = ReturnType,
-                IsConstructor = IsConstructor,
+                Kind = Kind,
             };
 
             foreach (var attribute in Attributes)
@@ -80,8 +96,6 @@ namespace CppAst.CodeGen.CSharp
             return functionPointer;
         }
 
-        public Action<CodeWriter, CSharpElement>? Body { get; set; }
-
         /// <inheritdoc />
         public virtual IEnumerable<CSharpAttribute> GetAttributes()
         {
@@ -97,12 +111,16 @@ namespace CppAst.CodeGen.CSharp
             ReturnType?.DumpContextualAttributesTo(writer, false, CSharpAttributeScope.Return);
             Visibility.DumpTo(writer);
             Modifiers.DumpTo(writer);
-            if (IsConstructor)
+            if (Kind == CSharpMethodKind.Constructor)
             {
                 writer.Write(((CSharpNamedType)Parent!).Name);
             }
             else
             {
+                if (Kind == CSharpMethodKind.Operator)
+                {
+                    writer.Write("operator ");
+                }
                 ReturnType?.DumpReferenceTo(writer);
                 writer.Write(" ");
                 writer.Write(Name ?? string.Empty);
@@ -125,6 +143,12 @@ namespace CppAst.CodeGen.CSharp
             }
             else
             {
+                if (BodyInline != null)
+                {
+                    writer.Write(" => ");
+                    BodyInline?.Invoke(writer, this);
+                }
+
                 writer.WriteLine(";");
             }
         }

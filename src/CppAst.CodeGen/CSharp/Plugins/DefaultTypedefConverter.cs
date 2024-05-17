@@ -49,11 +49,15 @@ namespace CppAst.CodeGen.CSharp
                 return funcStandardType();
             }
 
+            // For typedef we need to resolve it from the container perspective, not from its usage (e.g field)
+            if (!(context is ICSharpContainer))
+            {
+                context = converter.CurrentCSharpCompilation!;
+            }
+            
             var csElementType = converter.GetCSharpType(elementType, context, true);
 
             var noWrap = converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.NoWrap && !converter.Options.TypedefWrapForceList.Contains(cppTypedef.Name);
-
-            var csElementTypeName = converter.ConvertTypeReferenceToString(csElementType, out var attachedAttributes);
 
             var csStructName = converter.GetCSharpName(cppTypedef, context);
             var csStruct = new CSharpStruct(csStructName)
@@ -61,7 +65,7 @@ namespace CppAst.CodeGen.CSharp
                 CppElement = cppTypedef,
             };
 
-            if (noWrap || csStruct.IsOpaque || csElementTypeName == "void")
+            if (noWrap || csStruct.IsOpaque || (csElementType is CSharpPrimitiveType csPrimitive && csPrimitive.Kind == CSharpPrimitiveKind.Void))
             {
                 return csElementType;
             }
@@ -92,34 +96,73 @@ namespace CppAst.CodeGen.CSharp
             csStruct.Modifiers |= CSharpModifiers.ReadOnly;
             csStruct.BaseTypes.Add(new CSharpFreeType($"IEquatable<{name}>"));
 
-            // Dump the type name and attached attributes for the element type
-
+            csStruct.Members.Add(new CSharpMethod(name)
+            {
+                Kind = CSharpMethodKind.Constructor,
+                Parameters =
+                {
+                    new CSharpParameter("value")
+                    {
+                        ParameterType = csElementType
+                    }
+                },
+                Visibility = CSharpVisibility.Public,
+                BodyInline = ((writer, _) => writer.Write("this.Value = value"))
+            });
+            csStruct.Members.Add(new CSharpProperty("Value")
+            {
+                ReturnType = csElementType,
+                Visibility = CSharpVisibility.Public,
+                GetterOnly = true
+            });
+            csStruct.Members.Add(new CSharpLineElement($"public override bool Equals(object obj) => obj is {name} other && Equals(other);"));
             if (csElementType is CSharpPointerType || csElementType is CSharpFunctionPointer)
             {
-                csStruct.Members.Add(new CSharpLineElement($"public {name}({csElementTypeName} value) => this.Value = value;"));
-                csStruct.Members.Add(new CSharpLineElement($"{attachedAttributes}public {csElementTypeName} Value {{ get; }}"));
-                csStruct.Members.Add(new CSharpLineElement($"public bool Equals({name} other) =>  Value == other.Value;"));
-                csStruct.Members.Add(new CSharpLineElement($"public override bool Equals(object obj) => obj is {name} other && Equals(other);"));
+                csStruct.Members.Add(new CSharpLineElement($"public bool Equals({name} other) => Value == other.Value;"));
                 csStruct.Members.Add(new CSharpLineElement("public override int GetHashCode() => ((nint)(void*)Value).GetHashCode();"));
                 csStruct.Members.Add(new CSharpLineElement("public override string ToString() => ((nint)(void*)Value).ToString();"));
-                csStruct.Members.Add(new CSharpLineElement($"public static implicit operator {csElementTypeName}({name} from) => from.Value;"));
-                csStruct.Members.Add(new CSharpLineElement($"public static implicit operator {name}({csElementTypeName} from) => new {name}(from);"));
-                csStruct.Members.Add(new CSharpLineElement($"public static bool operator ==({name} left, {name} right) => left.Equals(right);"));
-                csStruct.Members.Add(new CSharpLineElement($"public static bool operator !=({name} left, {name} right) => !left.Equals(right);"));
             }
             else
             {
-                csStruct.Members.Add(new CSharpLineElement($"public {name}({csElementTypeName} value) => this.Value = value;"));
-                csStruct.Members.Add(new CSharpLineElement($"{attachedAttributes}public {csElementTypeName} Value {{ get; }}"));
-                csStruct.Members.Add(new CSharpLineElement($"public bool Equals({name} other) =>  Value.Equals(other.Value);"));
-                csStruct.Members.Add(new CSharpLineElement($"public override bool Equals(object obj) => obj is {name} other && Equals(other);"));
+                csStruct.Members.Add(new CSharpLineElement($"public bool Equals({name} other) => Value.Equals(other.Value);"));
                 csStruct.Members.Add(new CSharpLineElement("public override int GetHashCode() => Value.GetHashCode();"));
                 csStruct.Members.Add(new CSharpLineElement("public override string ToString() => Value.ToString();"));
-                csStruct.Members.Add(new CSharpLineElement($"public static implicit operator {csElementTypeName}({name} from) => from.Value;"));
-                csStruct.Members.Add(new CSharpLineElement($"public static implicit operator {name}({csElementTypeName} from) => new {name}(from);"));
-                csStruct.Members.Add(new CSharpLineElement($"public static bool operator ==({name} left, {name} right) => left.Equals(right);"));
-                csStruct.Members.Add(new CSharpLineElement($"public static bool operator !=({name} left, {name} right) => !left.Equals(right);"));
             }
+
+            csStruct.Members.Add(new CSharpMethod(string.Empty)
+            {
+                Kind = CSharpMethodKind.Operator,
+                ReturnType = csElementType,
+                Modifiers = CSharpModifiers.Static | CSharpModifiers.Implicit,
+                Parameters =
+                {
+                    new CSharpParameter("from") {ParameterType = csStruct},
+                },
+                BodyInline = ((writer, _) => writer.Write("from.Value")),
+                Visibility = CSharpVisibility.Public
+            });
+            csStruct.Members.Add(new CSharpMethod(string.Empty)
+            {
+                Kind = CSharpMethodKind.Operator,
+                ReturnType = csStruct,
+                Modifiers = CSharpModifiers.Static | CSharpModifiers.Implicit,
+                Parameters =
+                {
+                    new CSharpParameter("from") {ParameterType = csElementType},
+                },
+                BodyInline = (writer, element) =>
+                {
+                    writer.Write("new ");
+                    csStruct.DumpReferenceTo(writer);
+                    writer.Write("(");
+                    writer.Write("from");
+                    writer.Write(")");
+                },
+                Visibility = CSharpVisibility.Public
+            });
+            csStruct.Members.Add(new CSharpLineElement($"public static bool operator ==({name} left, {name} right) => left.Equals(right);"));
+            csStruct.Members.Add(new CSharpLineElement($"public static bool operator !=({name} left, {name} right) => !left.Equals(right);"));
+
 
             return csStruct;
         }
