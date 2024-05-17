@@ -103,7 +103,6 @@ namespace CppAst.CodeGen.CSharp
                         var canonicalElementType = arrayElementType.GetCanonicalType();
                         var isPointerElementType = IsPointerType(canonicalElementType);
                         if (converter.Options.AllowFixedSizeBuffers && 
-                            arrayType.Size > 0 && 
                             context is CSharpField csField && 
                             ((canonicalElementType is CppPrimitiveType cppPrimitive && 
                               cppPrimitive.Kind != CppPrimitiveKind.Bool && 
@@ -114,23 +113,21 @@ namespace CppAst.CodeGen.CSharp
                             var csParent = (CSharpTypeWithMembers)csField.Parent!;
                             csParent.Modifiers |= CSharpModifiers.Unsafe;
 
-                            var csArrayElementType = converter.GetCSharpType(arrayElementType, context, true)!;
+                            var csArrayElementType = converter.GetCSharpType(cppPrimitive, context, true)!;
+                            var size = arrayType.Size;
+                            if (size <= 0)
+                            {
+                                size = 1;
+                            }
 
-                            if (csArrayElementType is CSharpTypeWithMembers csArrayElementWithMembers)
-                            {
-                                csType = new CSharpFixedArrayType(csArrayElementWithMembers.BaseTypes.First(), arrayType.Size);
-                            }
-                            else
-                            {
-                                csType = new CSharpFixedArrayType(csArrayElementType, arrayType.Size);
-                            }
+                            csType = new CSharpFixedArrayType(csArrayElementType, size);
                         }
                         else
                         {
                             if (arrayType.Size > 0)
                             {
                                 var csArrayElementType = isPointerElementType ? CSharpPrimitiveType.IntPtr() : converter.GetCSharpType(arrayElementType, context, true)!;
-                                csType = new CSharpFreeType($"{converter.Options.FixedArrayPrefix}{arrayType.Size}<{csArrayElementType.GetName()}>");
+                                csType = new CSharpGenericTypeReference($"{converter.Options.FixedArrayPrefix}{arrayType.Size}", [csArrayElementType]);
                             }
                             else
                             {
