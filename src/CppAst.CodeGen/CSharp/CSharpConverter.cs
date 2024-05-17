@@ -243,21 +243,23 @@ namespace CppAst.CodeGen.CSharp
 
                     if (CurrentCSharpCompilation != null)
                     {
-                        if (csElement is CSharpStruct csStruct)
+                        switch (csElement)
                         {
-                            CurrentCSharpCompilation.AllStructs.Add(csStruct);
-                        }
-                        else if (csElement is CSharpMethod csMethod)
-                        {
-                            CurrentCSharpCompilation.AllFunctions.Add(csMethod);
-                        }
-                        else if (csElement is CSharpEnum csEnum)
-                        {
-                            CurrentCSharpCompilation.AllEnums.Add(csEnum);
-                        }
-                        else if (csElement is CSharpFunctionPointer csFunctionPointer)
-                        {
-                            CurrentCSharpCompilation.AllFunctionPointers.Add(csFunctionPointer);
+                            case CSharpField csField:
+                                CurrentCSharpCompilation.AllFields.Add(csField);
+                                break;
+                            case CSharpStruct csStruct:
+                                CurrentCSharpCompilation.AllStructs.Add(csStruct);
+                                break;
+                            case CSharpMethod csMethod:
+                                CurrentCSharpCompilation.AllFunctions.Add(csMethod);
+                                break;
+                            case CSharpEnum csEnum:
+                                CurrentCSharpCompilation.AllEnums.Add(csEnum);
+                                break;
+                            case CSharpFunctionPointer csFunctionPointer:
+                                CurrentCSharpCompilation.AllFunctionPointers.Add(csFunctionPointer);
+                                break;
                         }
                     }
                 }
@@ -379,6 +381,11 @@ namespace CppAst.CodeGen.CSharp
 
         public void ApplyDefaultVisibility(ICSharpElementWithVisibility element, ICSharpContainer container)
         {
+            ApplyDefaultVisibility(element, container, Options.GenerateAsInternal);
+        }
+
+        public static void ApplyDefaultVisibility(ICSharpElementWithVisibility element, ICSharpContainer container, bool generateAsInternal)
+        {
             if (element == null) throw new ArgumentNullException(nameof(element));
             if (container == null) throw new ArgumentNullException(nameof(container));
             // By default, make element public if parent is internal
@@ -389,7 +396,7 @@ namespace CppAst.CodeGen.CSharp
             }
             else if (elementVisibility == CSharpVisibility.None)
             {
-                elementVisibility = Options.GenerateAsInternal ? CSharpVisibility.Internal : CSharpVisibility.Public;
+                elementVisibility = generateAsInternal ? CSharpVisibility.Internal : CSharpVisibility.Public;
             }
             element.Visibility = elementVisibility;
         }

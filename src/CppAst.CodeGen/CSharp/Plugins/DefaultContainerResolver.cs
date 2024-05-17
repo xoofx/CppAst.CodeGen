@@ -102,6 +102,9 @@ namespace CppAst.CodeGen.CSharp
             converter.ApplyDefaultVisibility(csClassLib, csNamespace);
 
             csNamespace.Members.Add(csClassLib);
+
+            converter.CurrentCSharpCompilation!.AllClasses.Add(csClassLib);
+            
             return csClassLib;
         }
 

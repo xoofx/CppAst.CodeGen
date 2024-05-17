@@ -27,7 +27,11 @@ namespace CppAst.CodeGen.CSharp
 
         /// <inheritdoc />
         public CSharpContainerList<CSharpElement> Members { get; }
-        
+
+        public List<CSharpClass> AllClasses { get; } = new();
+
+        public List<CSharpField> AllFields { get; } = new();
+
         public List<CSharpStruct> AllStructs { get; } = new();
 
         public List<CSharpEnum> AllEnums { get; } = new();
