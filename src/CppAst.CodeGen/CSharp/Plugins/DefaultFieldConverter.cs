@@ -187,31 +187,24 @@ namespace CppAst.CodeGen.CSharp
             }
 
             csField.FieldType = converter.GetCSharpType(cppField.Type, csField);
-            
-            if (cppField.InitExpression != null)
-            {
-                if (cppField.InitExpression.Kind == CppExpressionKind.Unexposed)
-                {
-                    csField.InitValue = cppField.InitValue?.Value?.ToString();
-                }
-                else
-                {
-                    csField.InitValue = converter.ConvertExpression(cppField.InitExpression);
-                }
 
-                var isString = csField.FieldType is CSharpPrimitiveType primitive && primitive.Kind == CSharpPrimitiveKind.String;
-                if (isString)
+            if (cppField.InitValue?.Value is not null)
+            {
+                csField.InitValue = cppField.InitValue.Value.ToString();
+                // Quote strings
+                if (csField.FieldType is CSharpPrimitiveType primitive && primitive.Kind == CSharpPrimitiveKind.String)
                 {
                     csField.InitValue = $"\"{csField.InitValue}\"";
                 }
             }
 
-            if (string.IsNullOrEmpty(csField.InitValue))
-            {
-                csField.InitValue = cppField.InitValue?.Value?.ToString();
-            }
-
             return csField;
         }
+        private static bool IsPrimitiveType(CppType cppType)
+        {
+            var canonicalType = cppType.GetCanonicalType();
+            return canonicalType is CppPointerType || canonicalType is CppPrimitiveType || (canonicalType is CppQualifiedType qualifiedType && qualifiedType.ElementType is CppPrimitiveType);
+        }
     }
+
 }

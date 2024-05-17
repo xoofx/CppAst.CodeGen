@@ -26,22 +26,16 @@ namespace CppAst.CodeGen.CSharp
             csEnumItem.Comment = converter.GetCSharpComment(cppEnumItem, context);
 
             // Process any enum item value expression (e.g ENUM_ITEM = 1 << 2)
+            csEnumItem.Value = $"unchecked(({csEnum.IntegerBaseType}){cppEnumItem.Value})";
             if (cppEnumItem.ValueExpression != null)
             {
-                var integerValue = converter.ConvertExpression(cppEnumItem.ValueExpression);
-
-                csEnumItem.Value = $"unchecked(({csEnum.IntegerBaseType}){(string.IsNullOrEmpty(integerValue) ? cppEnumItem.Value + "" : integerValue)})";
+                var cppExpression = converter.ConvertExpression(cppEnumItem.ValueExpression);
 
                 // Tag the enum has flags
-                if (!csEnum.IsFlags && csEnumItem.Value.Contains("<<"))
+                if (!csEnum.IsFlags && cppExpression.Contains("<<"))
                 {
                     csEnum.IsFlags = true;
                 }
-
-                //if (csEnum.IsFlags)
-                //{
-                //    csEnumItem.Value = csEnumItem.Value.Replace("<<", $" << (int)");
-                //}
             }
 
             if (converter.Options.GenerateEnumItemAsFields && context.Parent is CSharpClass csClass)
