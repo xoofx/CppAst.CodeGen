@@ -38,6 +38,13 @@ namespace CppAst.CodeGen.CSharp
 
             var csFieldName = converter.GetCSharpName(cppField, (CSharpElement)csContainer);
 
+            // Handle the case for union types where the field name is auto-generated from the union name
+            // and could have a conflict with it. Add the index of the field to the name to avoid conflicts
+            if (string.IsNullOrEmpty(cppField.Name))
+            {
+                csFieldName = $"{csFieldName}__{((CppClass)cppField.Parent).Fields.IndexOf(cppField)}";
+            }
+            
             if (cppField.IsBitField)
             {
                 CSharpBitField? csBitFieldStorage = null;
