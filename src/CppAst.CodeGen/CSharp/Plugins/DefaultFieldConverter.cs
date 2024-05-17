@@ -205,7 +205,8 @@ namespace CppAst.CodeGen.CSharp
                     csField.InitValue = $"\"{csField.InitValue}\"";
                 }
             }
-            else
+
+            if (string.IsNullOrEmpty(csField.InitValue))
             {
                 csField.InitValue = cppField.InitValue?.Value?.ToString();
             }
