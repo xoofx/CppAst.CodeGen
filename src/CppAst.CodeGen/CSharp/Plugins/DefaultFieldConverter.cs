@@ -37,13 +37,6 @@ namespace CppAst.CodeGen.CSharp
             var isUnion = ((cppField.Parent as CppClass)?.ClassKind ?? CppClassKind.Struct) == CppClassKind.Union;
 
             var csFieldName = converter.GetCSharpName(cppField, (CSharpElement)csContainer);
-
-            // Handle the case for union types where the field name is auto-generated from the union name
-            // and could have a conflict with it. Add the index of the field to the name to avoid conflicts
-            if (string.IsNullOrEmpty(cppField.Name))
-            {
-                csFieldName = $"{csFieldName}__{((CppClass)cppField.Parent).Fields.IndexOf(cppField)}";
-            }
             
             if (cppField.IsBitField)
             {
@@ -160,7 +153,6 @@ namespace CppAst.CodeGen.CSharp
                 return csProperty;
             }
 
-            var parentName = cppField.Parent is CppClass cppClass ? cppClass.Name : string.Empty;
             var csField = new CSharpField(csFieldName) { CppElement = cppField };
             converter.ApplyDefaultVisibility(csField, csContainer);
 

@@ -84,25 +84,19 @@ namespace CppAst.CodeGen.CSharp
                 }
             }
 
-            // If we have any anonymous structs/unions for a field type
-            // try to compute a name for them before processing them
-            foreach (var cppField in cppClass.Fields)
+            //If we have any anonymous structs/unions for a field type
+            //try to compute a name for them before processing them
+            if (context is CSharpTypeWithMembers typeWithMembers)
             {
-                var fieldType = cppField.Type;
-
-                if (fieldType is CppClass cppFieldTypeClass && cppFieldTypeClass.IsAnonymous && string.IsNullOrEmpty(cppFieldTypeClass.Name))
+                var parentName = typeWithMembers.Name;
+                foreach (var cppField in cppClass.Fields)
                 {
-                    var parentName = string.Empty;
-                    if (cppFieldTypeClass.Parent is CppClass cppParentClass)
-                    {
-                        parentName = cppParentClass.Name;
-                    }
+                    var fieldType = cppField.Type;
 
-                    if (cppFieldTypeClass.ClassKind == CppClassKind.Union)
+                    if (!string.IsNullOrEmpty(cppField.Name) && fieldType is CppClass cppFieldTypeClass && cppFieldTypeClass.IsAnonymous && string.IsNullOrEmpty(cppFieldTypeClass.Name))
                     {
-                        parentName = parentName == string.Empty ? "union" : parentName + "_union";
+                        cppFieldTypeClass.Name = $"{parentName}_{cppField.Name}";
                     }
-                    cppFieldTypeClass.Name = $"{parentName}_{cppField.Name}";
                 }
             }
 

@@ -27,15 +27,54 @@ namespace CppAst.CodeGen.CSharp
             // If it is null, try to get a contextual name from the context
             if (string.IsNullOrEmpty(name))
             {
-                var contextName = string.Empty;
                 if (context is ICSharpMember csMember)
                 {
-                    contextName = csMember.Name;
+                    name = csMember.Name;
                 }
 
-                if (!string.IsNullOrEmpty(contextName))
+                if (!string.IsNullOrEmpty(name))
                 {
-                    name = contextName;
+                    // Handle the case for union types where the field name is auto-generated from the union name
+                    // and could have a conflict with it. Add the index of the field to the name to avoid conflicts
+                    if (context.CppElement is ICppDeclarationContainer cppContainer)
+                    {
+                        int indexOfElement;
+                        string? kind = "";
+                        if (cppContainer is CppClass cppClass)
+                        {
+                            kind = $"{cppClass.ClassKind.ToString().ToLowerInvariant()}_";
+                        }
+
+                        if (element is CppField cppField)
+                        {
+                            indexOfElement = cppContainer.Fields.IndexOf(cppField);
+                        }
+                        else if (element is CppClass subclass)
+                        {
+                            indexOfElement = cppContainer.Classes.IndexOf(subclass);
+                        }
+                        else if (element is CppFunction cppFunction)
+                        {
+                            indexOfElement = cppContainer.Functions.IndexOf(cppFunction);
+                        }
+                        else if (element is CppEnum cppEnum)
+                        {
+                            indexOfElement = cppContainer.Enums.IndexOf(cppEnum);
+                        }
+                        else if (element is CppTypedef cppTypedef)
+                        {
+                            indexOfElement = cppContainer.Typedefs.IndexOf(cppTypedef);
+                        }
+                        else
+                        {
+                            indexOfElement = -1;
+                        }
+
+                        if (indexOfElement >= 0)
+                        {
+                            name = $"{name}__{kind}{indexOfElement}";
+                        }
+                    }
                 }
             }
 
@@ -44,18 +83,6 @@ namespace CppAst.CodeGen.CSharp
             {
                 var fileName = Path.GetFileNameWithoutExtension(element.Span.Start.File);
                 name = $"__Anonymous{element.GetType().Name}_{fileName}_{element.Span.Start.Offset}";
-            }
-            else if (element is CppType cppType && (!(element is ICppMember cppMember) || string.IsNullOrEmpty(cppMember.Name)))
-            {
-                switch (cppType)
-                {
-                    case CppClass cppClass:
-                        name = CSharpHelper.AppendWithCasing(name, CSharpHelper.GetCSharpCasingKind(name), cppClass.ClassKind.ToString().ToLowerInvariant(), CSharpCasingKind.Lower);
-                        break;
-                    case CppFunctionType cppFunctionType:
-                        name = CSharpHelper.AppendWithCasing(name, CSharpHelper.GetCSharpCasingKind(name), "delegate", CSharpCasingKind.Lower);
-                        break;
-                }
             }
 
             return name;
