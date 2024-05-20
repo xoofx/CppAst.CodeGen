@@ -104,6 +104,7 @@ namespace CppAst.CodeGen.CSharp
                         var isPointerElementType = IsPointerType(canonicalElementType);
                         if (converter.Options.AllowFixedSizeBuffers && 
                             context is CSharpField csField && 
+                            !nested &&
                             ((canonicalElementType is CppPrimitiveType cppPrimitive && 
                               cppPrimitive.Kind != CppPrimitiveKind.Bool && 
                               ((cppPrimitive.Kind != CppPrimitiveKind.Long && cppPrimitive.Kind != CppPrimitiveKind.UnsignedLong)))
