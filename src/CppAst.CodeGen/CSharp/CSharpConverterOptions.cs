@@ -115,6 +115,8 @@ namespace CppAst.CodeGen.CSharp
 
         public bool MapCLongToIntPtr { get; set; }
 
+        public CallingConvention? DefaultCallingConvention { get; set; }
+
         public object? this[string tagName]
         {
             get

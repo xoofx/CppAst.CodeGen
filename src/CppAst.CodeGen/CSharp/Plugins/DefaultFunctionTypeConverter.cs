@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 namespace CppAst.CodeGen.CSharp
 {
@@ -28,7 +29,7 @@ namespace CppAst.CodeGen.CSharp
             };
 
             // Add calling convention
-            var csCallingConvention = cppFunctionType.CallingConvention.GetCSharpCallingConvention();
+            CallingConvention csCallingConvention = converter.Options.DefaultCallingConvention ?? cppFunctionType.CallingConvention.GetCSharpCallingConvention();
 
             csFunctionPointer.UnmanagedCallingConvention.Add(csCallingConvention.GetUnmanagedCallConvType());
             

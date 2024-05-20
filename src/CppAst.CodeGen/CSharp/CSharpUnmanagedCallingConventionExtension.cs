@@ -13,9 +13,9 @@ namespace CppAst.CodeGen.CSharp
             return callingConvention switch
             {
                 CallingConvention.Cdecl => "Cdecl",
-                CallingConvention.StdCall => "StdCall",
-                CallingConvention.ThisCall => "ThisCall",
-                CallingConvention.FastCall => "FastCall",
+                CallingConvention.StdCall => "Stdcall",
+                CallingConvention.ThisCall => "Thiscall",
+                CallingConvention.FastCall => "Fastcall",
                 CallingConvention.Winapi => "Winapi"
             };
         }

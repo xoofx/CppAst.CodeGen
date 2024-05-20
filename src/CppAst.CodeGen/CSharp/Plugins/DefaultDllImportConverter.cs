@@ -26,8 +26,18 @@ namespace CppAst.CodeGen.CSharp
                 return;
             }
 
-            var callingConvention = (method.CppElement as CppFunction)?.CallingConvention ?? CppCallingConvention.Default;
-            var csCallingConvention = callingConvention.GetCSharpCallingConvention();
+            CallingConvention csCallingConvention;
+
+            if (converter.Options.DefaultCallingConvention.HasValue)
+            {
+                csCallingConvention = converter.Options.DefaultCallingConvention.Value;
+            }
+            else
+            {
+                var callingConvention = (method.CppElement as CppFunction)?.CallingConvention ?? CppCallingConvention.Default;
+                csCallingConvention = callingConvention.GetCSharpCallingConvention();
+            }
+            
             var name = converter.Options.DefaultDllImportNameAndArguments ?? "LibNativeName";
 
             if (converter.Options.UseLibraryImport)
