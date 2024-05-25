@@ -40,30 +40,31 @@ namespace CppAst.CodeGen.CSharp
                     {
                         int indexOfElement;
                         string? kind = "";
-                        if (cppContainer is CppClass cppClass)
-                        {
-                            kind = $"{cppClass.ClassKind.ToString().ToLowerInvariant()}_";
-                        }
 
                         if (element is CppField cppField)
                         {
                             indexOfElement = cppContainer.Fields.IndexOf(cppField);
+                            kind = "field_";
                         }
                         else if (element is CppClass subclass)
                         {
                             indexOfElement = cppContainer.Classes.IndexOf(subclass);
+                            kind = $"{subclass.ClassKind.ToString().ToLowerInvariant()}_";
                         }
                         else if (element is CppFunction cppFunction)
                         {
                             indexOfElement = cppContainer.Functions.IndexOf(cppFunction);
+                            kind = "func_";
                         }
                         else if (element is CppEnum cppEnum)
                         {
                             indexOfElement = cppContainer.Enums.IndexOf(cppEnum);
+                            kind = "enum_";
                         }
                         else if (element is CppTypedef cppTypedef)
                         {
                             indexOfElement = cppContainer.Typedefs.IndexOf(cppTypedef);
+                            kind = "typedef_";
                         }
                         else
                         {
