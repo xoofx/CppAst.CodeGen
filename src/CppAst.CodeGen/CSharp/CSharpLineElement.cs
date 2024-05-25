@@ -9,24 +9,31 @@ namespace CppAst.CodeGen.CSharp
 {
     public class CSharpLineElement : CSharpElement
     {
+        private static readonly Func<string> EmptyString = () => string.Empty;
+
         public CSharpLineElement()
         {
-            Text = string.Empty;
+            Text = EmptyString;
         }
 
         public CSharpLineElement(string text)
         {
-            Text = text ?? throw new ArgumentNullException(nameof(text));
+            Text = () => text;
         }
 
-        public string Text { get; set; }
+        public CSharpLineElement(Func<string> text)
+        {
+            Text = text ?? throw new ArgumentNullException(nameof(text));
+        }
+        
+        public Func<string> Text { get; set; }
 
         /// <inheritdoc />
         public override void DumpTo(CodeWriter writer)
         {
             if (writer.Mode == CodeWriterMode.Full)
             {
-                writer.WriteLine(Text);
+                writer.WriteLine(Text());
             }
         }
     }

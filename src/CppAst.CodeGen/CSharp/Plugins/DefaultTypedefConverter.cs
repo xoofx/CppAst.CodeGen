@@ -94,7 +94,7 @@ namespace CppAst.CodeGen.CSharp
 
             var name = csStruct.Name;
             csStruct.Modifiers |= CSharpModifiers.ReadOnly;
-            csStruct.BaseTypes.Add(new CSharpFreeType($"IEquatable<{name}>"));
+            csStruct.BaseTypes.Add(new CSharpGenericTypeReference($"IEquatable", [csStruct]));
 
             csStruct.Members.Add(new CSharpMethod(name)
             {
@@ -115,16 +115,16 @@ namespace CppAst.CodeGen.CSharp
                 Visibility = CSharpVisibility.Public,
                 GetterOnly = true
             });
-            csStruct.Members.Add(new CSharpLineElement($"public override bool Equals(object obj) => obj is {name} other && Equals(other);"));
+            csStruct.Members.Add(new CSharpLineElement(() => $"public override bool Equals(object obj) => obj is {name} other && Equals(other);"));
             if (csElementType is CSharpPointerType || csElementType is CSharpFunctionPointer)
             {
-                csStruct.Members.Add(new CSharpLineElement($"public bool Equals({name} other) => Value == other.Value;"));
+                csStruct.Members.Add(new CSharpLineElement(() => $"public bool Equals({name} other) => Value == other.Value;"));
                 csStruct.Members.Add(new CSharpLineElement("public override int GetHashCode() => ((nint)(void*)Value).GetHashCode();"));
                 csStruct.Members.Add(new CSharpLineElement("public override string ToString() => ((nint)(void*)Value).ToString();"));
             }
             else
             {
-                csStruct.Members.Add(new CSharpLineElement($"public bool Equals({name} other) => Value.Equals(other.Value);"));
+                csStruct.Members.Add(new CSharpLineElement(() => $"public bool Equals({name} other) => Value.Equals(other.Value);"));
                 csStruct.Members.Add(new CSharpLineElement("public override int GetHashCode() => Value.GetHashCode();"));
                 csStruct.Members.Add(new CSharpLineElement("public override string ToString() => Value.ToString();"));
             }
@@ -160,8 +160,8 @@ namespace CppAst.CodeGen.CSharp
                 },
                 Visibility = CSharpVisibility.Public
             });
-            csStruct.Members.Add(new CSharpLineElement($"public static bool operator ==({name} left, {name} right) => left.Equals(right);"));
-            csStruct.Members.Add(new CSharpLineElement($"public static bool operator !=({name} left, {name} right) => !left.Equals(right);"));
+            csStruct.Members.Add(new CSharpLineElement(() => $"public static bool operator ==({name} left, {name} right) => left.Equals(right);"));
+            csStruct.Members.Add(new CSharpLineElement(() => $"public static bool operator !=({name} left, {name} right) => !left.Equals(right);"));
 
 
             return csStruct;

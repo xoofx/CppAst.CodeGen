@@ -71,16 +71,16 @@ namespace CppAst.CodeGen.CSharp
                 csStruct.Modifiers |= CSharpModifiers.ReadOnly;
                 if (converter.Options.DetectOpaquePointers)
                 {
-                    csStruct.BaseTypes.Add(new CSharpFreeType($"IEquatable<{csStruct.Name}>"));
+                    csStruct.BaseTypes.Add(new CSharpGenericTypeReference($"IEquatable", [csStruct]));
 
-                    csStruct.Members.Add(new CSharpLineElement($"public {csStruct.Name}(nint handle) => Handle = handle;"));
+                    csStruct.Members.Add(new CSharpLineElement(() => $"public {csStruct.Name}(nint handle) => Handle = handle;"));
                     csStruct.Members.Add(new CSharpLineElement("public nint Handle { get; }"));
-                    csStruct.Members.Add(new CSharpLineElement($"public bool Equals({csStruct.Name} other) => Handle.Equals(other.Handle);"));
-                    csStruct.Members.Add(new CSharpLineElement($"public override bool Equals(object obj) => obj is {csStruct.Name} other && Equals(other);"));
+                    csStruct.Members.Add(new CSharpLineElement(() => $"public bool Equals({csStruct.Name} other) => Handle.Equals(other.Handle);"));
+                    csStruct.Members.Add(new CSharpLineElement(() => $"public override bool Equals(object obj) => obj is {csStruct.Name} other && Equals(other);"));
                     csStruct.Members.Add(new CSharpLineElement("public override int GetHashCode() => Handle.GetHashCode();"));
                     csStruct.Members.Add(new CSharpLineElement("public override string ToString() => \"0x\" + (nint.Size == 8 ? Handle.ToString(\"X16\") : Handle.ToString(\"X8\"));"));
-                    csStruct.Members.Add(new CSharpLineElement($"public static bool operator ==({csStruct.Name} left, {csStruct.Name} right) => left.Equals(right);"));
-                    csStruct.Members.Add(new CSharpLineElement($"public static bool operator !=({csStruct.Name} left, {csStruct.Name} right) => !left.Equals(right);"));
+                    csStruct.Members.Add(new CSharpLineElement(() =>  $"public static bool operator ==({csStruct.Name} left, {csStruct.Name} right) => left.Equals(right);"));
+                    csStruct.Members.Add(new CSharpLineElement(() => $"public static bool operator !=({csStruct.Name} left, {csStruct.Name} right) => !left.Equals(right);"));
                 }
             }
 
