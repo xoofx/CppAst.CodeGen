@@ -34,8 +34,8 @@ namespace CppAst.CodeGen.CSharp
                 new DefaultFieldConverter(),
                 new DefaultFunctionTypeConverter(),
                 new DefaultTypeConverter(),
-                new DefaultDllImportConverter(),
                 new DefaultMappingRulesConverter(),
+                new DefaultDllImportConverter(),
             };
 
             MappingRules = new CppMappingRules();

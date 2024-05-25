@@ -133,7 +133,7 @@ namespace CppAst.CodeGen.CSharp
             ConvertEnd.Clear();
             RegisteredPlugins.Clear();
 
-            for (var index = Options.Plugins.Count - 1; index >= 0; index--)
+            for (var index = 0; index < Options.Plugins.Count; index++)
             {
                 var plugin = Options.Plugins[index];
                 if (RegisteredPlugins.Contains(plugin))
