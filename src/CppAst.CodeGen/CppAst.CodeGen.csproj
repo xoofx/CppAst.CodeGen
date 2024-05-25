@@ -22,7 +22,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CppAst" Version="0.20.0" />
     <PackageReference Include="Zio" Version="0.17.0" />
   </ItemGroup>
 
@@ -40,9 +39,10 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 
-  <!--<ItemGroup>
-    <ProjectReference Include="..\..\..\CppAst\src\CppAst\CppAst.csproj" />
-  </ItemGroup>-->
+  <ItemGroup>
+    <PackageReference Include="CppAst" Version="0.20.0" />
+    <!--<ProjectReference Include="..\..\..\CppAst\src\CppAst\CppAst.csproj" />-->
+  </ItemGroup>
 
   <Target Name="PatchVersion" AfterTargets="MinVer">
     <PropertyGroup>
