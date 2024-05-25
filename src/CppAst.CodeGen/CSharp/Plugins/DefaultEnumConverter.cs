@@ -14,8 +14,8 @@ namespace CppAst.CodeGen.CSharp
 
         public static CSharpElement? ConvertEnum(CSharpConverter converter, CppEnum cppEnum, CSharpElement context)
         {
-            // If the enum is anonymous, we don't generate it
-            if (cppEnum.IsAnonymous)
+            // We don't support generate anonymous enums
+            if (cppEnum.IsAnonymous && context is CSharpCompilation)
             {
                 return null;
             }
@@ -26,11 +26,6 @@ namespace CppAst.CodeGen.CSharp
             {
                 CppElement = cppEnum
             };
-
-            if (cppEnum.IsAnonymous)
-            {
-                csEnum.Name += "AnonymousEnum";
-            }
 
             var container = converter.GetCSharpContainer(cppEnum, context);
             container.Members.Add(csEnum);
