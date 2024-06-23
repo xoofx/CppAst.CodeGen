@@ -16,7 +16,7 @@ namespace CppAst.CodeGen.CSharp
             Members = new CSharpContainerList<CSharpElement>(this);
             BaseTypes = new List<CSharpType>();
             Visibility = CSharpVisibility.Public;
-            RecordParameters = new List<CSharpParameter>();
+            PrimaryConstructorParameters = new List<CSharpParameter>();
         }
 
         public CSharpComment? Comment { get; set; }
@@ -36,9 +36,14 @@ namespace CppAst.CodeGen.CSharp
         public bool IsRecord { get; set; }
 
         /// <summary>
-        /// Record Parameters if <see cref="IsRecord"/> is true.
+        /// Gets or sets a boolean indicating if this type should have primary constructor parameters.
         /// </summary>
-        public List<CSharpParameter> RecordParameters { get; }
+        public bool ForcePrimaryConstructorParameters { get; set; }
+
+        /// <summary>
+        /// Record Parameters if <see cref="IsRecord"/> is true or <see cref="ForcePrimaryConstructorParameters"/> is true.
+        /// </summary>
+        public List<CSharpParameter> PrimaryConstructorParameters { get; }
 
         /// <inheritdoc />
         public CSharpContainerList<CSharpElement> Members { get; }
@@ -78,12 +83,12 @@ namespace CppAst.CodeGen.CSharp
 
             writer.Write(Name);
 
-            if (IsRecord && RecordParameters.Count > 0)
+            if (ForcePrimaryConstructorParameters || (IsRecord && PrimaryConstructorParameters.Count > 0))
             {
                 writer.Write("(");
-                for (var i = 0; i < RecordParameters.Count; i++)
+                for (var i = 0; i < PrimaryConstructorParameters.Count; i++)
                 {
-                    var parameter = RecordParameters[i];
+                    var parameter = PrimaryConstructorParameters[i];
                     if (i > 0) writer.Write(", ");
                     parameter.DumpTo(writer);
                 }
