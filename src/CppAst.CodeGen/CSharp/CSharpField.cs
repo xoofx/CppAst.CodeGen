@@ -32,6 +32,8 @@ namespace CppAst.CodeGen.CSharp
 
         public string? InitValue { get; set; }
 
+        public Func<string>? DynamicInitValue { get; set; }
+        
         /// <inheritdoc />
         public string Name { get; set; }
 
@@ -67,6 +69,12 @@ namespace CppAst.CodeGen.CSharp
                 writer.Write(" = ");
                 writer.Write(InitValue);
             }
+            else if (DynamicInitValue != null)
+            {
+                writer.Write(" = ");
+                writer.Write(DynamicInitValue());
+            }
+
             writer.Write(";");
             writer.WriteLine();
         }

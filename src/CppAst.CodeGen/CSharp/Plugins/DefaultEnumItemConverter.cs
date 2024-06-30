@@ -45,7 +45,7 @@ namespace CppAst.CodeGen.CSharp
                     Modifiers = CSharpModifiers.Const,
                     FieldType = csEnum,
                     Comment = csEnumItem.Comment,
-                    InitValue = $"{csEnum.Name}.{csEnumItem.Name}"
+                    DynamicInitValue = () => $"{csEnum.Name}.{csEnumItem.Name}"
                 };
                 converter.ApplyDefaultVisibility(csEnumItemAsField, csClass);
 
