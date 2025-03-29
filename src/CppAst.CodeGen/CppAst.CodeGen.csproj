@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CppAst" Version="0.21.1" />
+    <PackageReference Include="CppAst" Version="0.21.2" />
     <!--<ProjectReference Include="..\..\..\CppAst\src\CppAst\CppAst.csproj" />-->
   </ItemGroup>
 
