@@ -1,10 +1,11 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -315,14 +316,26 @@ namespace CppAst.CodeGen.CSharp
             };
         }
 
-        public static CppElementMappingRule MapType(this CppMappingRules dispatcher, string cppType, string csType, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
-        {
-            throw new NotImplementedException();
-        }
+        public static CppElementMappingRule MapType(this CppMappingRules dispatcher, string cppType, string csType, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0) 
+            => MapType(dispatcher, cppType, new CSharpFreeType(csType), mapOriginFilePath, mapLineNumber);
 
-        public static CppElementMappingRule MapArrayType(this CppMappingRules dispatcher, string cppElementType, int arraySize, string csType, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
+        public static CppElementMappingRule MapType(this CppMappingRules dispatcher, string cppType, CSharpType csType, [CallerFilePath] string? mapOriginFilePath = null, [CallerLineNumber] int mapLineNumber = 0)
         {
-            throw new NotImplementedException();
+            var typeConverter = dispatcher.ConverterOptions.Plugins.OfType<DefaultTypeConverter>().FirstOrDefault();
+            if (typeConverter == null)
+            {
+                throw new InvalidOperationException("Cannot find a DefaultTypeConverter plugin");
+            }
+
+            // Register the type directly on the default type converter
+            typeConverter.MapCppToCSharpType[cppType] = csType;
+
+            // Create an empty mapping rule
+            return new CppElementMappingRule()
+            {
+                DeclarationFileName = mapOriginFilePath,
+                DeclarationLineNumber = mapLineNumber
+            };
         }
     }
 }

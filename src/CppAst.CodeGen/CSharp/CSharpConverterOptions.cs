@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
@@ -38,7 +38,10 @@ namespace CppAst.CodeGen.CSharp
                 new DefaultDllImportConverter(),
             };
 
-            MappingRules = new CppMappingRules();
+            MappingRules = new CppMappingRules()
+            {
+                ConverterOptions = this
+            };
             DefaultNamespace = "LibNative";
             DefaultOutputFilePath = "/LibNative.generated.cs";
             DefaultClassLib = "libnative";
@@ -131,7 +134,10 @@ namespace CppAst.CodeGen.CSharp
         {
             var csConverterOptions = (CSharpConverterOptions)base.Clone();
 
-            csConverterOptions.MappingRules = new CppMappingRules();
+            csConverterOptions.MappingRules = new CppMappingRules()
+            {
+                ConverterOptions = csConverterOptions
+            };
             csConverterOptions.MappingRules.MacroRules.AddRange(MappingRules.MacroRules);
             csConverterOptions.MappingRules.StandardRules.AddRange(MappingRules.StandardRules);
 
