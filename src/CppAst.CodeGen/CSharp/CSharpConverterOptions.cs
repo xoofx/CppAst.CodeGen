@@ -50,6 +50,7 @@ namespace CppAst.CodeGen.CSharp
             GenerateEnumItemAsFields = true;
             TypedefCodeGenKind = CppTypedefCodeGenKind.Wrap;
             TypedefWrapForceList = new HashSet<string>();
+            TypedefNoWrapForceList = new HashSet<string>();
             Tags = new Dictionary<string, object?>();
             DefaultCharSet = CharSet.Ansi;
             AllowFixedSizeBuffers = true;
@@ -101,6 +102,8 @@ namespace CppAst.CodeGen.CSharp
         public bool DisableRuntimeMarshalling { get; set; }
 
         public HashSet<string> TypedefWrapForceList { get; }
+
+        public HashSet<string> TypedefNoWrapForceList { get; }
 
         public Dictionary<string, object?> Tags { get; private set; }
 
