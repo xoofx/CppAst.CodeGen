@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
@@ -28,6 +28,16 @@ namespace CppAst.CodeGen.Common
         public CodeWriterOptions Options { get; }
 
         public CodeWriterMode Mode => Options.Mode;
+
+        public void WriteCommonFileHeader()
+        {
+            WriteLine(Options.GetDefaultHeader());
+            WriteLine();
+            foreach (var ns in Options.DefaultUsings)
+            {
+                WriteLine(ns);
+            }
+        }
 
         public TextWriter? CurrentWriter => _backendWriters.Count > 0 ? _backendWriters.Peek().Writer : null;
 
