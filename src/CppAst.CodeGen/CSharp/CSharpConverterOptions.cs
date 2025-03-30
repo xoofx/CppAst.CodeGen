@@ -49,6 +49,7 @@ namespace CppAst.CodeGen.CSharp
             GenerateAsInternal = false;
             GenerateEnumItemAsFields = true;
             TypedefCodeGenKind = CppTypedefCodeGenKind.Wrap;
+            DisableTypedefToStructWrap = true;
             TypedefWrapForceList = new HashSet<string>();
             TypedefNoWrapForceList = new HashSet<string>();
             Tags = new Dictionary<string, object?>();
@@ -96,6 +97,8 @@ namespace CppAst.CodeGen.CSharp
         public bool GenerateEnumItemAsFields { get; set; }
 
         public CppTypedefCodeGenKind TypedefCodeGenKind { get; set; }
+
+        public bool DisableTypedefToStructWrap { get; set; }
 
         public bool UseLibraryImport { get; set; }
 

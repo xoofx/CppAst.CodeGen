@@ -67,8 +67,10 @@ namespace CppAst.CodeGen.CSharp
             
             var csElementType = converter.GetCSharpType(elementType, context, true);
 
+            var noWrapForStruct = csElementType is CSharpStruct && converter.Options.DisableTypedefToStructWrap;
             var noWrap = converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.NoWrap && !converter.Options.TypedefWrapForceList.Contains(cppTypedef.Name)
-                         || converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.Wrap && converter.Options.TypedefNoWrapForceList.Contains(cppTypedef.Name);
+                         || converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.Wrap && converter.Options.TypedefNoWrapForceList.Contains(cppTypedef.Name)
+                         || noWrapForStruct;
             
             var csStructName = converter.GetCSharpName(cppTypedef, context);
             var csStruct = new CSharpStruct(csStructName)
@@ -78,7 +80,7 @@ namespace CppAst.CodeGen.CSharp
 
             if (noWrap || csStruct.IsOpaque || (csElementType is CSharpPrimitiveType csPrimitive && csPrimitive.Kind == CSharpPrimitiveKind.Void))
             {
-                if (noWrap && csElementType is CSharpStruct csStructElementType)
+                if (noWrapForStruct && csElementType is CSharpStruct csStructElementType)
                 {
                     csStructElementType.Name = csStructName;
                 }
