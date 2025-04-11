@@ -1,10 +1,11 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace CppAst.CodeGen.CSharp
 {
@@ -184,10 +185,18 @@ namespace CppAst.CodeGen.CSharp
             return new CSharpTextComment(text);
         }
 
+        private static readonly Regex MatchDoxygenMarkers = new(@"^\s*@(?<name>\w+)\s*(?<value>.*)$", RegexOptions.ExplicitCapture);
+
         private static string? GetAsText(CppComment? comment, bool trimEnd = true)
         {
             if (comment == null) return null;
             var text = comment is CppCommentParamCommand paramCommand ? paramCommand.ChildrenToString() : comment.ToString();
+            var match = MatchDoxygenMarkers.Match(text);
+            if (match.Success)
+            {
+                var value = match.Groups["value"].Value;
+                text = value;
+            }
             return trimEnd ? text.TrimEnd() : text;
         }
 
