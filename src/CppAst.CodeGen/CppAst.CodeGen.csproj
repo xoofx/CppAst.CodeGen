@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Zio" Version="0.20.0" />
+    <PackageReference Include="Zio" Version="0.21.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CppAst" Version="0.21.2" />
+    <PackageReference Include="CppAst" Version="0.21.3" />
     <!--<ProjectReference Include="..\..\..\CppAst\src\CppAst\CppAst.csproj" />-->
   </ItemGroup>
 
