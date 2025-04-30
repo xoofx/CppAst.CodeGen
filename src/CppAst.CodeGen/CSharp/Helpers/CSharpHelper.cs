@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
@@ -186,6 +186,10 @@ namespace CppAst.CodeGen.CSharp
                     return CSharpPrimitiveType.Double();
                 case CppPrimitiveKind.LongDouble:
                     return CSharpPrimitiveType.Double();
+                case CppPrimitiveKind.Int128:
+                    return CSharpPrimitiveType.Int128();
+                case CppPrimitiveKind.UInt128:
+                    return CSharpPrimitiveType.UInt128();
                 default:
                     throw new ArgumentOutOfRangeException($"The kind {cppType.Kind} is not supported");
             }

@@ -49,7 +49,7 @@ namespace CppAst.CodeGen.CSharp
             GenerateAsInternal = false;
             GenerateEnumItemAsFields = true;
             TypedefCodeGenKind = CppTypedefCodeGenKind.Wrap;
-            DisableTypedefToStructWrap = true;
+            DisableTypedefToStructWrap = false;
             TypedefWrapForceList = new HashSet<string>();
             TypedefNoWrapForceList = new HashSet<string>();
             Tags = new Dictionary<string, object?>();

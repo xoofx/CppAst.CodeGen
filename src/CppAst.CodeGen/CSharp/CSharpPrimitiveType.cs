@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
@@ -23,6 +23,8 @@ namespace CppAst.CodeGen.CSharp
         public static CSharpPrimitiveType Float() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Float);
         public static CSharpPrimitiveType Double() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Double);
         public static CSharpPrimitiveType Object() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Object);
+        public static CSharpPrimitiveType Int128() => new CSharpPrimitiveType(CSharpPrimitiveKind.Int128);
+        public static CSharpPrimitiveType UInt128() => new CSharpPrimitiveType(CSharpPrimitiveKind.UInt128);
         public static CSharpPrimitiveType String() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.String);
         public static CSharpPrimitiveType IntPtr() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.IntPtr);
         public static CSharpPrimitiveType UIntPtr() => new CSharpPrimitiveType(CSharpPrimitiveKind.UIntPtr);
@@ -89,6 +91,12 @@ namespace CppAst.CodeGen.CSharp
                     break;
                 case CSharpPrimitiveKind.UIntPtr:
                     writer.Write("nuint");
+                    break;
+                case CSharpPrimitiveKind.Int128:
+                    writer.Write("System.Int128");
+                    break;
+                case CSharpPrimitiveKind.UInt128:
+                    writer.Write("System.UInt128");
                     break;
                 default:
                     throw new InvalidOperationException($"{Kind} is not supported");

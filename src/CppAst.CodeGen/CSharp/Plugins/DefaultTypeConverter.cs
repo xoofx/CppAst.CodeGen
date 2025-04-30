@@ -114,15 +114,12 @@ namespace CppAst.CodeGen.CSharp
                         if (converter.Options.AllowFixedSizeBuffers && 
                             context is CSharpField csField && 
                             !nested &&
-                            ((canonicalElementType is CppPrimitiveType cppPrimitive && 
-                              cppPrimitive.Kind != CppPrimitiveKind.Bool && 
-                              ((cppPrimitive.Kind != CppPrimitiveKind.Long && cppPrimitive.Kind != CppPrimitiveKind.UnsignedLong)))
-                            )
-                            )
+                            IsCppTypeCompatibleWithFixedArrayCSharp(canonicalElementType))
                         {
                             var csParent = (CSharpTypeWithMembers)csField.Parent!;
                             csParent.Modifiers |= CSharpModifiers.Unsafe;
 
+                            var cppPrimitive = (CppPrimitiveType)canonicalElementType;
                             var csArrayElementType = converter.GetCSharpType(cppPrimitive, context, true)!;
                             var size = arrayType.Size;
                             if (size <= 0)
@@ -168,6 +165,16 @@ namespace CppAst.CodeGen.CSharp
             }
 
             return csType;
+        }
+
+        private bool IsCppTypeCompatibleWithFixedArrayCSharp(CppType type)
+        {
+            return type is CppPrimitiveType cppPrimitiveType &&
+                   cppPrimitiveType.Kind != CppPrimitiveKind.Bool &&
+                   cppPrimitiveType.Kind != CppPrimitiveKind.Long &&
+                   cppPrimitiveType.Kind != CppPrimitiveKind.UnsignedLong &&
+                   cppPrimitiveType.Kind != CppPrimitiveKind.UInt128 &&
+                   cppPrimitiveType.Kind != CppPrimitiveKind.Int128;
         }
         
         public static CSharpType GetCSharpPrimitiveType(CSharpConverter converter, CppPrimitiveType cppPrimitiveType)
