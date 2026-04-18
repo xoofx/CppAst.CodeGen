@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Zio" Version="0.21.0" />
+    <PackageReference Include="Zio" Version="0.22.2" />
   </ItemGroup>
 
   <ItemGroup>
