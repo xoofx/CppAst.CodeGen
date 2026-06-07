@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Zio" Version="0.21.0" />
+    <PackageReference Include="Zio" Version="0.22.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,16 +31,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MinVer" Version="6.0.0">
+    <PackageReference Include="MinVer" Version="7.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <!--Add support for sourcelink-->
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.300" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CppAst" Version="0.22.0" />
+    <PackageReference Include="CppAst" Version="0.25.0" />
     <!--<ProjectReference Include="..\..\..\CppAst\src\CppAst\CppAst.csproj" />-->
   </ItemGroup>
 

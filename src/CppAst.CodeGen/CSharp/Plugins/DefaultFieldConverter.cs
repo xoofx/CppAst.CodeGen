@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
@@ -34,6 +34,12 @@ namespace CppAst.CodeGen.CSharp
 
             var csContainer = converter.GetCSharpContainer(cppField, context);
 
+            bool isExtern = cppField.StorageQualifier == CppStorageQualifier.Extern;
+            if (isExtern)
+            {
+                isConst = false;
+            }
+            
             var isUnion = ((cppField.Parent as CppClass)?.ClassKind ?? CppClassKind.Struct) == CppClassKind.Union;
 
             var csFieldName = converter.GetCSharpName(cppField, (CSharpElement)csContainer);
@@ -79,6 +85,14 @@ namespace CppAst.CodeGen.CSharp
                         case CppPrimitiveKind.Int:
                             csBitFieldStorage.FieldType = CSharpPrimitiveType.Int();
                             csBitFieldStorage.MaxBitWidth = 32;
+                            break;
+                        case CppPrimitiveKind.Long:
+                            csBitFieldStorage.FieldType = CSharpHelper.GetCSharpPrimitive(converter, canonicalType);
+                            csBitFieldStorage.MaxBitWidth = 64; // TODO: can be 32 or 64 depending on the platform
+                            break;
+                        case CppPrimitiveKind.UnsignedLong:
+                            csBitFieldStorage.FieldType = CSharpHelper.GetCSharpPrimitive(converter, canonicalType);
+                            csBitFieldStorage.MaxBitWidth = 64; // TODO: can be 32 or 64 depending on the platform
                             break;
                         case CppPrimitiveKind.LongLong:
                             csBitFieldStorage.FieldType = CSharpPrimitiveType.Long();
@@ -153,44 +167,65 @@ namespace CppAst.CodeGen.CSharp
                 return csProperty;
             }
 
-            var csField = new CSharpField(csFieldName) { CppElement = cppField };
-            converter.ApplyDefaultVisibility(csField, csContainer);
 
-            csContainer.Members.Add(csField);
-
-            csField.Comment = converter.GetCSharpComment(cppField, csField);
-
-            if (isUnion)
+            if (isExtern)
             {
-                csField.Attributes.Add(new CSharpFreeAttribute("FieldOffset(0)"));
-                converter.AddUsing(csContainer, "System.Runtime.InteropServices");
+                var csProperty = new CSharpProperty(csFieldName) { CppElement = cppField };
+                converter.ApplyDefaultVisibility(csProperty, csContainer);
+
+                csContainer.Members.Add(csProperty);
+
+                csProperty.Comment = converter.GetCSharpComment(cppField, csProperty);
+
+                csProperty.ReturnType = converter.GetCSharpType(cppField.Type, csProperty);
+
+                csProperty.GetBodyInlined = "throw new NotImplementedException()";
+
+                csProperty.Modifiers = CSharpModifiers.Static;
+
+                return csProperty;
             }
-            
-            if (isConst)
+            else
             {
-                if (isParentClass)
+                var csField = new CSharpField(csFieldName) { CppElement = cppField };
+                converter.ApplyDefaultVisibility(csField, csContainer);
+
+                csContainer.Members.Add(csField);
+
+                csField.Comment = converter.GetCSharpComment(cppField, csField);
+
+                if (isUnion)
                 {
-                    //csField.Modifiers |= CSharpModifiers.ReadOnly;
+                    csField.Attributes.Add(new CSharpFreeAttribute("FieldOffset(0)"));
+                    converter.AddUsing(csContainer, "System.Runtime.InteropServices");
                 }
-                else
+
+                if (isConst)
                 {
-                    csField.Modifiers |= CSharpModifiers.Const;
+                    if (isParentClass)
+                    {
+                        //csField.Modifiers |= CSharpModifiers.ReadOnly;
+                    }
+                    else
+                    {
+                        csField.Modifiers |= CSharpModifiers.Const;
+                    }
                 }
+
+                csField.FieldType = converter.GetCSharpType(cppField.Type, csField);
+
+                if (cppField.InitValue?.Value is not null)
+                {
+                    csField.InitValue = cppField.InitValue.Value.ToString();
+                    // Quote strings
+                    if (csField.FieldType is CSharpPrimitiveType primitive && primitive.Kind == CSharpPrimitiveKind.String)
+                    {
+                        csField.InitValue = $"\"{csField.InitValue}\"";
+                    }
+                }
+
+                return csField;
             }
-
-            csField.FieldType = converter.GetCSharpType(cppField.Type, csField);
-
-            if (cppField.InitValue?.Value is not null)
-            {
-                csField.InitValue = cppField.InitValue.Value.ToString();
-                // Quote strings
-                if (csField.FieldType is CSharpPrimitiveType primitive && primitive.Kind == CSharpPrimitiveKind.String)
-                {
-                    csField.InitValue = $"\"{csField.InitValue}\"";
-                }
-            }
-
-            return csField;
         }
         private static bool IsPrimitiveType(CppType cppType)
         {

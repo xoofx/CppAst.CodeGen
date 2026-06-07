@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
@@ -10,7 +10,11 @@ namespace CppAst.CodeGen.CSharp
 {
     public delegate void GlobalProcessingDelegate(CSharpConverter converter);
 
-    public delegate ICSharpContainer? GetCSharpContainerDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
+    public delegate bool ShouldVisitChildrenDelegate(CSharpConverter converter, CppElement element, CSharpElement? context);
+
+    public delegate IEnumerable<ICppDeclaration> GetCppChildrenDelegate(CSharpConverter converter, ICppContainer container, CSharpElement? context);
+
+    public delegate ICSharpContainer? GetCSharpContainerDelegate(CSharpConverter converter, CppElement element, CSharpElement? context);
 
     public delegate CSharpComment? ConvertCommentDelegate(CSharpConverter converter, CppElement element, CSharpElement context);
 
@@ -44,35 +48,41 @@ namespace CppAst.CodeGen.CSharp
 
     public delegate void ProcessAfterConvertDelegate(CSharpConverter converter, CSharpElement element, CSharpElement context);
 
+    public delegate string GetDefaultDllImportNameDelegate(CSharpConverter converter, CppElement element, CSharpElement? context);
+
     public sealed class CSharpConverterPipeline
     {
         public CSharpConverterPipeline(CSharpConverterOptions options)
         {
             Options = options ?? throw new ArgumentNullException(nameof(options));
-            ConvertBegin = new List<GlobalProcessingDelegate>();
-            GetCSharpNameResolvers = new List<GetCSharpNameDelegate>();
-            GetCSharpTypeResolvers = new List<GetCSharpTypeDelegate>();
-            GetCSharpContainerResolvers = new List<GetCSharpContainerDelegate>();
-            AfterPreprocessing = new List<AfterPreprocessingDelegate>();
-            CompilationConverters = new List<ConvertCompilationDelegate>();
-            CommentConverters = new List<ConvertCommentDelegate>();
-            EnumConverters = new List<ConvertEnumDelegate>();
-            EnumItemConverters = new List<ConvertEnumItemDelegate>();
-            ClassConverters = new List<ConvertClassDelegate>();
-            FieldConverters = new List<ConvertFieldDelegate>();
-            FunctionConverters = new List<ConvertFunctionDelegate>();
-            FunctionTypeConverters = new List<ConvertFunctionTypeDelegate>();
-            ParameterConverters = new List<ConvertParameterDelegate>();
-            TypedefConverters = new List<ConvertTypedefDelegate>();
-            Converting = new List<ProcessBeforeConvertDelegate>();
-            Converted = new List<ProcessAfterConvertDelegate>();
-            ConvertEnd = new List<GlobalProcessingDelegate>();
-            RegisteredPlugins = new List<ICSharpConverterPlugin>();
+            ConvertBegin = [];
+            GetCSharpNameResolvers = [];
+            GetCSharpTypeResolvers = [];
+            GetCSharpContainerResolvers = [];
+            AfterPreprocessing = [];
+            CompilationConverters = [];
+            CommentConverters = [];
+            EnumConverters = [];
+            EnumItemConverters = [];
+            ClassConverters = [];
+            FieldConverters = [];
+            FunctionConverters = [];
+            FunctionTypeConverters = [];
+            ParameterConverters = [];
+            TypedefConverters = [];
+            Converting = [];
+            Converted = [];
+            ConvertEnd = [];
+            RegisteredPlugins = [];
+            ShouldVisitChildren = [];
+            GetDefaultDllImportNameResolvers = [];
         }
 
         public CSharpConverterOptions Options { get; }
 
         public List<AfterPreprocessingDelegate> AfterPreprocessing { get; }
+
+        public List<ShouldVisitChildrenDelegate> ShouldVisitChildren { get; }
 
         public List<GlobalProcessingDelegate> ConvertBegin { get; }
 
@@ -108,7 +118,11 @@ namespace CppAst.CodeGen.CSharp
 
         public List<GlobalProcessingDelegate> ConvertEnd { get; }
 
+        public List<GetDefaultDllImportNameDelegate> GetDefaultDllImportNameResolvers { get; }
+
         public List<ICSharpConverterPlugin> RegisteredPlugins { get; }
+
+        public GetCppChildrenDelegate GetCppChildren { get; set; } = (converter, container, context) => container.Children();
 
         public void RegisterPlugins(CSharpConverter converter)
         {

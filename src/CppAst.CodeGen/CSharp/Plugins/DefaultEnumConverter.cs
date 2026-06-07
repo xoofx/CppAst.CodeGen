@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
@@ -33,7 +33,11 @@ namespace CppAst.CodeGen.CSharp
             converter.ApplyDefaultVisibility(csEnum, container);
 
             csEnum.Comment = converter.GetCSharpComment(cppEnum, csEnum);
-            csEnum.BaseTypes.Add(converter.GetCSharpType(cppEnum.IntegerType, csEnum));
+
+            // We can only reason with a canonical type in C#
+            // while in C++ you could use a typedef
+            var canonicalType = cppEnum.IntegerType.GetCanonicalType();
+            csEnum.BaseTypes.Add(converter.GetCSharpType(canonicalType, csEnum));
 
             return csEnum;
         }

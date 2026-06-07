@@ -1,14 +1,14 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using CppAst.CodeGen.Common;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CppAst.CodeGen.CSharp
 {
@@ -118,6 +118,21 @@ namespace CppAst.CodeGen.CSharp
             return obj;
         }
 
+        public string GetDefaultDllImportName(CppElement cppElement, CSharpElement? context) 
+        {
+            if (cppElement == null) throw new ArgumentNullException(nameof(cppElement));
+            for (var i = _pipeline.GetDefaultDllImportNameResolvers.Count - 1; i >= 0; i--)
+            {
+                var getDefaultLibraryName = _pipeline.GetDefaultDllImportNameResolvers[i];
+                var name = getDefaultLibraryName(this, cppElement, context);
+                if (!string.IsNullOrEmpty(name))
+                {
+                    return name;
+                }
+            }
+            return Options.DefaultDllImportNameAndArguments;
+        }
+
         public T? GetTagValueOrDefault<T>(string name) where T : class => GetTagValueOrNull(name) as T;
 
         public string ConvertTypeReferenceToString(CSharpType csType, out string attachedAttributes)
@@ -140,16 +155,9 @@ namespace CppAst.CodeGen.CSharp
             return (CSharpCompilation?)Convert(cppCompilation, 0, CSharpElement.Empty);
         }
 
-        private CSharpElement? Convert(CppElement cppElement, CSharpElement context)
-        {
-            if (cppElement == null) throw new ArgumentNullException(nameof(cppElement));
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            return Convert(cppElement, 0, context);
-        }
-
         public CSharpType? ConvertType(CppType cppType, CSharpElement context)
         {
-            return (CSharpType?)Convert(cppType, context);
+            return (CSharpType?)Convert(cppType, 0, context);
         }
 
         private CSharpElement? Convert(CppElement cppElement, int index, CSharpElement context)
@@ -226,9 +234,13 @@ namespace CppAst.CodeGen.CSharp
                     }
 
                     var childCount = 0;
-                    foreach (var nestedCppElement in container.Children())
+                    
+                    foreach (var nestedCppElement in _pipeline.GetCppChildren(this, container, csElement).OfType<CppElement>())
                     {
-                        Convert((CppElement)nestedCppElement, childCount++, subContext);
+                        if (ShouldVisitChildren(nestedCppElement, csElement))
+                        {
+                            Convert(nestedCppElement, childCount++, subContext);
+                        }
                     }
 
                     if (containerPushed)
@@ -280,6 +292,20 @@ namespace CppAst.CodeGen.CSharp
             }
 
             return csElement;
+        }
+
+        public bool ShouldVisitChildren(CppElement element, CSharpElement? context)
+        {
+            if (element == null) throw new ArgumentNullException(nameof(element));
+            for (var i = _pipeline.ShouldVisitChildren.Count - 1; i >= 0; i--)
+            {
+                var shouldVisitChildren = _pipeline.ShouldVisitChildren[i];
+                if (!shouldVisitChildren(this, element, context))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public CSharpComment? GetCSharpComment(CppElement element, CSharpElement context)
@@ -350,6 +376,11 @@ namespace CppAst.CodeGen.CSharp
             if (cppType == null) throw new ArgumentNullException(nameof(cppType));
             if (context == null) throw new ArgumentNullException(nameof(context));
 
+            if (_mapCppToCSharp.TryGetValue(cppType, out var elementType))
+            {
+                return (CSharpType)elementType;
+            }
+
             CSharpType? csType = null;
             for (var i = _pipeline.GetCSharpTypeResolvers.Count - 1; i >= 0; i--)
             {
@@ -360,8 +391,12 @@ namespace CppAst.CodeGen.CSharp
                     break;
                 }
             }
-            
-            csType ??= new CSharpFreeType($"unsupported_type /* {cppType} */");
+
+            if (csType is null)
+            {
+                csType = new CSharpFreeType($"unsupported_type /* {cppType} */");
+            }
+
             csType.CppElement ??= cppType;
             return csType;
         }
@@ -614,23 +649,34 @@ namespace CppAst.CodeGen.CSharp
             members.Insert(insertIndex, new CSharpUsingDeclaration(referenceName) { Alias = aliasName, IsStatic = isStatic });
         }
 
-        private void Register(CppElement cppElement, CSharpElement element)
+        public void Register(CppElement cppElement, CSharpElement element)
         {
             if (cppElement == null) throw new ArgumentNullException(nameof(cppElement));
             if (element == null) throw new ArgumentNullException(nameof(element));
 
             // Verify that a type map to a type
-            if (cppElement is CppType && !(element is CSharpType))
-            {
-                throw new InvalidOperationException($"The {nameof(CppType)} element `{cppElement}` is converted to an element of type `{element.GetType()}` while it should inherit from `{nameof(CSharpType)}`");
-            }
+            //if (cppElement is CppType && !(element is CSharpType))
+            //{
+            //    throw new InvalidOperationException($"The {nameof(CppType)} element `{cppElement}` is converted to an element of type `{element.GetType()}` while it should inherit from `{nameof(CSharpType)}`");
+            //}
 
             if (_mapCppToCSharp.TryGetValue(cppElement, out var csElement))
             {
-                throw new InvalidOperationException($"The element `{cppElement}` is already registered to `{csElement}`");
+                if (element != csElement)
+                {
+                    throw new InvalidOperationException($"The element `{cppElement}` is already registered to `{csElement}`");
+                }
+
+                return;
             }
             element.CppElement = cppElement;
             _mapCppToCSharp[cppElement] = element;
+        }
+
+        public bool IsRegistered(CppElement cppElement)
+        {
+            if (cppElement == null) throw new ArgumentNullException(nameof(cppElement));
+            return _mapCppToCSharp.ContainsKey(cppElement);
         }
 
         public CSharpElement? FindCSharpElement(CppElement cppElement)

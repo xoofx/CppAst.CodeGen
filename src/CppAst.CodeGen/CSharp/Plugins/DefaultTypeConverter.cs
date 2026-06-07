@@ -2,13 +2,19 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System;
+using ClangSharp;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace CppAst.CodeGen.CSharp
 {
     public class DefaultTypeConverter : ICSharpConverterPlugin
     {
+        private int _nested;
+
         /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
@@ -24,12 +30,19 @@ namespace CppAst.CodeGen.CSharp
         
         public CSharpType? GetCSharpType(CSharpConverter converter, CppType cppType, CSharpElement context, bool nested)
         {
+        _nested++;
+        if (_nested > 100)
+        {
+            System.Diagnostics.Debugger.Break();
+        }
+        try
+        {
             // Early exit for primitive types
             if (cppType is CppPrimitiveType cppPrimitiveType)
             {
-                return GetCSharpPrimitiveType(converter, cppPrimitiveType);
+                return GetCSharpPrimitiveType(converter, cppPrimitiveType, context);
             }
-
+            
             // Check if a particular CppType has been already converted
             var csType = converter.FindCSharpType(cppType);
             if (csType != null)
@@ -37,12 +50,102 @@ namespace CppAst.CodeGen.CSharp
                 return csType;
             }
 
-            // Check if a particular 
+            // Check if there is a particular mapping
             if (MapCppToCSharpType.TryGetValue(cppType.FullName, out csType))
             {
                 return csType;
             }
+
+            // ObjectiveC generic type
+            if (cppType is CppTemplateParameterType cppParameterType)
+            {
+                // We need to register the template parameter type
+                var csTemplateParameterType = new CSharpGenericParameterType(cppParameterType.Name);
+                converter.Register(cppParameterType, csTemplateParameterType);
+                return csTemplateParameterType;
+            }
+
+            // ObjectiveC generic type reference
+            if (cppType is CppObjCGenericType cppObjCGenericType)
+            {
+                if (cppObjCGenericType.ObjCProtocolRefs.Count > 0)
+                {
+                    Debug.Assert(cppObjCGenericType.GenericArguments.Count == 0);
+
+                    CSharpType csObj;
+                    if (cppObjCGenericType.ObjCProtocolRefs.Count == 1)
+                    {
+                        var arg0 = converter.GetCSharpType(cppObjCGenericType.ObjCProtocolRefs[0], context, false);
+
+                        if (cppObjCGenericType.BaseType is CppPrimitiveType primitiveType && (primitiveType.Kind == CppPrimitiveKind.ObjCObject || primitiveType.Kind == CppPrimitiveKind.ObjCClass))
+                        {
+                            if (primitiveType.Kind == CppPrimitiveKind.ObjCObject)
+                            {
+                                var csInterface = (CSharpInterface)arg0;
+                                csObj = csInterface.ObjCProtocolDefaultImpl!;
+                            }
+                            else
+                            {
+                                csObj = new CSharpTargetAndMemberType(arg0, new CSharpFreeType(primitiveType.Kind.ToString()));
+                            }
+                        }
+                        else if (cppObjCGenericType.BaseType is CppClass cppClass && cppClass.ClassKind == CppClassKind.ObjCInterface)
+                        {
+                            var csInterface = (CSharpInterface)arg0;
+                            csObj = csInterface.ObjCProtocolDefaultImpl!;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Unsupported generic type reference {cppObjCGenericType}");
+                        }
+                    }
+                    else
+                    {
+                        // We simplify the ObjC generic type when there are multiple supported protocols 
+                        // TODO: log which methods are using this and how to work with them
+                        // TODO LOG when if (cppObjCGenericType.ObjCProtocolRefs.Count > 1)
+                        csObj = converter.GetCSharpType(cppObjCGenericType.BaseType, context, false);
+                    }
+                    
+                    converter.Register(cppObjCGenericType, csObj);
+                    return csObj;
+                }
+                else if (cppObjCGenericType.GenericArguments.Count > 0)
+                {
+                    Debug.Assert(cppObjCGenericType.ObjCProtocolRefs.Count == 0);
+
+                    var genericBaseType = converter.GetCSharpType(cppObjCGenericType.BaseType, context, false);
+
+                    var csGenericType = new CSharpGenericTypeReference(genericBaseType);
+                    foreach (var cppTypeArgument in cppObjCGenericType.GenericArguments)
+                    {
+                        var csTypeArgument = converter.GetCSharpType(cppTypeArgument, context, false);
+                        csGenericType.TypeArguments.Add(csTypeArgument);
+                    }
+
+                    converter.Register(cppObjCGenericType, csGenericType);
+                    return csGenericType;
+                }
+            }
             
+            // For ObjectiveC object types, we discard the pointers as our structs are already pointers
+            if (cppType.IsPointerToObjCType)
+            {
+                return converter.GetCSharpType(((CppPointerType)cppType).ElementType, context, false);
+            }
+
+            // TEMP
+            if (cppType.TypeKind == CppTypeKind.ObjCBlockFunction)
+            {
+                return CSharpPrimitiveType.IntPtr();
+            }
+
+            // void* => IntPtr
+            if (converter.Options.MapVoidPtrToIntPtr && cppType is CppPointerType simplePointerType && simplePointerType.ElementType is CppPrimitiveType cppPrimitiveType2 && cppPrimitiveType2.Kind == CppPrimitiveKind.Void)
+            {
+                return CSharpPrimitiveType.IntPtr();
+            }
+
             DecodeSimpleType(cppType, out var isConst, out var isPointer, out var isOpaqueStructElementType, out var elementType);
 
             var isParamFromFunctionOrFunctionPointer = !nested && context is CSharpParameter;
@@ -54,7 +157,7 @@ namespace CppAst.CodeGen.CSharp
             if (isConst && isPointer && !nested && elementType.Equals(CppPrimitiveType.Char) && (isParam || isReturn || isConstField))
             {
                 // const char* => string (with marshal)
-                csType = GetStringType(converter, isReturn ? CppStringUsage.Return : isConstField ? CppStringUsage.Const : CppStringUsage.Parameter );
+                csType = GetStringType(converter, isReturn ? CppStringUsage.Return : isConstField ? CppStringUsage.Const : CppStringUsage.Parameter);
             }
 
             if (csType == null)
@@ -102,6 +205,7 @@ namespace CppAst.CodeGen.CSharp
 
                             csType ??= new CSharpPointerType(csElementType);
                         }
+
                         break;
                     case CppTypeKind.Reference:
                         csType = new CSharpRefType(CSharpRefKind.Ref, converter.GetCSharpType(((CppReferenceType)cppType).ElementType, context, true)!);
@@ -111,8 +215,8 @@ namespace CppAst.CodeGen.CSharp
                         var arrayElementType = arrayType.ElementType;
                         var canonicalElementType = arrayElementType.GetCanonicalType();
                         var isPointerElementType = IsPointerType(canonicalElementType);
-                        if (converter.Options.AllowFixedSizeBuffers && 
-                            context is CSharpField csField && 
+                        if (converter.Options.AllowFixedSizeBuffers &&
+                            context is CSharpField csField &&
                             !nested &&
                             IsCppTypeCompatibleWithFixedArrayCSharp(canonicalElementType))
                         {
@@ -142,6 +246,7 @@ namespace CppAst.CodeGen.CSharp
                                 csType = new CSharpPointerType(csArrayElementType);
                             }
                         }
+
                         break;
                     case CppTypeKind.Qualified:
                         var qualifiedType = (CppQualifiedType)cppType;
@@ -166,6 +271,11 @@ namespace CppAst.CodeGen.CSharp
 
             return csType;
         }
+        finally
+        {
+            _nested--;
+        }
+        }
 
         private bool IsCppTypeCompatibleWithFixedArrayCSharp(CppType type)
         {
@@ -177,16 +287,22 @@ namespace CppAst.CodeGen.CSharp
                    cppPrimitiveType.Kind != CppPrimitiveKind.Int128;
         }
         
-        public static CSharpType GetCSharpPrimitiveType(CSharpConverter converter, CppPrimitiveType cppPrimitiveType)
+        public static CSharpType GetCSharpPrimitiveType(CSharpConverter converter, CppPrimitiveType cppPrimitiveType, CSharpElement context)
         {
             CSharpType? csType = null;
 
-            if (!converter.Options.DisableRuntimeMarshalling && converter.Options.DefaultMarshalForBool != null && cppPrimitiveType.Kind == CppPrimitiveKind.Bool)
+            if (cppPrimitiveType.Kind == CppPrimitiveKind.Bool)
             {
-                csType = CSharpPrimitiveType.Bool();
-                var boolTypeWithMarshal = new CSharpTypeWithAttributes(csType);
-                boolTypeWithMarshal.Attributes.Add(converter.Options.DefaultMarshalForBool.Clone());
-                csType = boolTypeWithMarshal;
+                if (!converter.Options.DisableRuntimeMarshalling || context is CSharpMethod)
+                {
+                    if (converter.Options.DefaultMarshalForBool != null)
+                    {
+                        csType = CSharpPrimitiveType.Bool();
+                        var boolTypeWithMarshal = new CSharpTypeWithAttributes(csType);
+                        boolTypeWithMarshal.Attributes.Add(converter.Options.DefaultMarshalForBool.Clone());
+                        csType = boolTypeWithMarshal;
+                    }
+                }
             }
             else if (converter.Options.CharAsByte && cppPrimitiveType.Kind == CppPrimitiveKind.Char)
             {

@@ -1,20 +1,32 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace CppAst.CodeGen.CSharp
 {
     public class DefaultGetCSharpNamePlugin : ICSharpConverterPlugin
     {
+
+        private readonly HashSet<CppClass> _tempOtherClasses;
+
+        public DefaultGetCSharpNamePlugin()
+        {
+            _tempOtherClasses = new HashSet<CppClass>();
+        }
+
         /// <inheritdoc />
         public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
         {
-            pipeline.GetCSharpNameResolvers.Add(DefaultGetCSharpName);
+            pipeline.GetCSharpNameResolvers.Add(GetCSharpName);
         }
 
-        public static string DefaultGetCSharpName(CSharpConverter converter, CppElement element, CSharpElement context)
+        protected virtual string GetCSharpName(CSharpConverter converter, CppElement element, CSharpElement context)
         {
             var name = string.Empty;
 
@@ -22,6 +34,58 @@ namespace CppAst.CodeGen.CSharp
             if (element is ICppMember member)
             {
                 name = member.Name;
+            }
+
+            if (element is CppFunction cppFunction && cppFunction.Parent is CppClass cppClass && 
+                (cppClass.ClassKind == CppClassKind.ObjCInterface ||
+                 cppClass.ClassKind == CppClassKind.ObjCInterfaceCategory ||
+                 cppClass.ClassKind == CppClassKind.ObjCProtocol))
+            {
+                // For ObjC interface, we keep only the name before the first :
+                var nameBuilder = new StringBuilder();
+                var nameParts = name.Split(':', StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < nameParts.Length; i++)
+                {
+                    var namePart = nameParts[i];
+                    if (nameBuilder.Length > 0)
+                    {
+                        nameBuilder.Append(namePart[0].ToString().ToUpperInvariant());
+                        nameBuilder.Append(namePart.Substring(1));
+                    }
+                    else
+                    {
+                        nameBuilder.Append(namePart);
+                    }
+                }
+
+                name = nameBuilder.ToString();
+
+                // Some ObjC methods can have a static and non static version with the same name, so we append "Static" on the static if required.
+                if ((cppFunction.Flags & CppFunctionFlags.ClassMethod) != 0)
+                {
+                    _tempOtherClasses.Clear();
+                    _tempOtherClasses.Add(cppClass);
+
+                    // Wwe need to visit also categories that can add methods that can conflict with a method defined in another class
+                    if (cppClass.ObjCCategoryTargetClass != null)
+                    {
+                        _tempOtherClasses.Add(cppClass.ObjCCategoryTargetClass);
+
+                        foreach (var otherCppClass in cppClass.ObjCCategoryTargetClass.ObjCCategories)
+                        {
+                            _tempOtherClasses.Add(otherCppClass);
+                        }
+                    }
+
+                    foreach (var otherClass in _tempOtherClasses)
+                    {
+                        if (otherClass.Functions.Any(x => x.Name == cppFunction.Name && (x.Flags & CppFunctionFlags.ClassMethod) == 0))
+                        {
+                            name = $"{name}Static";
+                            break;
+                        }
+                    }
+                }
             }
 
             // If it is null, try to get a contextual name from the context
@@ -51,9 +115,9 @@ namespace CppAst.CodeGen.CSharp
                             indexOfElement = cppContainer.Classes.IndexOf(subclass);
                             kind = $"{subclass.ClassKind.ToString().ToLowerInvariant()}_";
                         }
-                        else if (element is CppFunction cppFunction)
+                        else if (element is CppFunction cppFunction2)
                         {
-                            indexOfElement = cppContainer.Functions.IndexOf(cppFunction);
+                            indexOfElement = cppContainer.Functions.IndexOf(cppFunction2);
                             kind = "func_";
                         }
                         else if (element is CppEnum cppEnum)

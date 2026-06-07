@@ -2,12 +2,11 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace CppAst.CodeGen.CSharp;
 
-[StructLayout(LayoutKind.Explicit)]
-public class DefaultFunctionConverter : ICSharpConverterPlugin
+public class DefaultObjCFunctionConverter : ICSharpConverterPlugin
 {
     /// <inheritdoc />
     public void Register(CSharpConverter converter, CSharpConverterPipeline pipeline)
@@ -17,38 +16,46 @@ public class DefaultFunctionConverter : ICSharpConverterPlugin
 
     protected virtual CSharpElement? ConvertFunction(CSharpConverter converter, CppFunction cppFunction, CSharpElement context)
     {
-        var cppParent = cppFunction.Parent as CppClass;
-
-        if (CppHelper.IsObjCFunction(cppFunction) || !cppFunction.IsPublicExport() || ((cppFunction.Flags & (CppFunctionFlags.Inline | CppFunctionFlags.Method | CppFunctionFlags.Constructor | CppFunctionFlags.Destructor)) != 0 && (cppFunction.Flags & CppFunctionFlags.Virtual) == 0))
+        if (!CppHelper.IsObjCFunction(cppFunction))
         {
             return null;
         }
 
+        var cppParent = cppFunction.Parent as CppClass;
+
         // Register the struct as soon as possible
-        var csFunction = new CSharpMethod(string.Empty) { CppElement = cppFunction };
+        var csFunction = new CSharpMethod(string.Empty)
+        { 
+            CppElement = cppFunction
+        };
+        
+        var container = (ICSharpContainer)context;
 
-        var container = converter.GetCSharpContainer(cppFunction, context);
-
-        converter.ApplyDefaultVisibility(csFunction, container);
+        if (container is CSharpTypeWithMembers csTypeWithMembers)
+        {
+            container = (CSharpExtension)csTypeWithMembers.LinkedExtension!;
+        }
         container.Members.Add(csFunction);
 
-        converter.AddUsing(container, "System.Runtime.InteropServices");
-
-        if ((cppFunction.Flags & (CppFunctionFlags.Virtual | CppFunctionFlags.Method)) == 0)
+        if ((cppFunction.Flags & (CppFunctionFlags.Virtual | CppFunctionFlags.Method | CppFunctionFlags.ClassMethod)) == 0)
         {
             csFunction.Modifiers |= CSharpModifiers.Static | CSharpModifiers.Extern;
         }
-        else
+        else if ((cppFunction.Flags & (CppFunctionFlags.ClassMethod)) != 0)
         {
-            csFunction.Visibility = CSharpVisibility.None;
+            csFunction.Modifiers |= CSharpModifiers.Static;
         }
+        csFunction.Visibility = CSharpVisibility.Public;
 
         // TODO: hack to allow GetCSharpName to rename the function
         CSharpElement parentCsFunction = csFunction;
+        parentCsFunction = (CSharpElement)container;
 
         csFunction.Name = converter.GetCSharpName(cppFunction, parentCsFunction);
         csFunction.Comment = converter.GetCSharpComment(cppFunction, parentCsFunction);
         csFunction.ReturnType = converter.GetCSharpType(cppFunction.ReturnType, csFunction);
+
+        csFunction.BodyInline = (writer, element) => writer.Write("throw new NotImplementedException()");
 
         return csFunction;
     }

@@ -21,6 +21,12 @@ namespace CppAst.CodeGen.CSharp
             Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
+        public CSharpParameter(CSharpType parameterType, string name) : this()
+        {
+            ParameterType = parameterType ?? throw new ArgumentNullException(nameof(parameterType));
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+        }
+
         public List<CSharpAttribute> Attributes { get; private set; }
 
         public int Index { get; set; }

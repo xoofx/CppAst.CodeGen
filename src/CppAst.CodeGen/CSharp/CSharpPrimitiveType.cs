@@ -23,6 +23,7 @@ namespace CppAst.CodeGen.CSharp
         public static CSharpPrimitiveType Float() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Float);
         public static CSharpPrimitiveType Double() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Double);
         public static CSharpPrimitiveType Object() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.Object);
+        public static CSharpPrimitiveType Rune() => new CSharpPrimitiveType(CSharpPrimitiveKind.Rune);
         public static CSharpPrimitiveType Int128() => new CSharpPrimitiveType(CSharpPrimitiveKind.Int128);
         public static CSharpPrimitiveType UInt128() => new CSharpPrimitiveType(CSharpPrimitiveKind.UInt128);
         public static CSharpPrimitiveType String() =>  new CSharpPrimitiveType(CSharpPrimitiveKind.String);
@@ -91,6 +92,9 @@ namespace CppAst.CodeGen.CSharp
                     break;
                 case CSharpPrimitiveKind.UIntPtr:
                     writer.Write("nuint");
+                    break;
+                case CSharpPrimitiveKind.Rune:
+                    writer.Write("System.Text.Rune");
                     break;
                 case CSharpPrimitiveKind.Int128:
                     writer.Write("System.Int128");

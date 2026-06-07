@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
@@ -45,6 +45,8 @@ namespace CppAst.CodeGen.CSharp
         public string Name { get; set; }
 
         public List<CSharpParameter> Parameters { get; }
+
+        public List<CSharpGenericParameterType> GenericParameters { get; } = new List<CSharpGenericParameterType>();
 
         public bool IsManaged { get; set; }
 
@@ -125,7 +127,27 @@ namespace CppAst.CodeGen.CSharp
                 writer.Write(" ");
                 writer.Write(Name ?? string.Empty);
             }
+
+            if (GenericParameters.Count > 0)
+            {
+                writer.Write("<");
+                for (int i = 0; i < GenericParameters.Count; i++)
+                {
+                    if (i > 0) writer.Write(", ");
+                    GenericParameters[i].DumpTo(writer);
+                }
+                writer.Write(">");
+            }
+
             Parameters.DumpTo(writer);
+
+            if (GenericParameters.Count > 0)
+            {
+                foreach(var genericParam in GenericParameters)
+                {
+                    genericParam.DumpWhereClausesTo(writer);
+                }
+            }
 
             if (Body != null)
             {

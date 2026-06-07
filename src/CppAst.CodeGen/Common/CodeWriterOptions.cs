@@ -38,7 +38,10 @@ namespace CppAst.CodeGen.Common
         /// <summary>
         /// Gets the list of default usings for each C# file.
         /// </summary>
-        public List<string> DefaultUsings { get; } = ["using System;"];
+        public List<string> DefaultUsings { get; } = [
+            "using System;",
+            "using System.Runtime.InteropServices;"
+        ];
 
         public CodeWriterMode Mode { get; set; }
 

@@ -44,9 +44,14 @@ namespace CppAst.CodeGen.CSharp
             _defaultTypeConverter = converter.Options.Plugins.OfType<DefaultTypeConverter>().FirstOrDefault();
         }
 
-        public CSharpElement ConvertTypedef(CSharpConverter converter, CppTypedef cppTypedef, CSharpElement context)
+        protected virtual CppType GetElementType(CSharpConverter converter, CppTypedef cppTypedef, CSharpElement context)
         {
-            var elementType = cppTypedef.ElementType;
+            return cppTypedef.ElementType;
+        }
+
+        protected virtual CSharpElement ConvertTypedef(CSharpConverter converter, CppTypedef cppTypedef, CSharpElement context)
+        {
+            var elementType = GetElementType(converter, cppTypedef, context);
 
             // Use the default type converter if available
             if (_defaultTypeConverter is not null && _defaultTypeConverter.MapCppToCSharpType.TryGetValue(cppTypedef.Name, out var csType))
@@ -67,20 +72,30 @@ namespace CppAst.CodeGen.CSharp
             
             var csElementType = converter.GetCSharpType(elementType, context, true);
 
+            // Recursive typedef that has been already discovered
+            var csStructFound = converter.FindCSharpType(cppTypedef);
+            if (csStructFound != null)
+            {
+                return csStructFound;
+            }
+            
             var noWrapForStruct = csElementType is CSharpStruct && converter.Options.DisableTypedefToStructWrap;
             var noWrap = converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.NoWrap && !converter.Options.TypedefWrapForceList.Contains(cppTypedef.Name)
                          || converter.Options.TypedefCodeGenKind == CppTypedefCodeGenKind.Wrap && converter.Options.TypedefNoWrapForceList.Contains(cppTypedef.Name)
                          || noWrapForStruct;
             
             var csStructName = converter.GetCSharpName(cppTypedef, context);
-            var csStruct = new CSharpStruct(csStructName)
+
+            var isObjC = elementType.IsPointerToObjCType;
+            var csStruct = isObjC ? CSharpStruct.MakeObjCObject(csStructName, cppTypedef) : new CSharpStruct(csStructName)
             {
                 CppElement = cppTypedef,
             };
+            var isOpaqueStruct = CppType.IsOpaqueStruct(cppTypedef);
 
-            if (noWrap || csStruct.IsOpaque || (csElementType is CSharpPrimitiveType csPrimitive && csPrimitive.Kind == CSharpPrimitiveKind.Void))
+            if (noWrap || isOpaqueStruct || (csElementType is CSharpPrimitiveType csPrimitive && csPrimitive.Kind == CSharpPrimitiveKind.Void))
             {
-                if (noWrapForStruct && csElementType is CSharpStruct csStructElementType)
+                if (!noWrapForStruct && csElementType is CSharpStruct csStructElementType)
                 {
                     csStructElementType.Name = csStructName;
                 }
@@ -88,63 +103,91 @@ namespace CppAst.CodeGen.CSharp
                 return csElementType;
             }
 
+            converter.Register(cppTypedef, csStruct);
             var container = converter.GetCSharpContainer(cppTypedef, context);
             converter.ApplyDefaultVisibility(csStruct, container);
             container.Members.Add(csStruct);
 
             csStruct.Comment = converter.GetCSharpComment(cppTypedef, csStruct);
 
-            var structLayout = new CSharpStructLayoutAttribute(LayoutKind.Sequential);
-            if (!converter.Options.DisableRuntimeMarshalling)
+            var csStructSimpleType = new CSharpSimpleNameReferenceType(csStruct);
+
+            // Objective-C types are already records
+            if (!isObjC)
             {
-                structLayout.CharSet = converter.Options.DefaultCharSet;
-            }
-
-            // TODO: Add size/pack information
-
-            if (structLayout.CharSet.HasValue || structLayout.Pack.HasValue || structLayout.Size.HasValue || structLayout.LayoutKind != LayoutKind.Sequential)
-            {
-                csStruct.Attributes.Add(structLayout);
-
-                // Required by StructLayout
-                converter.AddUsing(container, "System.Runtime.InteropServices");
-            }
-
-            var name = csStruct.Name;
-            csStruct.Modifiers |= CSharpModifiers.ReadOnly;
-            csStruct.BaseTypes.Add(new CSharpGenericTypeReference($"IEquatable", [csStruct]));
-
-            csStruct.Members.Add(new CSharpMethod(name)
-            {
-                Kind = CSharpMethodKind.Constructor,
-                Parameters =
+                if (CppHelper.IsStructCanBeRecordWithElementType(elementType))
                 {
-                    new CSharpParameter("value")
+                    csStruct.IsRecord = true;
+                    csStruct.PrimaryConstructorParameters.Add(new CSharpParameter("Value")
                     {
-                        ParameterType = csElementType
+                        ParameterType = csElementType,
+                    });
+                }
+                else
+                {
+                    // Otherwise we need to create a struct that looks like a record (e.g. for element type pointers/funtion pointers...etc.)
+                    var structLayout = new CSharpStructLayoutAttribute(LayoutKind.Sequential);
+                    if (!converter.Options.DisableRuntimeMarshalling)
+                    {
+                        structLayout.CharSet = converter.Options.DefaultCharSet;
                     }
-                },
-                Visibility = CSharpVisibility.Public,
-                BodyInline = ((writer, _) => writer.Write("this.Value = value"))
-            });
-            csStruct.Members.Add(new CSharpProperty("Value")
-            {
-                ReturnType = csElementType,
-                Visibility = CSharpVisibility.Public,
-                GetterOnly = true
-            });
-            csStruct.Members.Add(new CSharpLineElement(() => $"public override bool Equals(object obj) => obj is {name} other && Equals(other);"));
-            if (csElementType is CSharpPointerType || csElementType is CSharpFunctionPointer)
-            {
-                csStruct.Members.Add(new CSharpLineElement(() => $"public bool Equals({name} other) => Value == other.Value;"));
-                csStruct.Members.Add(new CSharpLineElement("public override int GetHashCode() => ((nint)(void*)Value).GetHashCode();"));
-                csStruct.Members.Add(new CSharpLineElement("public override string ToString() => ((nint)(void*)Value).ToString();"));
-            }
-            else
-            {
-                csStruct.Members.Add(new CSharpLineElement(() => $"public bool Equals({name} other) => Value.Equals(other.Value);"));
-                csStruct.Members.Add(new CSharpLineElement("public override int GetHashCode() => Value.GetHashCode();"));
-                csStruct.Members.Add(new CSharpLineElement("public override string ToString() => Value.ToString();"));
+
+                    // TODO: Add size/pack information
+
+                    if (structLayout.CharSet.HasValue || structLayout.Pack.HasValue || structLayout.Size.HasValue || structLayout.LayoutKind != LayoutKind.Sequential)
+                    {
+                        csStruct.Attributes.Add(structLayout);
+
+                        // Required by StructLayout
+                        converter.AddUsing(container, "System.Runtime.InteropServices");
+                    }
+
+                    var name = csStruct.Name;
+                    csStruct.Modifiers |= CSharpModifiers.ReadOnly;
+                    csStruct.BaseTypes.Add(new CSharpGenericTypeReference($"IEquatable")
+                    {
+                        TypeArguments =
+                        {
+                            csStructSimpleType
+                        }
+                    });
+
+                    csStruct.Members.Add(new CSharpMethod(name)
+                    {
+                        Kind = CSharpMethodKind.Constructor,
+                        Parameters =
+                        {
+                            new CSharpParameter("value")
+                            {
+                                ParameterType = csElementType
+                            }
+                        },
+                        Visibility = CSharpVisibility.Public,
+                        BodyInline = ((writer, _) => writer.Write("this.Value = value"))
+                    });
+                    csStruct.Members.Add(new CSharpProperty("Value")
+                    {
+                        ReturnType = csElementType,
+                        Visibility = CSharpVisibility.Public,
+                        GetterOnly = true
+                    });
+                    csStruct.Members.Add(new CSharpLineElement(() => $"public override bool Equals(object obj) => obj is {name} other && Equals(other);"));
+                    if (csElementType is CSharpPointerType || csElementType is CSharpFunctionPointer)
+                    {
+                        csStruct.Members.Add(new CSharpLineElement(() => $"public bool Equals({name} other) => Value == other.Value;"));
+                        csStruct.Members.Add(new CSharpLineElement("public override int GetHashCode() => ((nint)(void*)Value).GetHashCode();"));
+                        csStruct.Members.Add(new CSharpLineElement("public override string ToString() => ((nint)(void*)Value).ToString();"));
+                    }
+                    else
+                    {
+                        csStruct.Members.Add(new CSharpLineElement(() => $"public bool Equals({name} other) => Value.Equals(other.Value);"));
+                        csStruct.Members.Add(new CSharpLineElement("public override int GetHashCode() => Value.GetHashCode();"));
+                        csStruct.Members.Add(new CSharpLineElement("public override string ToString() => Value.ToString();"));
+                    }
+
+                    csStruct.Members.Add(new CSharpLineElement(() => $"public static bool operator ==({name} left, {name} right) => left.Equals(right);"));
+                    csStruct.Members.Add(new CSharpLineElement(() => $"public static bool operator !=({name} left, {name} right) => !left.Equals(right);"));
+                }
             }
 
             csStruct.Members.Add(new CSharpMethod(string.Empty)
@@ -154,15 +197,15 @@ namespace CppAst.CodeGen.CSharp
                 Modifiers = CSharpModifiers.Static | CSharpModifiers.Implicit,
                 Parameters =
                 {
-                    new CSharpParameter("from") {ParameterType = csStruct},
+                    new CSharpParameter("from") {ParameterType = csStructSimpleType},
                 },
-                BodyInline = ((writer, _) => writer.Write("from.Value")),
+                BodyInline = ((writer, _) => writer.Write(isObjC ? "new(from.Handle)" : "from.Value")),
                 Visibility = CSharpVisibility.Public
             });
             csStruct.Members.Add(new CSharpMethod(string.Empty)
             {
                 Kind = CSharpMethodKind.Operator,
-                ReturnType = csStruct,
+                ReturnType = csStructSimpleType,
                 Modifiers = CSharpModifiers.Static | CSharpModifiers.Implicit,
                 Parameters =
                 {
@@ -171,15 +214,12 @@ namespace CppAst.CodeGen.CSharp
                 BodyInline = (writer, element) =>
                 {
                     writer.Write("new ");
-                    csStruct.DumpReferenceTo(writer);
                     writer.Write("(");
-                    writer.Write("from");
+                    writer.Write(isObjC ? "from.Handle" : "from");
                     writer.Write(")");
                 },
                 Visibility = CSharpVisibility.Public
             });
-            csStruct.Members.Add(new CSharpLineElement(() => $"public static bool operator ==({name} left, {name} right) => left.Equals(right);"));
-            csStruct.Members.Add(new CSharpLineElement(() => $"public static bool operator !=({name} left, {name} right) => !left.Equals(right);"));
 
 
             return csStruct;

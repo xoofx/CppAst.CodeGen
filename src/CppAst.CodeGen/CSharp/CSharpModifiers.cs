@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
@@ -19,5 +19,6 @@ namespace CppAst.CodeGen.CSharp
         Unsafe = 1 << 6,
         Implicit = 1 << 7,
         Explicit = 1 << 8,
+        New = 1 << 9,
     }
 }

@@ -23,6 +23,7 @@ namespace CppAst.CodeGen.CSharp
         String,
         IntPtr,
         UIntPtr,
+        Rune,
         Int128,
         UInt128,
     }

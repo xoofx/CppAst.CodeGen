@@ -1,40 +1,59 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-using System;
+using System.Collections.Generic;
 using CppAst.CodeGen.Common;
 
 namespace CppAst.CodeGen.CSharp;
 
 public class CSharpGenericTypeReference : CSharpType
 {
-    public CSharpGenericTypeReference(string name, CSharpType[] typeArguments)
+    public CSharpGenericTypeReference(CSharpType baseType)
     {
-        Name = name ?? throw new ArgumentNullException(nameof(name));
-        TypeArguments = typeArguments ?? throw new ArgumentNullException(nameof(typeArguments));
+        BaseType = baseType;
+        TypeArguments = new();
     }
 
-    public string Name { get; set; }
+    public CSharpGenericTypeReference(CSharpType baseType, params CSharpType[] typeArguments) : this(baseType)
+    {
+        TypeArguments.AddRange(typeArguments);
+    }
 
-    public CSharpType[] TypeArguments { get; set; }
+    public CSharpGenericTypeReference(string name) : this(new CSharpFreeType(name))
+    {
+    }
+
+    public CSharpGenericTypeReference(string name, params CSharpType[] typeArguments) : this(new CSharpFreeType(name))
+    {
+        TypeArguments.AddRange(typeArguments);
+    }
+
+    public CSharpType BaseType { get; set; }
+
+    public List<CSharpType> TypeArguments { get; }
 
     /// <inheritdoc />
     public override void DumpTo(CodeWriter writer)
     {
-        writer.Write(Name);
-        writer.Write("<");
-        for (var i = 0; i < TypeArguments.Length; i++)
+        BaseType.DumpReferenceTo(writer);
+
+        // Allows to have a GenericTypeReference that don't have type arguments
+        if (TypeArguments.Count > 0)
         {
-            if (i > 0)
+            writer.Write("<");
+            for (var i = 0; i < TypeArguments.Count; i++)
             {
-                writer.Write(", ");
+                if (i > 0)
+                {
+                    writer.Write(", ");
+                }
+
+                TypeArguments[i].DumpReferenceTo(writer);
             }
 
-            TypeArguments[i].DumpReferenceTo(writer);
+            writer.Write(">");
         }
-
-        writer.Write(">");
     }
 
     /// <inheritdoc />

@@ -167,9 +167,9 @@ namespace CppAst.CodeGen.CSharp
                 case CppPrimitiveKind.Int:
                     return CSharpPrimitiveType.Int();
                 case CppPrimitiveKind.Long:
-                    return converter.Options.MapCLongToIntPtr ? CSharpPrimitiveType.IntPtr() : new CSharpFreeType("global::System.Runtime.InteropServices.CLong");
+                    return converter.Options.MapCLongFunc != null ? converter.Options.MapCLongFunc(cppType.Kind) : converter.Options.MapCLongToIntPtr ? CSharpPrimitiveType.IntPtr() : new CSharpFreeType("global::System.Runtime.InteropServices.CLong");
                 case CppPrimitiveKind.UnsignedLong:
-                    return converter.Options.MapCLongToIntPtr ? CSharpPrimitiveType.UIntPtr() : new CSharpFreeType("global::System.Runtime.InteropServices.CULong");
+                    return converter.Options.MapCLongFunc != null ? converter.Options.MapCLongFunc(cppType.Kind) : converter.Options.MapCLongToIntPtr ? CSharpPrimitiveType.UIntPtr() : new CSharpFreeType("global::System.Runtime.InteropServices.CULong");
                 case CppPrimitiveKind.LongLong:
                     return CSharpPrimitiveType.Long();
                 case CppPrimitiveKind.UnsignedChar:
@@ -190,6 +190,20 @@ namespace CppAst.CodeGen.CSharp
                     return CSharpPrimitiveType.Int128();
                 case CppPrimitiveKind.UInt128:
                     return CSharpPrimitiveType.UInt128();
+                case CppPrimitiveKind.ObjCSel:
+                    return new CSharpFreeType("ObjCRuntime.ObjCSelector");
+                case CppPrimitiveKind.ObjCClass:
+                    return new CSharpFreeType("ObjCRuntime.ObjCClass");
+                case CppPrimitiveKind.ObjCObject:
+                    return new CSharpFreeType("ObjCRuntime.ObjCObject");
+                case CppPrimitiveKind.Float16:
+                    return new CSharpFreeType("System.Half");
+                case CppPrimitiveKind.BFloat16:
+                    return new CSharpFreeType("BFloat16");
+                case CppPrimitiveKind.IntPtr:
+                    return CSharpPrimitiveType.IntPtr();
+                case CppPrimitiveKind.UIntPtr:
+                    return CSharpPrimitiveType.UIntPtr();
                 default:
                     throw new ArgumentOutOfRangeException($"The kind {cppType.Kind} is not supported");
             }

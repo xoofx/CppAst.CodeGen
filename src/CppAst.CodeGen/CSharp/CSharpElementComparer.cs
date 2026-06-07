@@ -85,6 +85,10 @@ public class CSharpElementComparer
 
                 return true;
             }
+            case CSharpParameter cSharpParameter:
+            {
+                return Compare(cSharpParameter, (CSharpParameter)right, visitedElement);
+            }
             case CSharpType csType:
             {
                 return Compare(csType, (CSharpType)right, visitedElement);
@@ -117,17 +121,17 @@ public class CSharpElementComparer
         {
             case CSharpGenericTypeReference cSharpGenericTypeReference:
             {
-                if (cSharpGenericTypeReference.Name != ((CSharpGenericTypeReference)right).Name)
+                if (!CompareReference(cSharpGenericTypeReference.BaseType, ((CSharpGenericTypeReference)right).BaseType, visitedElement))
                 {
                     return false;
                 }
 
-                if (cSharpGenericTypeReference.TypeArguments.Length != ((CSharpGenericTypeReference)right).TypeArguments.Length)
+                if (cSharpGenericTypeReference.TypeArguments.Count != ((CSharpGenericTypeReference)right).TypeArguments.Count)
                 {
                     return false;
                 }
 
-                for (int i = 0; i < cSharpGenericTypeReference.TypeArguments.Length; i++)
+                for (int i = 0; i < cSharpGenericTypeReference.TypeArguments.Count; i++)
                 {
                     if (!Compare(cSharpGenericTypeReference.TypeArguments[i], ((CSharpGenericTypeReference)right).TypeArguments[i], visitedElement))
                     {
@@ -137,6 +141,30 @@ public class CSharpElementComparer
 
                 return true;
             }
+
+            case CSharpGenericParameterType cSharpGenericParameterType:
+                {
+                    if (cSharpGenericParameterType.Name != ((CSharpGenericParameterType)right).Name)
+                    {
+                        return false;
+                    }
+
+                    if (cSharpGenericParameterType.IsOut != ((CSharpGenericParameterType)right).IsOut)
+                    {
+                        return false;
+                    }
+
+                    if (!CompareWhereClauses(cSharpGenericParameterType.WhereClauses, ((CSharpGenericParameterType)right).WhereClauses, visitedElement))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+
+            case CSharpSimpleNameReferenceType cSharpSimpleNameReferenceType:
+                return cSharpSimpleNameReferenceType.BaseType.GetType() == ((CSharpSimpleNameReferenceType)right).BaseType.GetType()
+                       && cSharpSimpleNameReferenceType.BaseType.Name == ((CSharpSimpleNameReferenceType)right).BaseType.Name;
 
             case CSharpFreeType cSharpFreeType:
                 return cSharpFreeType.Text == ((CSharpFreeType)right).Text;
@@ -170,6 +198,31 @@ public class CSharpElementComparer
             case CSharpTypeWithMembers csWithMembers:
             {
                 visitedElement ??= new HashSet<CSharpType>();
+
+                if (csWithMembers.IsRecord != ((CSharpTypeWithMembers)right).IsRecord)
+                {
+                    return false;
+                }
+
+                if (csWithMembers.ForcePrimaryConstructorParameters != ((CSharpTypeWithMembers)right).ForcePrimaryConstructorParameters)
+                {
+                    return false;
+                }
+
+                if (!CompareGenericParameters(csWithMembers.GenericParameters, ((CSharpTypeWithMembers)right).GenericParameters, visitedElement))
+                {
+                    return false;
+                }
+
+                if (!CompareTypeReferences(csWithMembers.BaseTypes, ((CSharpTypeWithMembers)right).BaseTypes, visitedElement))
+                {
+                    return false;
+                }
+
+                if ((csWithMembers.IsRecord || csWithMembers.ForcePrimaryConstructorParameters) && !CompareParameters(csWithMembers.PrimaryConstructorParameters, ((CSharpTypeWithMembers)right).PrimaryConstructorParameters, visitedElement))
+                {
+                    return false;
+                }
 
                 // Process fields
                 var leftAllFields = csWithMembers.Members.OfType<CSharpField>().ToList();
@@ -308,5 +361,130 @@ public class CSharpElementComparer
         }
 
         throw new NotImplementedException($"{left.GetType()} comparison is not implemented");
+    }
+
+    private static bool CompareParameters(IReadOnlyList<CSharpParameter> left, IReadOnlyList<CSharpParameter> right, HashSet<CSharpType>? visitedElement)
+    {
+        if (left.Count != right.Count)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < left.Count; i++)
+        {
+            if (!Compare(left[i], right[i], visitedElement))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool Compare(CSharpParameter left, CSharpParameter right, HashSet<CSharpType>? visitedElement)
+    {
+        if (left.Name != right.Name || left.DefaultValue != right.DefaultValue || left.IsParams != right.IsParams || left.IsThis != right.IsThis)
+        {
+            return false;
+        }
+
+        if (left.ParameterType is null || right.ParameterType is null)
+        {
+            return left.ParameterType is null && right.ParameterType is null;
+        }
+
+        return Compare(left.ParameterType, right.ParameterType, visitedElement);
+    }
+
+    private static bool CompareGenericParameters(IReadOnlyList<CSharpGenericParameterType> left, IReadOnlyList<CSharpGenericParameterType> right, HashSet<CSharpType>? visitedElement)
+    {
+        if (left.Count != right.Count)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < left.Count; i++)
+        {
+            if (!Compare(left[i], right[i], visitedElement))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool CompareTypeReferences(IReadOnlyList<CSharpType> left, IReadOnlyList<CSharpType> right, HashSet<CSharpType>? visitedElement)
+    {
+        if (left.Count != right.Count)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < left.Count; i++)
+        {
+            if (!CompareReference(left[i], right[i], visitedElement))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool CompareReference(CSharpType left, CSharpType right, HashSet<CSharpType>? visitedElement)
+    {
+        if (left.GetType() != right.GetType())
+        {
+            return false;
+        }
+
+        if (left is CSharpNamedType leftNamedType && right is CSharpNamedType rightNamedType)
+        {
+            return leftNamedType.Name == rightNamedType.Name;
+        }
+
+        if (left is CSharpSimpleNameReferenceType leftSimpleReference && right is CSharpSimpleNameReferenceType rightSimpleReference)
+        {
+            return leftSimpleReference.BaseType.GetType() == rightSimpleReference.BaseType.GetType()
+                   && leftSimpleReference.BaseType.Name == rightSimpleReference.BaseType.Name;
+        }
+
+        return Compare(left, right, visitedElement);
+    }
+
+    private static bool CompareWhereClauses(IReadOnlyList<CSharpWhereClause> left, IReadOnlyList<CSharpWhereClause> right, HashSet<CSharpType>? visitedElement)
+    {
+        if (left.Count != right.Count)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < left.Count; i++)
+        {
+            if (left[i].Constraint != right[i].Constraint)
+            {
+                return false;
+            }
+
+            var leftType = left[i].Type;
+            var rightType = right[i].Type;
+            if (leftType is null || rightType is null)
+            {
+                if (leftType is not null || rightType is not null)
+                {
+                    return false;
+                }
+
+                continue;
+            }
+
+            if (!CompareReference(leftType, rightType, visitedElement))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

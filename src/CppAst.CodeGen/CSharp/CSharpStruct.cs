@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
@@ -16,19 +16,21 @@ namespace CppAst.CodeGen.CSharp
 
         public CSharpStructMarshallingUsage MarshallingUsage { get; set; }
 
-        public bool IsOpaque
+
+        public static CSharpStruct MakeObjCObject(string name, CppElement element)
         {
-            get
+            var csStruct = new CSharpStruct(name)
             {
-                var cppElement = CppElement;
-
-                while (cppElement is CppTypedef cppTypedef)
-                {
-                    cppElement = cppTypedef.ElementType;
-                }
-
-                return cppElement is CppClass cppClass && !cppClass.IsDefinition;
-            }
+                CppElement = element,
+                IsRecord = true,
+                Modifiers = CSharpModifiers.ReadOnly | CSharpModifiers.Partial
+            };
+            csStruct.BaseTypes.Add(new CSharpFreeType("ObjCRuntime.IObjCObject"));
+            csStruct.PrimaryConstructorParameters.Add(new CSharpParameter("Handle")
+            {
+                ParameterType = CSharpPrimitiveType.IntPtr(),
+            });
+            return csStruct;
         }
     }
 }

@@ -10,6 +10,12 @@ namespace CppAst.CodeGen.CSharp
         {
         }
 
+        /// <summary>
+        /// Gets or sets an associated object (used by ObjC to link interface/struct)
+        /// </summary>
+        public CSharpStruct? ObjCProtocolDefaultImpl { get; set; }
+
+
         protected override string DeclarationKind => "interface";
     }
 }

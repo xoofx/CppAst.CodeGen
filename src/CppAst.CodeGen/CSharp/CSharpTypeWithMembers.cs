@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
@@ -31,6 +31,11 @@ namespace CppAst.CodeGen.CSharp
         public List<CSharpType> BaseTypes { get; }
 
         /// <summary>
+        /// The generic parameters of this type.
+        /// </summary>
+        public List<CSharpGenericParameterType> GenericParameters { get; } = new List<CSharpGenericParameterType>();
+
+        /// <summary>
         /// Gets or sets a boolean indicating if this type is a record.
         /// </summary>
         public bool IsRecord { get; set; }
@@ -47,6 +52,11 @@ namespace CppAst.CodeGen.CSharp
 
         /// <inheritdoc />
         public CSharpContainerList<CSharpElement> Members { get; }
+
+        /// <summary>
+        /// Gets or sets an associated object (used by ObjC to link interface/struct)
+        /// </summary>
+        public CSharpExtension? LinkedExtension { get; set; }
 
         /// <inheritdoc />
         ICSharpContainer? ICSharpContainer.Parent => Parent as ICSharpContainer;
@@ -82,7 +92,19 @@ namespace CppAst.CodeGen.CSharp
             writer.Write(" ");
 
             writer.Write(Name);
-
+            
+            if (GenericParameters.Count > 0)
+            {
+                writer.Write("<");
+                for (var i = 0; i < GenericParameters.Count; i++)
+                {
+                    var genericParameter = GenericParameters[i];
+                    if (i > 0) writer.Write(", ");
+                    genericParameter.DumpTo(writer);
+                }
+                writer.Write(">");
+            }
+            
             if (ForcePrimaryConstructorParameters || (IsRecord && PrimaryConstructorParameters.Count > 0))
             {
                 writer.Write("(");
@@ -106,7 +128,16 @@ namespace CppAst.CodeGen.CSharp
                 }
             }
 
-            if (IsRecord && Members.Count == 0)
+            if (GenericParameters.Count > 0)
+            {
+                for (var i = 0; i < GenericParameters.Count; i++)
+                {
+                    var genericParameter = GenericParameters[i];
+                    genericParameter.DumpWhereClausesTo(writer);
+                }
+            }
+
+            if (Members.Count == 0)
             {
                 writer.WriteLine(";");
             }

@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Zio;
@@ -28,14 +29,17 @@ namespace CppAst.CodeGen.CSharp
                 new DefaultEnumConverter(),
                 new DefaultEnumItemConverter(),
                 new DefaultFunctionConverter(),
+                new DefaultObjCFunctionConverter(),
                 new DefaultParameterConverter(),
                 new DefaultInterfaceConverter(),
                 new DefaultStructConverter(),
+                new DefaultObjCInterfaceAndProtocolConverter(),
                 new DefaultFieldConverter(),
                 new DefaultFunctionTypeConverter(),
                 new DefaultTypeConverter(),
                 new DefaultMappingRulesConverter(),
                 new DefaultDllImportConverter(),
+                new DefaultShouldVisitChildrenConverter(),
             };
 
             MappingRules = new CppMappingRules()
@@ -43,6 +47,7 @@ namespace CppAst.CodeGen.CSharp
                 ConverterOptions = this
             };
             DefaultNamespace = "LibNative";
+            DefaultOutputExtension = ".generated.cs";
             DefaultOutputFilePath = "/LibNative.generated.cs";
             DefaultClassLib = "libnative";
             DefaultDllImportNameAndArguments = "\"libnative\"";
@@ -69,6 +74,8 @@ namespace CppAst.CodeGen.CSharp
         }
 
         public string DefaultNamespace { get; set; }
+
+        public string DefaultOutputExtension { get; set; }
 
         public UPath DefaultOutputFilePath { get; set; }
 
@@ -123,6 +130,10 @@ namespace CppAst.CodeGen.CSharp
         public string FixedArrayPrefix { get; set; } = "FixedArray";
 
         public bool MapCLongToIntPtr { get; set; }
+
+        public bool MapVoidPtrToIntPtr { get; set; }
+
+        public Func<CppPrimitiveKind, CSharpType>? MapCLongFunc { get; set; }
 
         public CallingConvention? DefaultCallingConvention { get; set; }
 
