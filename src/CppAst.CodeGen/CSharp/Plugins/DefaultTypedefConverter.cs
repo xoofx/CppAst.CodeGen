@@ -117,6 +117,7 @@ namespace CppAst.CodeGen.CSharp
             {
                 if (CppHelper.IsStructCanBeRecordWithElementType(elementType))
                 {
+                    csStruct.Modifiers |= CSharpModifiers.ReadOnly;
                     csStruct.IsRecord = true;
                     csStruct.PrimaryConstructorParameters.Add(new CSharpParameter("Value")
                     {
