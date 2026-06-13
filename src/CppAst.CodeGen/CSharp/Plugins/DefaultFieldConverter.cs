@@ -24,7 +24,8 @@ namespace CppAst.CodeGen.CSharp
             bool isConst = cppField.Type is CppQualifiedType qualifiedType && qualifiedType.Qualifier == CppTypeQualifier.Const 
                 || cppField.Type is CppPointerType pointerType && pointerType.ElementType is CppQualifiedType qualifiedElementType && qualifiedElementType.Qualifier == CppTypeQualifier.Const;
 
-            var isGlobalVariable = (!(cppField.Parent is CppClass) && !isConst) || cppField.StorageQualifier == CppStorageQualifier.Static;
+            bool isExtern = cppField.StorageQualifier == CppStorageQualifier.Extern;
+            var isGlobalVariable = (!(cppField.Parent is CppClass) && !isConst && !isExtern) || cppField.StorageQualifier == CppStorageQualifier.Static;
             if (isGlobalVariable)
             {
                 return null;
@@ -34,7 +35,6 @@ namespace CppAst.CodeGen.CSharp
 
             var csContainer = converter.GetCSharpContainer(cppField, context);
 
-            bool isExtern = cppField.StorageQualifier == CppStorageQualifier.Extern;
             if (isExtern)
             {
                 isConst = false;
