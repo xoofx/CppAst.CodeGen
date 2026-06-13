@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
@@ -134,7 +134,27 @@ namespace CppAst.CodeGen.CSharp
         public TElement this[int index]
         {
             get => _elements[index];
-            set => _elements[index] = value;
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(value));
+                if (ReferenceEquals(value, _container)) throw new ArgumentException("Cannot add item to itself as a container owner");
+                _container.ValidateMember(value);
+
+                var current = _elements[index];
+                if (ReferenceEquals(current, value))
+                {
+                    return;
+                }
+
+                if (value.Parent != null)
+                {
+                    throw new ArgumentException("The item belongs already to a container");
+                }
+
+                current.Parent = null;
+                value.Parent = (CSharpElement)_container;
+                _elements[index] = value;
+            }
         }
     }
 

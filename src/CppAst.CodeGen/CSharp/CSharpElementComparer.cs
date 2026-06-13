@@ -30,7 +30,8 @@ public class CSharpElementComparer
         {
             case CSharpEnumItem cSharpEnumItem:
             {
-                return cSharpEnumItem.Value == ((CSharpEnumItem)right).Value;
+                var rightEnumItem = (CSharpEnumItem)right;
+                return cSharpEnumItem.Name == rightEnumItem.Name && cSharpEnumItem.Value == rightEnumItem.Value;
             }
 
             case CSharpField cSharpField:
@@ -60,6 +61,11 @@ public class CSharpElementComparer
 
             case CSharpMethod csSharpMethod:
             {
+                if (csSharpMethod.Name != ((CSharpMethod)right).Name || csSharpMethod.Kind != ((CSharpMethod)right).Kind)
+                {
+                    return false;
+                }
+
                 if (csSharpMethod.Parameters.Count != ((CSharpMethod)right).Parameters.Count)
                 {
                     return false;
@@ -199,6 +205,11 @@ public class CSharpElementComparer
             {
                 visitedElement ??= new HashSet<CSharpType>();
 
+                if (csWithMembers.Name != ((CSharpTypeWithMembers)right).Name)
+                {
+                    return false;
+                }
+
                 if (csWithMembers.IsRecord != ((CSharpTypeWithMembers)right).IsRecord)
                 {
                     return false;
@@ -271,6 +282,11 @@ public class CSharpElementComparer
 
             case CSharpDelegate cSharpDelegate:
             {
+                if (cSharpDelegate.Name != ((CSharpDelegate)right).Name)
+                {
+                    return false;
+                }
+
                 if (cSharpDelegate.Parameters.Count != ((CSharpDelegate)right).Parameters.Count)
                 {
                     return false;
@@ -334,6 +350,16 @@ public class CSharpElementComparer
                 return Compare(arrayType.ElementType, ((CSharpArrayType)right).ElementType, visitedElement);
             case CSharpFunctionPointer functionPointerType:
             {
+                if (functionPointerType.IsUnmanaged != ((CSharpFunctionPointer)right).IsUnmanaged)
+                {
+                    return false;
+                }
+
+                if (!functionPointerType.UnmanagedCallingConvention.SequenceEqual(((CSharpFunctionPointer)right).UnmanagedCallingConvention))
+                {
+                    return false;
+                }
+
                 if (functionPointerType.Parameters.Count != ((CSharpFunctionPointer)right).Parameters.Count)
                 {
                     return false;
