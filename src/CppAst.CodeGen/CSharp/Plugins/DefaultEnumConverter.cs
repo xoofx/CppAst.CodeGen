@@ -36,10 +36,21 @@ namespace CppAst.CodeGen.CSharp
 
             // We can only reason with a canonical type in C#
             // while in C++ you could use a typedef
-            var canonicalType = cppEnum.IntegerType.GetCanonicalType();
+            var canonicalType = GetCanonicalIntegerBaseType(cppEnum.IntegerType);
             csEnum.BaseTypes.Add(converter.GetCSharpType(canonicalType, csEnum));
 
             return csEnum;
+        }
+
+        private static CppType GetCanonicalIntegerBaseType(CppType integerType)
+        {
+            var canonicalType = integerType.GetCanonicalType();
+            while (canonicalType is CppTypedef typedef)
+            {
+                canonicalType = typedef.ElementType.GetCanonicalType();
+            }
+
+            return canonicalType;
         }
     }
 }

@@ -89,6 +89,35 @@ EXPORT_API void function0(int x);
         }
 
         [Test]
+        public void TestEnumWithTypedefBaseUsesCanonicalBaseType()
+        {
+            var options = new CSharpConverterOptions();
+
+            var csCompilation = CSharpConverter.Convert(@"
+typedef unsigned int EnumBase;
+
+enum class MyEnum : EnumBase
+{
+    MyEnum_Value = 1,
+};
+            ", options);
+
+            Assert.False(csCompilation.HasErrors);
+
+            var fs = new MemoryFileSystem();
+            var codeWriter = new CodeWriter(new CodeWriterOptions(fs));
+            csCompilation.DumpTo(codeWriter);
+
+            var text = fs.ReadAllText(options.DefaultOutputFilePath);
+            Console.WriteLine(text);
+
+            StringAssert.Contains("public readonly partial record struct EnumBase(uint Value)", text);
+            StringAssert.Contains("public enum MyEnum : uint", text);
+            StringAssert.DoesNotContain("public enum MyEnum : EnumBase", text);
+            StringAssert.Contains("MyEnum_Value = unchecked((uint)1)", text);
+        }
+
+        [Test]
         public void TestMappingRules()
         {
             var rules = new CppMappingRules()
