@@ -62,11 +62,11 @@
 - [x] Remove or reduce `Console.WriteLine`-only test output once assertions cover the scenario.
 
 ## Verification checklist
-- [ ] Run focused tests after each slice, e.g. `cd src; dotnet test -c Release --filter <new-test-class-or-category>`.
-- [ ] Run the full suite: `cd src; dotnet test -c Release`.
-- [ ] Run the release build: `cd src; dotnet build -c Release`.
-- [ ] Self-review `git diff` to ensure only test files, narrow necessary source fixes, and this plan changed; verify ignored `bin/obj` artifacts are not included.
-- [ ] Commit each green logical slice using the repo’s dotnet-releaser prefix rules (for example `Add test coverage helpers`, `Add converter mapping tests`, `Fix macro mapping references`).
+- [x] Run focused tests after each slice, e.g. `cd src; dotnet test -c Release --filter <new-test-class-or-category>`.
+- [x] Run the full suite: `cd src; dotnet test -c Release`.
+- [x] Run the release build: `cd src; dotnet build -c Release`.
+- [x] Self-review `git diff` to ensure only test files, narrow necessary source fixes, and this plan changed; verify ignored `bin/obj` artifacts are not included.
+- [x] Commit each green logical slice using the repo’s dotnet-releaser prefix rules (for example `Add test coverage helpers`, `Add converter mapping tests`, `Fix macro mapping references`).
 
 ## Handoff notes
 - Execute this approved plan in Default mode now; no further user approval is needed.
