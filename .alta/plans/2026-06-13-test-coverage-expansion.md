@@ -48,7 +48,7 @@
 ## Implementation checklist
 - [x] Read approved plan and confirm workspace state before implementation.
 - [x] Add test helper(s) under `src/CppAst.CodeGen.Tests/` (for example `TestHelpers/GeneratedCodeTestHelper.cs`) for convert-and-dump, multi-output capture, line-ending normalization, and grouped string assertions.
-- [ ] Refactor `ConverterTests.cs` to use the helper and turn console-only tests into assertions covering anonymous/nested structs/unions/function pointers, macro-to-const/enum output, canonical enum typedef base types, and the larger function/typedef/string scenario.
+- [x] Refactor `ConverterTests.cs` to use the helper and turn console-only tests into assertions covering anonymous/nested structs/unions/function pointers, macro-to-const/enum output, canonical enum typedef base types, and the larger function/typedef/string scenario.
 - [ ] Add C# AST/model dumping tests covering `CSharpGeneratedFile`, namespace forms, classes/structs/interfaces/enums, generic parameters/where clauses, methods/properties/fields, fixed arrays, contextual return/parameter attributes, and `CSharpMethod.Wrap`/`Clone`/`ToFunctionPointer`.
 - [ ] Add comment and XML-doc tests covering escaping, inline/self-closing XML comments, `CSharpFullComment`/`CSharpSimpleComment` prefixes, `CSharpParamComment`, `CSharpReturnComment`, `CSharpSinceComment`, and conversion of representative C++ Doxygen comments to generated XML docs.
 - [ ] Add container/comparer/helper tests covering `CSharpContainerList` parent updates and validation, `CSharpElementComparer` equality/inequality for names, methods, fields, enum items, generics, nullable/pointer/ref/array/function-pointer types, `CSharpHelper` casing/name escaping, and calling-convention mapping.

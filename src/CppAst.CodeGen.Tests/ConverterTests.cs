@@ -1,27 +1,18 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-using System;
-using CppAst.CodeGen.Common;
+using System.Linq;
 using CppAst.CodeGen.CSharp;
-using NUnit.Framework;
-using Zio;
-using Zio.FileSystems;
 
 namespace CppAst.CodeGen.Tests
 {
-    /// <summary>
-    /// TODO: Write proper tests
-    /// </summary>
     public class ConverterTests
     {
         [Test]
-        public void TestAnonymousStructAndFunction()
+        public void ConvertsAnonymousStructUnionAndFunctionPointer()
         {
-            var options = new CSharpConverterOptions();
-
-            var csCompilation = CSharpConverter.Convert(@"
+            var text = GeneratedCodeTestHelper.GenerateSingleFile(@"
 typedef struct { int x; } AnotherStruct;
 
 struct {
@@ -37,34 +28,24 @@ struct {
         int d;
     } e;
 } outer;
-            ", options);
+            ");
 
-            Assert.False(csCompilation.HasErrors);
-
-            var fs = new MemoryFileSystem();
-            var codeWriter = new CodeWriter(new CodeWriterOptions(fs));
-            csCompilation.DumpTo(codeWriter);
-
-            var text = fs.ReadAllText(options.DefaultOutputFilePath);
-            Console.WriteLine(text);
+            GeneratedCodeTestHelper.AssertContainsAll(text,
+                "public partial struct AnotherStruct",
+                "public int x;",
+                "public libnative.AnotherStruct v;",
+                "public libnative.AnotherStruct* pv;",
+                "public delegate*unmanaged[Cdecl]<int, int, delegate*unmanaged[Cdecl]<int, void>, void> ptr;",
+                "[global::System.Runtime.InteropServices.StructLayout(LayoutKind.Explicit, CharSet = CharSet.Ansi)]",
+                "[FieldOffset(0)]\n                public int c;",
+                "[FieldOffset(0)]\n                public int d;",
+                "__union_0 e;");
         }
 
-
         [Test]
-        public void TestMacroToConst()
+        public void MapsMacrosToConstantsAndEnumItems()
         {
-            var options = new CSharpConverterOptions()
-            {
-                MappingRules =
-                {
-                    e => e.MapMacroToConst("MYNAME_(.*)", "int"),
-                    e => e.MapMacroToEnum("MYNAME_(.*)", "MYNAME_ENUM", @"MYNAME_ENUM_$1"),
-                    e => e.Map<CppParameter>("function0::x").Type("char*"),
-                    e => e.Map<CppFunction>("function0").Visibility(CSharpVisibility.Private),
-                }
-            };
-
-            var csCompilation = CSharpConverter.Convert(@"
+            var text = GeneratedCodeTestHelper.GenerateSingleFile(@"
 #ifdef WIN32
 #define EXPORT_API __declspec(dllexport)
 #else
@@ -76,71 +57,63 @@ struct {
 #define MYNAME_XY (MYNAME_X|MYNAME_Y)
 
 EXPORT_API void function0(int x);
-            ", options);
+            ", options =>
+            {
+                options.MappingRules.Add(e => e.MapMacroToConst("MYNAME_(.*)", "int"));
+                options.MappingRules.Add(e => e.MapMacroToEnum("MYNAME_(.*)", "MYNAME_ENUM", @"MYNAME_ENUM_$1"));
+                options.MappingRules.Add(e => e.Map<CppParameter>("function0::x").Type("char*"));
+                options.MappingRules.Add(e => e.Map<CppFunction>("function0").Visibility(CSharpVisibility.Private));
+            });
 
-            Assert.False(csCompilation.HasErrors);
-
-            var fs = new MemoryFileSystem();
-            var codeWriter = new CodeWriter(new CodeWriterOptions(fs));
-            csCompilation.DumpTo(codeWriter);
-
-            var text = fs.ReadAllText(options.DefaultOutputFilePath);
-            Console.WriteLine(text);
+            GeneratedCodeTestHelper.AssertContainsAll(text,
+                "public enum MYNAME_ENUM : int",
+                "MYNAME_ENUM_X = unchecked((int)1)",
+                "MYNAME_ENUM_Y = unchecked((int)2)",
+                "MYNAME_ENUM_XYWZ = unchecked((int)1)",
+                "MYNAME_ENUM_XY = unchecked((int)3)",
+                "public const int MYNAME_X = 1;",
+                "public const int MYNAME_Y = 2;",
+                "public const int MYNAME_XYWZ = 1;",
+                "public const int MYNAME_XY = 3;",
+                "private static partial void function0(byte* x);");
         }
 
         [Test]
-        public void TestEnumWithTypedefBaseUsesCanonicalBaseType()
+        public void EnumWithTypedefBaseUsesCanonicalBaseType()
         {
-            var options = new CSharpConverterOptions();
-
-            var csCompilation = CSharpConverter.Convert(@"
+            var text = GeneratedCodeTestHelper.GenerateSingleFile(@"
 typedef unsigned int EnumBase;
 
 enum class MyEnum : EnumBase
 {
     MyEnum_Value = 1,
 };
-            ", options);
+            ");
 
-            Assert.False(csCompilation.HasErrors);
-
-            var fs = new MemoryFileSystem();
-            var codeWriter = new CodeWriter(new CodeWriterOptions(fs));
-            csCompilation.DumpTo(codeWriter);
-
-            var text = fs.ReadAllText(options.DefaultOutputFilePath);
-            Console.WriteLine(text);
-
-            StringAssert.Contains("public readonly partial record struct EnumBase(uint Value)", text);
-            StringAssert.Contains("public enum MyEnum : uint", text);
-            StringAssert.DoesNotContain("public enum MyEnum : EnumBase", text);
-            StringAssert.Contains("MyEnum_Value = unchecked((uint)1)", text);
+            GeneratedCodeTestHelper.AssertContainsAll(text,
+                "public readonly partial record struct EnumBase(uint Value)",
+                "public enum MyEnum : uint",
+                "MyEnum_Value = unchecked((uint)1)");
+            GeneratedCodeTestHelper.AssertDoesNotContainAny(text, "public enum MyEnum : EnumBase");
         }
 
         [Test]
-        public void TestMappingRules()
+        public void MappingRulesCollectionSeparatesStandardRules()
         {
-            var rules = new CppMappingRules()
+            var rules = new CppMappingRules
             {
                 e => e.Map(@"name([a-z]+)::a(\d+)b").Private(),
             };
+
+            Assert.AreEqual(1, rules.StandardRules.Count);
+            Assert.AreEqual(0, rules.MacroRules.Count);
+            Assert.AreSame(rules.StandardRules[0], ((System.Collections.Generic.IEnumerable<CppElementMappingRuleBase>)rules).Single());
         }
 
-
         [Test]
-        public void CheckFunction()
+        public void ConvertsEnumsStructsTypedefsCommentsAndFunctionExports()
         {
-            var options = new CSharpConverterOptions()
-            {
-                GenerateAsInternal = true,
-                TypedefCodeGenKind = CppTypedefCodeGenKind.Wrap,
-                TypedefWrapForceList =
-                {
-                    "git_my_string"
-                }
-            };
-
-            var csCompilation = CSharpConverter.Convert(@"
+            var text = GeneratedCodeTestHelper.GenerateSingleFile(@"
             #ifdef WIN32
             #define EXPORT_API __declspec(dllexport)
             #else
@@ -177,17 +150,30 @@ enum class MyEnum : EnumBase
             // @param myrepo yoyo
             // @return This is a big list of things to return
             EXPORT_API bool function0(git_my_repo* myrepo, int a, float b, const char* text, const char text2[], bool arg4[], git_my_yoyo arg5, git_my_string arg6);
-            ", options);
+            ", options =>
+            {
+                options.GenerateAsInternal = true;
+                options.TypedefCodeGenKind = CppTypedefCodeGenKind.Wrap;
+                options.TypedefWrapForceList.Add("git_my_string");
+            });
 
-            Assert.False(csCompilation.HasErrors);
-
-            var fs = new MemoryFileSystem();
-            var codeWriter = new CodeWriter(new CodeWriterOptions(fs));
-            csCompilation.DumpTo(codeWriter);
-
-            var text = fs.ReadAllText(options.DefaultOutputFilePath);
-            Console.WriteLine(text);
+            GeneratedCodeTestHelper.AssertContainsAll(text,
+                "internal static unsafe partial class libnative",
+                "[Flags]\n        public enum Toto : int",
+                "TOTO_FLAG = unchecked((int)1)",
+                "/// <summary>\n        /// This is a comment\n        /// </summary>",
+                "public unsafe partial struct Tata",
+                "public fixed byte items[4];",
+                "public fixed int item2[8];",
+                "public byte* d;",
+                "public readonly partial record struct git_my_repo(nint Handle)",
+                "public readonly partial record struct git_my_yoyo(int Value)",
+                "public readonly partial struct git_my_string : IEquatable<git_my_string>",
+                "/// <param name=\"myrepo\">yoyo</param>",
+                "/// <returns>This is a big list of things to return</returns>",
+                "[global::System.Runtime.InteropServices.LibraryImport(\"libnative\", EntryPoint = \"function0\")]",
+                "[return:global::System.Runtime.InteropServices.MarshalAs(UnmanagedType.U1)]",
+                "public static partial bool function0(libnative.git_my_repo myrepo, int a, float b, [global::System.Runtime.InteropServices.MarshalAs(UnmanagedType.LPUTF8Str)] string text, byte* text2, bool* arg4, libnative.git_my_yoyo arg5, libnative.git_my_string arg6);");
         }
     }
-
 }
