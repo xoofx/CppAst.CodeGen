@@ -126,6 +126,40 @@ enum
             "ANON_A");
     }
 
+    [Test]
+    public void EnumWithUsingAliasBaseUsesCanonicalBaseType()
+    {
+        var text = GeneratedCodeTestHelper.GenerateSingleFile(@"
+#include <stdint.h>
+
+namespace Steinberg
+{
+using int32 = int32_t;
+
+namespace Vst
+{
+using KnobMode = Steinberg::int32;
+
+enum KnobModes : KnobMode
+{
+    kCircularMode = 0,
+    kRelativCircularMode,
+    kLinearMode
+};
+}
+}
+");
+
+        GeneratedCodeTestHelper.AssertContainsAll(text,
+            "public readonly partial record struct int32(int Value)",
+            "public readonly partial record struct KnobMode(libnative.int32 Value)",
+            "public enum KnobModes : int",
+            "kCircularMode = unchecked((int)0)",
+            "kRelativCircularMode = unchecked((int)1)",
+            "kLinearMode = unchecked((int)2)");
+        GeneratedCodeTestHelper.AssertDoesNotContainAny(text, "public enum KnobModes : KnobMode");
+    }
+
     private static string ExportHeader(string declarations)
     {
         return @$"

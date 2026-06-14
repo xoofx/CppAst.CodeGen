@@ -2,6 +2,8 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System.Collections.Generic;
+
 namespace CppAst.CodeGen.CSharp
 {
     public class DefaultEnumConverter : ICSharpConverterPlugin
@@ -35,22 +37,74 @@ namespace CppAst.CodeGen.CSharp
             csEnum.Comment = converter.GetCSharpComment(cppEnum, csEnum);
 
             // We can only reason with a canonical type in C#
-            // while in C++ you could use a typedef
-            var canonicalType = GetCanonicalIntegerBaseType(cppEnum.IntegerType);
+            // while in C++ you could use a typedef or a using alias
+            var canonicalType = GetCanonicalIntegerBaseType(converter, cppEnum);
             csEnum.BaseTypes.Add(converter.GetCSharpType(canonicalType, csEnum));
 
             return csEnum;
         }
 
-        private static CppType GetCanonicalIntegerBaseType(CppType integerType)
+        private static CppType GetCanonicalIntegerBaseType(CSharpConverter converter, CppEnum cppEnum)
         {
-            var canonicalType = integerType.GetCanonicalType();
-            while (canonicalType is CppTypedef typedef)
+            var canonicalType = cppEnum.IntegerType;
+            var visitedTypes = new HashSet<CppType>();
+            while (visitedTypes.Add(canonicalType))
             {
-                canonicalType = typedef.ElementType.GetCanonicalType();
+                var nextType = canonicalType.GetCanonicalType();
+                if (!ReferenceEquals(nextType, canonicalType))
+                {
+                    canonicalType = nextType;
+                    continue;
+                }
+
+                if (canonicalType is CppTypedef typedef)
+                {
+                    canonicalType = typedef.ElementType;
+                    continue;
+                }
+
+                var resolvedTypedef = canonicalType is CppUnexposedType unexposedType ? FindTypedef(converter, cppEnum, unexposedType.Name) : null;
+                if (resolvedTypedef is not null)
+                {
+                    canonicalType = resolvedTypedef.ElementType;
+                    continue;
+                }
+
+                break;
             }
 
             return canonicalType;
+        }
+
+        private static CppTypedef? FindTypedef(CSharpConverter converter, CppEnum cppEnum, string typeName)
+        {
+            if (converter.CurrentCppCompilation is { } compilation && typeName.Contains("::"))
+            {
+                var typedef = compilation.FindByFullName(typeName) as CppTypedef;
+                if (typedef is not null)
+                {
+                    return typedef;
+                }
+            }
+
+            var container = cppEnum.Parent;
+            while (container is not null)
+            {
+                if (container is ICppDeclarationContainer declarationContainer)
+                {
+                    foreach (var candidate in declarationContainer.Typedefs)
+                    {
+                        if (candidate.Name == typeName)
+                        {
+                            return candidate;
+                        }
+                    }
+                }
+
+                container = (container as CppElement)?.Parent;
+            }
+
+            return null;
         }
     }
 }
